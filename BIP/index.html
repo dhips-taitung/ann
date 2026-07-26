@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>線上簽名式表單</title>
+  <!-- 引入 Signature Pad 套件 -->
+  <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: #f0f2f5;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+    }
+    .form-container {
+      background: #ffffff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      width: 100%;
+      max-width: 550px;
+    }
+    h2 {
+      margin-top: 0;
+      color: #1a73e8;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .form-group {
+      margin-bottom: 18px;
+    }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+      color: #333;
+    }
+    label .required {
+      color: #d93025;
+    }
+    input[type="text"],
+    input[type="tel"],
+    input[type="email"],
+    textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input:focus, textarea:focus {
+      border-color: #1a73e8;
+    }
+    /* 簽名板區塊設定 (內嵌直接呈現) */
+    .signature-wrapper {
+      position: relative;
+      border: 2px dashed #4285f4;
+      border-radius: 8px;
+      background-color: #fafafa;
+      height: 220px;
+      margin-top: 6px;
+    }
+    canvas {
+      width: 100%;
+      height: 100%;
+      border-radius: 6px;
+      touch-action: none;
+    }
+    .clear-btn {
+      margin-top: 8px;
+      background-color: #f1f3f4;
+      color: #3c4043;
+      border: 1px solid #dadce0;
+      padding: 6px 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      float: right;
+    }
+    .clear-btn:hover {
+      background-color: #e8eaed;
+    }
+    .submit-btn {
+      width: 100%;
+      padding: 14px;
+      background-color: #1a73e8;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 25px;
+      transition: background 0.2s;
+    }
+    .submit-btn:hover {
+      background-color: #1557b0;
+    }
+    .submit-btn:disabled {
+      background-color: #a0c3ff;
+      cursor: not-allowed;
+    }
+    #loadingOverlay {
+      display: none;
+      text-align: center;
+      margin-top: 15px;
+      color: #1a73e8;
+      font-weight: bold;
+    }
+    #successMessage {
+      display: none;
+      text-align: center;
+      padding: 20px;
+    }
+    #successMessage h3 {
+      color: #34a853;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="form-container">
+  <form id="customForm">
+    <h2>線上確認與簽名表單</h2>
+
+    <!-- 表單主要問題欄位 (您可以自行增減) -->
+    <div class="form-group">
+      <label for="userName">填寫者姓名 <span class="required">*</span></label>
+      <input type="text" id="userName" name="userName" placeholder="請輸入姓名" required>
+    </div>
+
+    <div class="form-group">
+      <label for="phone">聯絡電話 <span class="required">*</span></label>
+      <input type="tel" id="phone" name="phone" placeholder="例如：0912345678" required>
+    </div>
+
+    <div class="form-group">
+      <label for="email">電子郵件</label>
+      <input type="email" id="email" name="email" placeholder="example@email.com">
+    </div>
+
+    <div class="form-group">
+      <label for="note">備註說明</label>
+      <textarea id="note" name="note" rows="3" placeholder="如有其他說明請在此填寫"></textarea>
+    </div>
+
+    <!-- 手寫簽名板 (直接內嵌呈現) -->
+    <div class="form-group">
+      <label>手寫簽名 <span class="required">*</span></label>
+      <div class="signature-wrapper">
+        <canvas id="signatureCanvas"></canvas>
+      </div>
+      <button type="button" class="clear-btn" id="clearBtn">重設/清除簽名</button>
+      <div style="clear: both;"></div>
+    </div>
+
+    <button type="submit" class="submit-btn" id="submitBtn">確認送出表單</button>
+    <div id="loadingOverlay">正在處理並上傳資料，請稍候...</div>
+  </form>
+
+  <!-- 送出成功顯示畫面 -->
+  <div id="successMessage">
+    <h3>🎉 資料已成功送出！</h3>
+    <p>感謝您的填寫與簽名，我們已收到您的回覆。</p>
+  </div>
+</div>
+
+<script>
+  // ⚠️【重點設定】請將下方網址替換為您在 Google Apps Script 部署獲得的網頁應用程式 URL
+  const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxF1w99R0B0FhWPKLWbLn_X5rW5V1m2_ahXruTd3Oxl_OCVl-l7-0OMIawwm0sj2A2hbw/exec";
+
+  // 初始化簽名板
+  const canvas = document.getElementById('signatureCanvas');
+  const signaturePad = new SignaturePad(canvas, {
+    backgroundColor: 'rgba(255, 255, 255, 0)'
+  });
+
+  // 自動調整 Canvas 畫布解析度（避免簽名線條失真與偏移）
+  function resizeCanvas() {
+    const ratio = Math.max(window.devicePixelRatio || 1, 1);
+    canvas.width = canvas.offsetWidth * ratio;
+    canvas.height = canvas.offsetHeight * ratio;
+    canvas.getContext("2d").scale(ratio, ratio);
+    signaturePad.clear();
+  }
+  window.addEventListener("resize", resizeCanvas);
+  resizeCanvas();
+
+  // 清除簽名
+  document.getElementById('clearBtn').addEventListener('click', function () {
+    signaturePad.clear();
+  });
+
+  // 表單送出處理
+  document.getElementById('customForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    if (signaturePad.isEmpty()) {
+      alert("請先完成手寫簽名再送出！");
+      return;
+    }
+
+    const submitBtn = document.getElementById('submitBtn');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    
+    submitBtn.disabled = true;
+    loadingOverlay.style.display = 'block';
+
+    // 收集表單資料
+    const formData = {
+      userName: document.getElementById('userName').value.trim(),
+      phone: document.getElementById('phone').value.trim(),
+      email: document.getElementById('email').value.trim(),
+      note: document.getElementById('note').value.trim(),
+      signatureBase64: signaturePad.toDataURL('image/png') // 將簽名轉為 Base64 字串
+    };
+
+    // 發送 POST 請求至 Google Apps Script
+    fetch(GAS_WEB_APP_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8',
+      },
+      body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.result === 'success') {
+        document.getElementById('customForm').style.display = 'none';
+        document.getElementById('successMessage').style.display = 'block';
+      } else {
+        alert("送出失敗：" + data.message);
+        submitBtn.disabled = false;
+        loadingOverlay.style.display = 'none';
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert("發生錯誤，請稍後再試！");
+      submitBtn.disabled = false;
+      loadingOverlay.style.display = 'none';
+    });
+  });
+</script>
+
+</body>
+</html>
