@@ -3,112 +3,142 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>線上簽名式表單</title>
+  <title>校園不當管教、體罰與霸凌法規確認暨簽名表單</title>
   <!-- 引入 Signature Pad 套件 -->
   <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      background-color: #f0f2f5;
+      background-color: #f4f6f9;
       margin: 0;
-      padding: 20px;
-      display: flex;
-      justify-content: center;
-    }
-    .form-container {
-      background: #ffffff;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-      width: 100%;
-      max-width: 550px;
-    }
-    h2 {
-      margin-top: 0;
-      color: #1a73e8;
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .form-group {
-      margin-bottom: 18px;
-    }
-    label {
-      display: block;
-      margin-bottom: 6px;
-      font-weight: 600;
+      padding: 20px 10px;
       color: #333;
     }
-    label .required {
-      color: #d93025;
+    .container {
+      max-width: 750px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 25px 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
     }
-    input[type="text"],
-    input[type="tel"],
-    input[type="email"],
-    textarea {
+    h2 {
+      text-align: center;
+      color: #1a73e8;
+      margin-top: 0;
+      margin-bottom: 20px;
+    }
+    .section-card {
+      background: #fafafa;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 18px 20px;
+      margin-bottom: 20px;
+    }
+    .section-title {
+      font-size: 16px;
+      font-weight: bold;
+      color: #202124;
+      margin-top: 0;
+      margin-bottom: 6px;
+    }
+    .section-desc {
+      font-size: 13px;
+      color: #5f6368;
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+    .checkbox-item {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 10px;
+      font-size: 14px;
+      line-height: 1.4;
+      cursor: pointer;
+    }
+    .checkbox-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      margin-right: 10px;
+      margin-top: 2px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .input-group {
+      margin-bottom: 15px;
+    }
+    .input-group label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .input-group input {
       width: 100%;
-      padding: 12px;
+      padding: 10px;
       border: 1px solid #ccc;
       border-radius: 6px;
       font-size: 15px;
-      outline: none;
-      transition: border-color 0.2s;
     }
-    input:focus, textarea:focus {
-      border-color: #1a73e8;
+    /* 全選按鈕條 */
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #e8f0fe;
+      padding: 12px 15px;
+      border-radius: 6px;
+      margin-bottom: 20px;
     }
-    /* 簽名板區塊設定 (內嵌直接呈現) */
-    .signature-wrapper {
+    .toolbar-btn {
+      background-color: #1a73e8;
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .toolbar-btn:hover { background-color: #1557b0; }
+    
+    /* 簽名板樣式 */
+    .signature-container {
       position: relative;
-      border: 2px dashed #4285f4;
+      border: 2px dashed #1a73e8;
       border-radius: 8px;
-      background-color: #fafafa;
-      height: 220px;
-      margin-top: 6px;
+      background-color: #ffffff;
+      height: 200px;
+      margin-top: 8px;
     }
     canvas {
       width: 100%;
       height: 100%;
-      border-radius: 6px;
       touch-action: none;
     }
     .clear-btn {
+      float: right;
       margin-top: 8px;
-      background-color: #f1f3f4;
-      color: #3c4043;
-      border: 1px solid #dadce0;
-      padding: 6px 14px;
+      background: #e0e0e0;
+      border: none;
+      padding: 6px 12px;
       border-radius: 4px;
       cursor: pointer;
       font-size: 13px;
-      font-weight: 500;
-      float: right;
-    }
-    .clear-btn:hover {
-      background-color: #e8eaed;
     }
     .submit-btn {
       width: 100%;
       padding: 14px;
-      background-color: #1a73e8;
+      background-color: #34a853;
       color: white;
       border: none;
       border-radius: 6px;
-      font-size: 16px;
+      font-size: 18px;
       font-weight: bold;
       cursor: pointer;
       margin-top: 25px;
-      transition: background 0.2s;
     }
-    .submit-btn:hover {
-      background-color: #1557b0;
-    }
-    .submit-btn:disabled {
-      background-color: #a0c3ff;
-      cursor: not-allowed;
-    }
+    .submit-btn:hover { background-color: #2d8e47; }
+    .submit-btn:disabled { background-color: #cccccc; cursor: not-allowed; }
     #loadingOverlay {
       display: none;
       text-align: center;
@@ -116,76 +146,181 @@
       color: #1a73e8;
       font-weight: bold;
     }
-    #successMessage {
+    #successBox {
       display: none;
       text-align: center;
-      padding: 20px;
+      padding: 30px;
     }
-    #successMessage h3 {
-      color: #34a853;
-      margin-bottom: 10px;
-    }
+    #successBox h3 { color: #34a853; font-size: 22px; }
   </style>
 </head>
 <body>
 
-<div class="form-container">
-  <form id="customForm">
-    <h2>線上確認與簽名表單</h2>
+<div class="container">
+  <form id="mainForm">
+    <h2>校園禁止體罰霸凌與違法處罰宣導確認單</h2>
 
-    <!-- 表單主要問題欄位 (您可以自行增減) -->
-    <div class="form-group">
-      <label for="userName">填寫者姓名 <span class="required">*</span></label>
-      <input type="text" id="userName" name="userName" placeholder="請輸入姓名" required>
+    <!-- 基本資料 -->
+    <div class="input-group">
+      <label>填寫人姓名 <span style="color:red">*</span></label>
+      <input type="text" id="userName" placeholder="請輸入您的姓名" required>
+    </div>
+    <div class="input-group">
+      <label>服務單位 / 學校職稱</label>
+      <input type="text" id="schoolUnit" placeholder="請輸入單位或職稱">
     </div>
 
-    <div class="form-group">
-      <label for="phone">聯絡電話 <span class="required">*</span></label>
-      <input type="tel" id="phone" name="phone" placeholder="例如：0912345678" required>
+    <!-- 捷徑條：全選條文 -->
+    <div class="toolbar">
+      <span id="checkProgress">條文確認進度：0 / 37 項</span>
+      <button type="button" class="toolbar-btn" id="selectAllBtn">一鍵勾選全部條文</button>
     </div>
 
-    <div class="form-group">
-      <label for="email">電子郵件</label>
-      <input type="email" id="email" name="email" placeholder="example@email.com">
+    <!-- 1. 體罰-親自施加強制力 -->
+    <div class="section-card">
+      <div class="section-title">一、體罰-親自施加強制力之體罰 <span style="color:red">*</span></div>
+      <div class="section-desc">指教師法施行細則規定之體罰，包含教師對學生身體施加強制力，或命令他人施加強制力之行為：</div>
+      <label class="checkbox-item"><input type="checkbox" class="rule-check"> 毆打</label>
+      <label class="checkbox-item"><input type="checkbox" class="rule-check"> 鞭打</label>
+      <label class="checkbox-item"><input type="checkbox" class="rule-check"> 打耳光</label>
+      <label class="checkbox-item"><input type="checkbox" class="rule-check"> 打手心</label>
+      <label class="checkbox-item"><input type="checkbox" class="rule-check"> 打臀部</label>
+      <label class="checkbox-item"><input type="checkbox" class="rule-check"> 責打身體其他部位等</label>
     </div>
 
-    <div class="form-group">
-      <label for="note">備註說明</label>
-      <textarea id="note" name="note" rows="3" placeholder="如有其他說明請在此填寫"></textarea>
+    <!-- 2. 體罰-命令學生自殘 -->
+    <div class="section-card">
+      <div class="section-title">一、體罰-命令學生自殘身體之體罰 <span style="color:red">*</span></div>
+      <div class="section-desc">指教師法施行細則規定之體罰，包含教師對學生身體施加強制力，或命令他人施加強制力之行為：</div>
+      <label class="checkbox-item"><input type="checkbox" class="rule-check"> 命令學生自打耳光等</label>
     </div>
 
-    <!-- 手寫簽名板 (直接內嵌呈現) -->
-    <div class="form-group">
-      <label>手寫簽名 <span class="required">*</span></label>
-      <div class="signature-wrapper">
+    <!-- 3. 體罰-命令第三者施加強制力 -->
+    <div class="section-card">
+      <div class="section-title">一、體罰-命令第三者施加強制力之體罰 <span style="color:red">*</span></div>
+      <div class="section-desc">指教師法施行細則規定之體罰，包含教師對學生身體施加強制力，或命令他人施加強制力之行為：</div>
+      <label class="checkbox-item"><input type="checkbox" class="rule-check"> 命令學生互打耳光等</label>
+    </div>
+
+    <!-- 4. 體罰-命令學生採取特定身體動作 -->
+    <div class="section-card">
+      <div class="section-title">一、體罰-命令學生採取特定身體動作之體罰 <span style="color:red">*</span></div>
+      <div class="section-desc">指教師法施行細則規定之體罰，包含教師對學生身體施加強制力，或命令他人施加強制力之行為：</div>
+      <label class="checkbox-item"><input type="checkbox" class="rule-check"> 交互蹲跳</label>
+      <label class="checkbox-item"><input type="checkbox" class="rule-check"> 半蹲</label>
+      <label class="checkbox-item"><input type="checkbox" class="rule-check"> 罰跪</label>
+      <label class="checkbox-item"><input type="checkbox" class="rule-check"> 蛙跳</label>
+      <label class="checkbox-item"><input type="checkbox" class="rule-check"> 兔子跳</label>
+      <label class="checkbox-item"><input type="checkbox" class="rule-check"> 學鴨子走路</label>
+      <label class="checkbox-item"><input type="checkbox" class="rule-check"> 提水桶過肩</label>
+      <label class="checkbox-item"><input type="checkbox" class="rule-check"> 單腳支撐地面</label>
+      <label class="checkbox-item"><input type="checkbox" class="rule-check"> 上下樓梯</label>
+      <label class="checkbox-item"><input type="checkbox" class="rule-check"> 其他類似之身體動作等</label>
+    </div>
+
+    <!-- 5. 霸凌 -->
+    <div class="section-card">
+      <div class="section-title">二、霸凌 <span style="color:red">*</span></div>
+      <div class="section-desc">指符合「校園霸凌防制準則」規定之霸凌行為。</div>
+      <label class="checkbox-item"><input type="checkbox" class="rule-check"> 肢體霸凌：實體之肢體攻擊、推擠、施暴等。</label>
+      <label class="checkbox-item"><input type="checkbox" class="rule-check"> 言語霸凌：透過語言、言詞辱罵、嘲弄、恐嚇或威脅等方式。</label>
+      <label class="checkbox-item"><input type="checkbox" class="rule-check"> 關係/社交霸凌：惡意排擠、散播謠言、孤立或破壞人際關係。</label>
+      <label class="checkbox-item"><input type="checkbox" class="rule-check"> 網路霸凌：透過網路、社群媒體、通訊軟體等散布私密照、毀謗、侮辱或騷擾。</label>
+      <label class="checkbox-item"><input type="checkbox" class="rule-check"> 性霸凌：與性或性別有關之霸凌（非屬性騷擾者），透過語言、肢體或其他暴力貶抑、攻擊或騷擾他人。</label>
+      <label class="checkbox-item"><input type="checkbox" class="rule-check"> 其他形式霸凌：符合校園霸凌防制準則所定之其他持續性侵害與霸凌行為。</label>
+    </div>
+
+    <!-- 6. 不當管教 -->
+    <div class="section-card">
+      <div class="section-title">三、不當管教 <span style="color:red">*</span></div>
+      <div class="section-desc">指教師對學生採取之管教措施，違反輔導管教相關法令之規定，而使學生身心受到侵害之行為：</div>
+      <label class="checkbox-item"><input type="checkbox" class="rule-check"> 身心受侵害之管教</label>
+      <label class="checkbox-item"><input type="checkbox" class="rule-check"> 站立反省逾時：每次超過一堂課，且每日累計超過兩小時。</label>
+      <label class="checkbox-item"><input type="checkbox" class="rule-check"> 對學生罰錢</label>
+      <label class="checkbox-item"><input type="checkbox" class="rule-check"> 非暫時保管之沒收或沒入學生物品</label>
+    </div>
+
+    <!-- 7. 其他違法處罰 - 涉及刑事 -->
+    <div class="section-card">
+      <div class="section-title">四、其他違法處罰- 涉及刑事法律之行為 <span style="color:red">*</span></div>
+      <div class="section-desc">使學生身心受侵害之犯罪行為：</div>
+      <label class="checkbox-item"><input type="checkbox" class="rule-check"> 公然侮辱罪（刑法第309條）：例如在公眾或師生面前以言語貶損學生人格尊嚴。</label>
+      <label class="checkbox-item"><input type="checkbox" class="rule-check"> 誹謗罪（刑法第310條）：例如散布足以毀損學生名譽之事。</label>
+      <label class="checkbox-item"><input type="checkbox" class="rule-check"> 強制罪（刑法第304條）：例如以強暴、脅迫使學生行無義務之事或妨害其行使權利。</label>
+      <label class="checkbox-item"><input type="checkbox" class="rule-check"> 恐嚇危害安全罪（刑法第305條）：例如以加害生命、身體、自由、名譽、財產之事恐嚇學生致生危害。</label>
+      <label class="checkbox-item"><input type="checkbox" class="rule-check"> 傷害罪／過失傷害罪（刑法第277條、第284條）：因管教過當致學生身體受傷。</label>
+    </div>
+
+    <!-- 8. 其他違法處罰 - 違反專業倫理 -->
+    <div class="section-card">
+      <div class="section-title">四、其他違法處罰- 違反專業倫理之行政法規 <span style="color:red">*</span></div>
+      <div class="section-desc">違反教育與福利法規並使學生身心受侵害：</div>
+      <label class="checkbox-item"><input type="checkbox" class="rule-check"> 違反《性別平等教育法》：例如性侵害、性騷擾、性霸凌或違法處理相關事件致學生身心受創。</label>
+    </div>
+
+    <!-- 9. 兒少法 -->
+    <div class="section-card">
+      <div class="section-title">四、其他違法處罰- 違反《兒童及少年福利與權益保障法》 <span style="color:red">*</span></div>
+      <div class="section-desc">
+        特別是第49條各款禁止規定：<br>
+        <b>罰則：違反本條者，處新臺幣 6 萬元至 60 萬元罰鍰，並公告姓名、管制任職資格。</b>
+      </div>
+      <label class="checkbox-item"><input type="checkbox" class="rule-check"> 虐待與剝削（第1-5款）：遺棄、身心虐待、利用從事危害活動、特殊形體供參觀、利用行乞。</label>
+      <label class="checkbox-item"><input type="checkbox" class="rule-check"> 權益與教育（第6-7款）：剝奪受教權、強迫婚嫁。</label>
+      <label class="checkbox-item"><input type="checkbox" class="rule-check"> 犯罪與性剝削（第8-9, 14款）：拐騙買賣、質押、從事猥褻或性交、自殺行為。</label>
+      <label class="checkbox-item"><input type="checkbox" class="rule-check"> 環境與物品危害（第10-13款）：提供危險物品、拍攝傳播有害內容、處於危險環境、帶入不當場所。</label>
+      <label class="checkbox-item"><input type="checkbox" class="rule-check"> 概括條款（第15款）：其他對兒少身心造成痛苦、不利健全成長之不正當行為。</label>
+      <label class="checkbox-item"><input type="checkbox" class="rule-check"> ★身心虐待（第2款）：毆打、不當管教等皆屬之。</label>
+      <label class="checkbox-item"><input type="checkbox" class="rule-check"> 第15款適用：實務上認定嚴重程度相當前14款者皆可開罰。</label>
+    </div>
+
+    <!-- 手寫簽名欄 (直接嵌入表單) -->
+    <div class="input-group">
+      <label>親筆簽名（請在此方框內手寫簽名） <span style="color:red">*</span></label>
+      <div class="signature-container">
         <canvas id="signatureCanvas"></canvas>
       </div>
-      <button type="button" class="clear-btn" id="clearBtn">重設/清除簽名</button>
+      <button type="button" class="clear-btn" id="clearBtn">清除重簽</button>
       <div style="clear: both;"></div>
     </div>
 
-    <button type="submit" class="submit-btn" id="submitBtn">確認送出表單</button>
-    <div id="loadingOverlay">正在處理並上傳資料，請稍候...</div>
+    <button type="submit" class="submit-btn" id="submitBtn">我已完全了解並確認以上條文，送出表單</button>
+    <div id="loadingOverlay">資料上傳中，請稍候...</div>
   </form>
 
-  <!-- 送出成功顯示畫面 -->
-  <div id="successMessage">
-    <h3>🎉 資料已成功送出！</h3>
-    <p>感謝您的填寫與簽名，我們已收到您的回覆。</p>
+  <div id="successBox">
+    <h3>🎉 表單與簽名提交成功！</h3>
+    <p>您的確認紀錄已傳送至後端系統備查，感謝您的配合。</p>
   </div>
 </div>
 
 <script>
-  // ⚠️【重點設定】請將下方網址替換為您在 Google Apps Script 部署獲得的網頁應用程式 URL
+  // ⚠️ 請替換為您在 Google Apps Script 取得的部署網址
   const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxF1w99R0B0FhWPKLWbLn_X5rW5V1m2_ahXruTd3Oxl_OCVl-l7-0OMIawwm0sj2A2hbw/exec";
+
+  const checkboxes = document.querySelectorAll('.rule-check');
+  const checkProgress = document.getElementById('checkProgress');
+  const totalCount = checkboxes.length;
+
+  // 更新勾選計數
+  function updateCount() {
+    const checkedCount = document.querySelectorAll('.rule-check:checked').length;
+    checkProgress.innerText = `條文確認進度：${checkedCount} / ${totalCount} 項`;
+    checkProgress.style.color = (checkedCount === totalCount) ? '#34a853' : '#d93025';
+  }
+
+  checkboxes.forEach(box => box.addEventListener('change', updateCount));
+
+  // 一鍵全選按鈕
+  document.getElementById('selectAllBtn').addEventListener('click', function() {
+    checkboxes.forEach(box => box.checked = true);
+    updateCount();
+  });
 
   // 初始化簽名板
   const canvas = document.getElementById('signatureCanvas');
-  const signaturePad = new SignaturePad(canvas, {
-    backgroundColor: 'rgba(255, 255, 255, 0)'
-  });
+  const signaturePad = new SignaturePad(canvas, { backgroundColor: 'rgba(255, 255, 255, 0)' });
 
-  // 自動調整 Canvas 畫布解析度（避免簽名線條失真與偏移）
   function resizeCanvas() {
     const ratio = Math.max(window.devicePixelRatio || 1, 1);
     canvas.width = canvas.offsetWidth * ratio;
@@ -196,17 +331,20 @@
   window.addEventListener("resize", resizeCanvas);
   resizeCanvas();
 
-  // 清除簽名
-  document.getElementById('clearBtn').addEventListener('click', function () {
-    signaturePad.clear();
-  });
+  document.getElementById('clearBtn').addEventListener('click', () => signaturePad.clear());
 
-  // 表單送出處理
-  document.getElementById('customForm').addEventListener('submit', function (e) {
+  // 表單驗證與送出
+  document.getElementById('mainForm').addEventListener('submit', function(e) {
     e.preventDefault();
 
+    const checkedCount = document.querySelectorAll('.rule-check:checked').length;
+    if (checkedCount < totalCount) {
+      alert(`您尚有條文未勾選！請勾選完全部 ${totalCount} 項條文（或點選右上角「一鍵勾選」）。`);
+      return;
+    }
+
     if (signaturePad.isEmpty()) {
-      alert("請先完成手寫簽名再送出！");
+      alert("請在下方簽名框完成親筆簽名！");
       return;
     }
 
@@ -216,41 +354,37 @@
     submitBtn.disabled = true;
     loadingOverlay.style.display = 'block';
 
-    // 收集表單資料
-    const formData = {
+    const payload = {
       userName: document.getElementById('userName').value.trim(),
-      phone: document.getElementById('phone').value.trim(),
-      email: document.getElementById('email').value.trim(),
-      note: document.getElementById('note').value.trim(),
-      signatureBase64: signaturePad.toDataURL('image/png') // 將簽名轉為 Base64 字串
+      schoolUnit: document.getElementById('schoolUnit').value.trim(),
+      checkedCount: checkedCount,
+      signatureBase64: signaturePad.toDataURL('image/png')
     };
 
-    // 發送 POST 請求至 Google Apps Script
     fetch(GAS_WEB_APP_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'text/plain;charset=utf-8',
-      },
-      body: JSON.stringify(formData)
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
     })
-    .then(response => response.json())
+    .then(res => res.json())
     .then(data => {
       if (data.result === 'success') {
-        document.getElementById('customForm').style.display = 'none';
-        document.getElementById('successMessage').style.display = 'block';
+        document.getElementById('mainForm').style.display = 'none';
+        document.getElementById('successBox').style.display = 'block';
       } else {
-        alert("送出失敗：" + data.message);
+        alert("提交失敗：" + data.message);
         submitBtn.disabled = false;
         loadingOverlay.style.display = 'none';
       }
     })
-    .catch(error => {
-      console.error('Error:', error);
-      alert("發生錯誤，請稍後再試！");
+    .catch(err => {
+      alert("系統發生錯誤，請重試！");
       submitBtn.disabled = false;
       loadingOverlay.style.display = 'none';
     });
   });
+
+  updateCount();
 </script>
 
 </body>
