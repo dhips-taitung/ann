@@ -109,7 +109,7 @@
       border-radius: 6px;
       font-size: 15px;
     }
-    /* 全選按鈕條 */
+    /* 進度條列 */
     .toolbar {
       display: flex;
       justify-content: space-between;
@@ -123,16 +123,6 @@
       z-index: 100;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
-    .toolbar-btn {
-      background-color: #1a73e8;
-      color: white;
-      border: none;
-      padding: 8px 14px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    .toolbar-btn:hover { background-color: #1557b0; }
     
     /* 簽名板區域樣式 */
     .signature-container {
@@ -207,13 +197,12 @@
     </div>
     <div class="input-group">
       <label>服務單位 / 學校與運動隊別</label>
-      <input type="text" id="schoolUnit" placeholder="例如：XX國小 XX隊教練">
+      <input type="text" id="schoolUnit" placeholder="例如：XX國小 XX隊教練/老師">
     </div>
 
-    <!-- 進度與全選按鈕條 -->
+    <!-- 位置 1 修改：進度條列（已刪除一鍵勾選按鈕） -->
     <div class="toolbar">
       <span id="checkProgress" style="font-weight: bold;">條文確認進度：計算中...</span>
-    <!-- <button type="button" class="toolbar-btn" id="selectAllBtn">一鍵勾選全部條文</button> -->
     </div>
 
     <!-- 大分類 一、適當之正向管教措施 -->
@@ -321,7 +310,7 @@
       </div>
     </div>
 
-    <!-- 手寫簽名欄 (直接在 HTML 標籤內寫死實體解析度 width/height) -->
+    <!-- 手寫簽名欄 (實體屬性 width=700 height=200 畫布) -->
     <div class="input-group">
       <label>親筆簽名確認（請在此方框內手寫簽名） <span style="color:red">*</span></label>
       <div class="signature-container">
@@ -358,14 +347,10 @@
 
   checkboxes.forEach(box => box.addEventListener('change', updateCount));
 
-  // 一鍵全選按鈕功能
-  document.getElementById('selectAllBtn').addEventListener('click', function() {
-    checkboxes.forEach(box => box.checked = true);
-    updateCount();
-  });
+  // 位置 2 修改：已徹底刪除原本監聽 selectAllBtn 按鈕點擊的 JS 程式碼
 
   // =========================================================================
-  // 原生 100% 必勝手寫簽名引擎 (藍色線條 + 座標自動動態映射)
+  // 原生手寫簽名引擎 (深藍色筆觸 + 動態縮放座標映射)
   // =========================================================================
   const canvas = document.getElementById('signatureCanvas');
   const ctx = canvas.getContext('2d');
@@ -378,13 +363,13 @@
   function initCanvas() {
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.strokeStyle = '#0033cc'; // 藍色墨水
+    ctx.strokeStyle = '#0033cc'; // 深藍色墨水
     ctx.lineWidth = 3;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
   }
 
-  // 精確轉換螢幕座標至 700x200 畫布內對應像素點
+  // 自動根據螢幕顯示比例計算對應至 700x200 畫布內的真實座標
   function getCanvasCoords(e) {
     const rect = canvas.getBoundingClientRect();
     let clientX = e.clientX;
@@ -398,7 +383,6 @@
       clientY = e.changedTouches[0].clientY;
     }
 
-    // 自動計算縮放比例，確保手機與電腦上落點 100% 精準
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
 
@@ -415,7 +399,6 @@
     lastX = pos.x;
     lastY = pos.y;
 
-    // 畫出起始藍點
     ctx.beginPath();
     ctx.arc(lastX, lastY, 1.5, 0, Math.PI * 2);
     ctx.fillStyle = '#0033cc';
@@ -431,7 +414,7 @@
     ctx.beginPath();
     ctx.moveTo(lastX, lastY);
     ctx.lineTo(pos.x, pos.y);
-    ctx.strokeStyle = '#0033cc'; // 藍色
+    ctx.strokeStyle = '#0033cc'; // 深藍色
     ctx.lineWidth = 3;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
@@ -449,7 +432,7 @@
     }
   }
 
-  // 綁定全系統事件 (滑鼠 + 觸控 + 指標)
+  // 綁定全系統輸入事件 (滑鼠 + 觸控 + 指標)
   canvas.addEventListener('mousedown', startDrawing, { passive: false });
   canvas.addEventListener('mousemove', draw, { passive: false });
   window.addEventListener('mouseup', stopDrawing);
@@ -487,7 +470,8 @@
 
     const checkedCount = document.querySelectorAll('.rule-check:checked').length;
     if (checkedCount < totalCount) {
-      alert(`您尚有條文未勾選！請勾選完全部 ${totalCount} 項條文（或使用右上方「一鍵勾選全部條文」）。`);
+      // 位置 3 修改：已調整警告提示文字
+      alert(`您尚有條文未勾選！請勾選完全部 ${totalCount} 項條文。`);
       return;
     }
 
