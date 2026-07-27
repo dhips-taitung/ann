@@ -155,20 +155,60 @@
       cursor: pointer;
       font-size: 13px;
     }
+    
+    /* 按鈕組樣式 */
+    .form-btn-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 25px;
+    }
+    .reset-all-btn {
+      flex: 1;
+      padding: 14px;
+      background-color: #f1f3f4;
+      color: #d93025;
+      border: 1px solid #dadce0;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .reset-all-btn:hover {
+      background-color: #fce8e6;
+    }
     .submit-btn {
-      width: 100%;
+      flex: 2;
       padding: 14px;
       background-color: #34a853;
       color: white;
       border: none;
       border-radius: 6px;
-      font-size: 18px;
+      font-size: 17px;
       font-weight: bold;
       cursor: pointer;
-      margin-top: 25px;
+      transition: background 0.2s;
     }
     .submit-btn:hover { background-color: #2d8e47; }
     .submit-btn:disabled { background-color: #cccccc; cursor: not-allowed; }
+
+    /* 成功畫面填寫新表單按鈕 */
+    .new-form-btn {
+      margin-top: 20px;
+      padding: 12px 28px;
+      background-color: #1a73e8;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .new-form-btn:hover {
+      background-color: #1557b0;
+    }
+
     #loadingOverlay {
       display: none;
       text-align: center;
@@ -182,6 +222,15 @@
       padding: 30px;
     }
     #successBox h3 { color: #34a853; font-size: 22px; }
+
+    @media (max-width: 600px) {
+      .form-btn-group {
+        flex-direction: column-reverse;
+      }
+      .reset-all-btn, .submit-btn {
+        width: 100%;
+      }
+    }
   </style>
 </head>
 <body>
@@ -200,7 +249,7 @@
       <input type="text" id="schoolUnit" placeholder="例如：XX國小 XX隊教練/老師">
     </div>
 
-    <!-- 位置 1 修改：進度條列（已刪除一鍵勾選按鈕） -->
+    <!-- 進度條列 -->
     <div class="toolbar">
       <span id="checkProgress" style="font-weight: bold;">條文確認進度：計算中...</span>
     </div>
@@ -310,7 +359,7 @@
       </div>
     </div>
 
-    <!-- 手寫簽名欄 (實體屬性 width=700 height=200 畫布) -->
+    <!-- 手寫簽名欄 -->
     <div class="input-group">
       <label>親筆簽名確認（請在此方框內手寫簽名） <span style="color:red">*</span></label>
       <div class="signature-container">
@@ -320,13 +369,19 @@
       <div style="clear: both;"></div>
     </div>
 
-    <button type="submit" class="submit-btn" id="submitBtn">我已完全了解並確認以上規範，送出表單</button>
+    <!-- 表單底部按鈕組 (含清空按鈕與送出按鈕) -->
+    <div class="form-btn-group">
+      <button type="button" class="reset-all-btn" id="resetAllBtn">清除所有表單資料</button>
+      <button type="submit" class="submit-btn" id="submitBtn">我已完全了解並確認以上規範，送出表單</button>
+    </div>
     <div id="loadingOverlay">資料上傳中，請稍候...</div>
   </form>
 
+  <!-- 送出成功結果畫面 -->
   <div id="successBox">
     <h3>🎉 檢核表與簽名已成功提交！</h3>
     <p>您的確認紀錄與親筆簽名已傳送至系統備查，感謝您的配合。</p>
+    <button type="button" class="new-form-btn" id="newFormBtn">填寫新表單</button>
   </div>
 </div>
 
@@ -347,10 +402,8 @@
 
   checkboxes.forEach(box => box.addEventListener('change', updateCount));
 
-  // 位置 2 修改：已徹底刪除原本監聽 selectAllBtn 按鈕點擊的 JS 程式碼
-
   // =========================================================================
-  // 原生手寫簽名引擎 (深藍色筆觸 + 動態縮放座標映射)
+  // 原生手寫簽名引擎 (藍色筆觸 + 動態座標映射)
   // =========================================================================
   const canvas = document.getElementById('signatureCanvas');
   const ctx = canvas.getContext('2d');
@@ -363,13 +416,13 @@
   function initCanvas() {
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.strokeStyle = '#0033cc'; // 深藍色墨水
+    ctx.strokeStyle = '#0033cc'; // 藍色墨水
     ctx.lineWidth = 3;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
   }
 
-  // 自動根據螢幕顯示比例計算對應至 700x200 畫布內的真實座標
+  // 精確轉換螢幕座標至 700x200 畫布內對應像素點
   function getCanvasCoords(e) {
     const rect = canvas.getBoundingClientRect();
     let clientX = e.clientX;
@@ -414,7 +467,7 @@
     ctx.beginPath();
     ctx.moveTo(lastX, lastY);
     ctx.lineTo(pos.x, pos.y);
-    ctx.strokeStyle = '#0033cc'; // 深藍色
+    ctx.strokeStyle = '#000000'; // 黑色
     ctx.lineWidth = 3;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
@@ -432,7 +485,7 @@
     }
   }
 
-  // 綁定全系統輸入事件 (滑鼠 + 觸控 + 指標)
+  // 綁定全系統事件 (滑鼠 + 觸控 + 指標)
   canvas.addEventListener('mousedown', startDrawing, { passive: false });
   canvas.addEventListener('mousemove', draw, { passive: false });
   window.addEventListener('mouseup', stopDrawing);
@@ -463,6 +516,44 @@
   initCanvas();
 
   // =========================================================================
+  // 表單重置與清空邏輯 (Reset Logic)
+  // =========================================================================
+  function resetEntireForm() {
+    // 1. 清空文字輸入框
+    document.getElementById('userName').value = '';
+    document.getElementById('schoolUnit').value = '';
+
+    // 2. 清空所有條文勾選
+    checkboxes.forEach(box => box.checked = false);
+
+    // 3. 更新進度計數
+    updateCount();
+
+    // 4. 清空簽名板
+    clearSignature();
+
+    // 5. 恢復送出按鈕狀態
+    const submitBtn = document.getElementById('submitBtn');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    submitBtn.disabled = false;
+    loadingOverlay.style.display = 'none';
+  }
+
+  // 「清除所有表單資料」按鈕事件（防誤觸 confirm 彈窗）
+  document.getElementById('resetAllBtn').addEventListener('click', function() {
+    if (confirm("確定要清除所有填寫的資料與簽名嗎？")) {
+      resetEntireForm();
+    }
+  });
+
+  // 「填寫新表單」按鈕事件
+  document.getElementById('newFormBtn').addEventListener('click', function() {
+    resetEntireForm();
+    document.getElementById('successBox').style.display = 'none';
+    document.getElementById('mainForm').style.display = 'block';
+  });
+
+  // =========================================================================
   // 表單驗證與送出處理
   // =========================================================================
   document.getElementById('mainForm').addEventListener('submit', function(e) {
@@ -470,7 +561,6 @@
 
     const checkedCount = document.querySelectorAll('.rule-check:checked').length;
     if (checkedCount < totalCount) {
-      // 位置 3 修改：已調整警告提示文字
       alert(`您尚有條文未勾選！請勾選完全部 ${totalCount} 項條文。`);
       return;
     }
