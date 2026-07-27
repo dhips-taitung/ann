@@ -136,7 +136,7 @@
     }
     .toolbar-btn:hover { background-color: #1557b0; }
     
-    /* 簽名板樣式 */
+    /* 【修改點 1】：簽名板與 Canvas 手寫防滾動修復 */
     .signature-container {
       position: relative;
       border: 2px dashed #1a73e8;
@@ -144,11 +144,15 @@
       background-color: #ffffff;
       height: 200px;
       margin-top: 8px;
+      touch-action: none; /* 防止行動裝置滑動頁面干擾手寫 */
+      user-select: none;
+      -webkit-user-select: none;
     }
     canvas {
       width: 100%;
       height: 100%;
-      touch-action: none;
+      display: block;
+      touch-action: none; /* 確保觸控事件直接傳給 SignaturePad */
     }
     .clear-btn {
       float: right;
@@ -202,13 +206,13 @@
     </div>
     <div class="input-group">
       <label>服務單位 / 學校與運動隊別</label>
-      <input type="text" id="schoolUnit" placeholder="例如：XX國小 羽球隊教練">
+      <input type="text" id="schoolUnit" placeholder="例如：XX國小 XX隊教練">
     </div>
 
     <!-- 進度與全選按鈕條 -->
     <div class="toolbar">
-      <span id="checkProgress" style="font-weight: bold;">條文確認進度：計算中...</span>
-    <!--  <button type="button" class="toolbar-btn" id="selectAllBtn">一鍵勾選全部條文</button> -->
+      <span id="checkProgress" style="font-weight: bold;">勾選條文確認進度：計算中...</span>
+    <!-- <button type="button" class="toolbar-btn" id="selectAllBtn">一鍵勾選全部條文</button> -->
     </div>
 
     <!-- 大分類 一、適當之正向管教措施 -->
@@ -216,13 +220,11 @@
       <div class="section-title">一、適當之正向管教措施（合法引導參考） <span style="color:red">*</span></div>
       <div class="section-desc">運動教練在指導選手、鍛鍊體能及管理團隊時，應秉持教育專業與愛心，得採取下列適當之正向管教措施來引導學生：</div>
       
-      <!-- 小分類標題（不設核取方塊） -->
       <div class="sub-category-title">一般引導與勸戒</div>
       <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 口頭勸戒與說服教育</label>
       <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 調整座位或訓練分組</label>
       <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 正向鼓勵、獎勵與建設性回饋</label>
 
-      <!-- 小分類標題（不設核取方塊） -->
       <div class="sub-category-title">訓練紀律與行為導正措施</div>
       <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 訓練場域中適當之暫時隔離反省（例如留在安全區域特定位置冷靜）</label>
       <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 留置學生於課後或訓練後進行補救/加強訓練（應注意學生交通安全並事先通知家長）</label>
@@ -359,21 +361,54 @@
     updateCount();
   });
 
-  // 初始化簽名板
+  // 【修改點 2】：手寫板 Canvas 尺寸調整與初始化重構
   const canvas = document.getElementById('signatureCanvas');
-  const signaturePad = new SignaturePad(canvas, { backgroundColor: 'rgba(255, 255, 255, 0)' });
+  let signaturePad;
 
   function resizeCanvas() {
     const ratio = Math.max(window.devicePixelRatio || 1, 1);
-    canvas.width = canvas.offsetWidth * ratio;
-    canvas.height = canvas.offsetHeight * ratio;
-    canvas.getContext("2d").scale(ratio, ratio);
-    signaturePad.clear();
-  }
-  window.addEventListener("resize", resizeCanvas);
-  resizeCanvas();
+    
+    // 確保正確取得寬度，若 offsetWidth 為 0 則以父容器寬度保底
+    const width = canvas.offsetWidth || (canvas.parentElement ? canvas.parentElement.clientWidth : 300);
+    const height = canvas.offsetHeight || 200;
 
-  document.getElementById('clearBtn').addEventListener('click', () => signaturePad.clear());
+    canvas.width = width * ratio;
+    canvas.height = height * ratio;
+    
+    const ctx = canvas.getContext("2d");
+    ctx.scale(ratio, ratio);
+
+    if (signaturePad) {
+      signaturePad.clear(); // 調整大小後重設手寫板
+    }
+  }
+
+  // 延遲至 DOMContentLoaded (網頁與 CSS 載入完畢後) 再進行手寫板初始化
+  document.addEventListener("DOMContentLoaded", function() {
+    resizeCanvas();
+    
+    // 初始化 SignaturePad 並明確設定筆觸屬性
+    signaturePad = new SignaturePad(canvas, {
+      minWidth: 1.5,
+      maxWidth: 3.5,
+      penColor: "rgb(0, 0, 0)", // 黑色筆觸
+      backgroundColor: "rgba(255, 255, 255, 0)"
+    });
+  });
+
+  // 視窗大小改變時重新計算 Canvas
+  window.addEventListener("resize", function() {
+    if (signaturePad) {
+      resizeCanvas();
+    }
+  });
+
+  // 清除重簽按鈕
+  document.getElementById('clearBtn').addEventListener('click', () => {
+    if (signaturePad) {
+      signaturePad.clear();
+    }
+  });
 
   // 表單驗證與送出處理
   document.getElementById('mainForm').addEventListener('submit', function(e) {
@@ -385,7 +420,8 @@
       return;
     }
 
-    if (signaturePad.isEmpty()) {
+    // 檢查簽名板是否為空
+    if (!signaturePad || signaturePad.isEmpty()) {
       alert("請在下方簽名框內完成親筆簽名！");
       return;
     }
