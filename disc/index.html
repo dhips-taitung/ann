@@ -49,13 +49,29 @@
       margin-bottom: 12px;
       line-height: 1.5;
     }
+    /* 無核取方塊的小分類標題樣式 */
+    .sub-category-title {
+      font-weight: bold;
+      color: #202124;
+      font-size: 15px;
+      margin-top: 14px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+    }
+    .sub-category-title::before {
+      content: "▪";
+      color: #1a73e8;
+      font-size: 18px;
+      margin-right: 8px;
+    }
     .penalty-box {
       background-color: #fce8e6;
       border-left: 4px solid #d93025;
       padding: 10px 12px;
       font-size: 13px;
       color: #a50e0e;
-      margin-top: 10px;
+      margin-top: 12px;
       margin-bottom: 10px;
       border-radius: 0 4px 4px 0;
       line-height: 1.5;
@@ -69,7 +85,7 @@
       cursor: pointer;
     }
     .checkbox-item.sub-item {
-      margin-left: 26px;
+      margin-left: 20px;
       color: #444;
     }
     .checkbox-item input[type="checkbox"] {
@@ -186,13 +202,13 @@
     </div>
     <div class="input-group">
       <label>服務單位 / 學校與運動隊別</label>
-      <input type="text" id="schoolUnit" placeholder="例如：XX國中 籃球隊教練">
+      <input type="text" id="schoolUnit" placeholder="例如：XX國小 羽球隊教練">
     </div>
 
     <!-- 進度與全選按鈕條 -->
     <div class="toolbar">
       <span id="checkProgress" style="font-weight: bold;">條文確認進度：計算中...</span>
-      <button type="button" class="toolbar-btn" id="selectAllBtn">一鍵勾選全部條文</button>
+    <!--  <button type="button" class="toolbar-btn" id="selectAllBtn">一鍵勾選全部條文</button> -->
     </div>
 
     <!-- 大分類 一、適當之正向管教措施 -->
@@ -200,12 +216,14 @@
       <div class="section-title">一、適當之正向管教措施（合法引導參考） <span style="color:red">*</span></div>
       <div class="section-desc">運動教練在指導選手、鍛鍊體能及管理團隊時，應秉持教育專業與愛心，得採取下列適當之正向管教措施來引導學生：</div>
       
-      <label class="checkbox-item"><input type="checkbox" class="rule-check"> <b>一般引導與勸戒</b></label>
+      <!-- 小分類標題（不設核取方塊） -->
+      <div class="sub-category-title">一般引導與勸戒</div>
       <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 口頭勸戒與說服教育</label>
       <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 調整座位或訓練分組</label>
       <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 正向鼓勵、獎勵與建設性回饋</label>
 
-      <label class="checkbox-item" style="margin-top: 10px;"><input type="checkbox" class="rule-check"> <b>訓練紀律與行為導正措施</b></label>
+      <!-- 小分類標題（不設核取方塊） -->
+      <div class="sub-category-title">訓練紀律與行為導正措施</div>
       <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 訓練場域中適當之暫時隔離反省（例如留在安全區域特定位置冷靜）</label>
       <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 留置學生於課後或訓練後進行補救/加強訓練（應注意學生交通安全並事先通知家長）</label>
       <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 要求合理之勞動服務（如清潔運動場地、整理器材，應符合比例原則）</label>
@@ -219,16 +237,16 @@
       <div class="section-title">二、嚴禁之處罰 - 1. 體罰 <span style="color:red">*</span></div>
       <div class="section-desc">指教師法施行細則規定之體罰，包含教練對學生身體施加強制力，或命令他人施加強制力之行為：</div>
       
-      <label class="checkbox-item"><input type="checkbox" class="rule-check"> <b>親自施加強制力之體罰</b></label>
+      <div class="sub-category-title">親自施加強制力之體罰</div>
       <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 毆打、鞭打、打耳光、打手心、打臀部、責打身體其他部位等</label>
       
-      <label class="checkbox-item"><input type="checkbox" class="rule-check"> <b>命令學生自殘身體之體罰</b></label>
+      <div class="sub-category-title">命令學生自殘身體之體罰</div>
       <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 命令學生自打耳光等</label>
       
-      <label class="checkbox-item"><input type="checkbox" class="rule-check"> <b>命令第三者施加強制力之體罰</b></label>
+      <div class="sub-category-title">命令第三者施加強制力之體罰</div>
       <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 命令學生互打耳光等</label>
       
-      <label class="checkbox-item"><input type="checkbox" class="rule-check"> <b>命令學生採取特定身體動作之體罰（運動訓練中最常見之違法樣態）</b></label>
+      <div class="sub-category-title">命令學生採取特定身體動作之體罰（運動訓練中最常見之違法樣態）</div>
       <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 交互蹲跳、半蹲、罰跪、蛙跳、兔子跳、學鴨子走路、提水桶過肩、單腳支撐地面、上下樓梯或其他類似之身體動作等</label>
 
       <div class="penalty-box">
@@ -243,7 +261,7 @@
       <div class="section-title">二、嚴禁之處罰 - 2. 霸凌 <span style="color:red">*</span></div>
       <div class="section-desc">指符合「校園霸凌防制準則」規定之霸凌行為：</div>
       
-      <label class="checkbox-item"><input type="checkbox" class="rule-check"> <b>校園霸凌行為（具體類型）</b></label>
+      <div class="sub-category-title">校園霸凌行為（具體類型）</div>
       <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 肢體霸凌：實體之肢體攻擊、推擠、施暴等。</label>
       <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 言語霸凌：透過語言、言詞辱罵、嘲弄、恐嚇或威脅等方式。</label>
       <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 關係/社交霸凌：惡意排擠、散播謠言、孤立或破壞團隊人際關係。</label>
@@ -276,22 +294,21 @@
     <div class="section-card">
       <div class="section-title">二、嚴禁之處罰 - 4. 其他違法處罰（涉及刑事法律與違反行政法規） <span style="color:red">*</span></div>
       
-      <label class="checkbox-item"><input type="checkbox" class="rule-check"> <b>涉及刑事法律之行為（使學生身心受侵害之犯罪行為）：</b></label>
+      <div class="sub-category-title">涉及刑事法律之行為（使學生身心受侵害之犯罪行為）</div>
       <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 公然侮辱罪（刑法第309條）：於公眾或師生、隊員面前以言語貶損學生人格尊嚴。➔ 處拘役或罰金。</label>
       <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 誹謗罪（刑法第310條）：散布足以毀損學生名譽之事。➔ 處1年以下有期徒刑、拘役或罰金。</label>
       <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 強制罪（刑法第304條）：以強暴、脅迫使學生行無義務之事或妨害其行使權利。➔ 處3年以下有期徒刑、拘役或罰金。</label>
       <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 恐嚇危害安全罪（刑法第305條）：以加害生命、身體、自由等事恐嚇學生致生危害。➔ 處2年以下有期徒刑、拘役或罰金。</label>
       <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 傷害罪 / 過失傷害罪（刑法第277條、第284條）：因體罰或過當訓練導致學生身體受傷。➔ 普通傷害罪處5年以下有期徒刑、拘役或罰金；過失傷害處1年以下有期徒刑、拘役或罰金。</label>
 
-      <div style="margin-top: 15px;"></div>
-      <label class="checkbox-item"><input type="checkbox" class="rule-check"> <b>違反專業倫理與行政法規：</b></label>
+      <div class="sub-category-title" style="margin-top: 18px;">違反專業倫理與行政法規</div>
       <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 違反《性別平等教育法》：涉及性侵害、性騷擾、性霸凌或違法處理相關事件致學生身心受創。➔ 依法解聘、終身或一定期間不得聘任，並處行政罰鍰或移送法辦。</label>
       
-      <label class="checkbox-item sub-item" style="margin-top: 8px;"><input type="checkbox" class="rule-check"> <b>違反《兒童及少年福利與權益保障法》（兒少權法第49條各款禁止規定）：</b></label>
-      <label class="checkbox-item sub-item" style="margin-left: 45px;"><input type="checkbox" class="rule-check"> 第1款：吊打、毆打或使兒童少年身心受到其他虐待或不當管教（教練對選手過度斯巴達式體罰常落入此款）。</label>
-      <label class="checkbox-item sub-item" style="margin-left: 45px;"><input type="checkbox" class="rule-check"> 第3款：妨害兒童少年身心健康或發展之行為（例如不當控制體重、強行不當脫水或過度飢餓）。</label>
-      <label class="checkbox-item sub-item" style="margin-left: 45px;"><input type="checkbox" class="rule-check"> 第7款：供應兒童少年菸品、酒品、檳榔、毒品等。</label>
-      <label class="checkbox-item sub-item" style="margin-left: 45px;"><input type="checkbox" class="rule-check"> 第9款：其他對兒童少年犯罪或不正當行為。</label>
+      <div class="sub-category-title" style="margin-top: 12px;">違反《兒童及少年福利與權益保障法》（兒少權法第49條各款禁止規定）</div>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 第1款：吊打、毆打或使兒童少年身心受到其他虐待或不當管教（教練對選手過度斯巴達式體罰常落入此款）。</label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 第3款：妨害兒童少年身心健康或發展之行為（例如不當控制體重、強行不當脫水或過度飢餓）。</label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 第7款：供應兒童少年菸品、酒品、檳榔、毒品等。</label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 第9款：其他對兒童少年犯罪或不正當行為。</label>
 
       <div class="penalty-box">
         <b>【兒少權法第49條罰責】</b><br>
