@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>學校運動教練輔導與管教規範暨不適任檢核表（完整整合版）</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: #f4f6f9;
+      margin: 0;
+      padding: 20px 10px;
+      color: #333;
+    }
+    .container {
+      max-width: 820px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 25px 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    h2 {
+      text-align: center;
+      color: #1a73e8;
+      margin-top: 0;
+      margin-bottom: 12px;
+    }
+    .header-desc {
+      font-size: 13px;
+      color: #5f6368;
+      line-height: 1.6;
+      background-color: #f8f9fa;
+      border: 1px solid #e8eaed;
+      padding: 12px 15px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+    }
+    .section-card {
+      background: #fafafa;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 18px 20px;
+      margin-bottom: 20px;
+    }
+    .section-title {
+      font-size: 16px;
+      font-weight: bold;
+      color: #1a73e8;
+      margin-top: 0;
+      margin-bottom: 8px;
+    }
+    .section-desc {
+      font-size: 13.5px;
+      color: #444;
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+    .sub-category-title {
+      font-weight: bold;
+      color: #202124;
+      font-size: 15px;
+      margin-top: 14px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+    }
+    .sub-category-title::before {
+      content: "▪";
+      color: #1a73e8;
+      font-size: 18px;
+      margin-right: 8px;
+    }
+    /* 說明盒樣式 (實例/白話解析) */
+    .example-box {
+      background-color: #f0f7ff;
+      border-left: 4px solid #1a73e8;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: #155724;
+      margin-top: 10px;
+      margin-bottom: 12px;
+      border-radius: 0 4px 4px 0;
+      line-height: 1.6;
+    }
+    .example-box-title {
+      font-weight: bold;
+      color: #1a73e8;
+      margin-bottom: 4px;
+    }
+    .legal-explain-box {
+      background-color: #fff8e1;
+      border-left: 4px solid #f57c00;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: #5d4037;
+      margin-top: 10px;
+      margin-bottom: 12px;
+      border-radius: 0 4px 4px 0;
+      line-height: 1.6;
+    }
+    .penalty-box {
+      background-color: #fce8e6;
+      border-left: 4px solid #d93025;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: #a50e0e;
+      margin-top: 12px;
+      margin-bottom: 10px;
+      border-radius: 0 4px 4px 0;
+      line-height: 1.5;
+    }
+    .checkbox-item {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 8px;
+      font-size: 14px;
+      line-height: 1.4;
+      cursor: pointer;
+    }
+    .checkbox-item.sub-item {
+      margin-left: 20px;
+      color: #444;
+    }
+    .checkbox-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      margin-right: 10px;
+      margin-top: 2px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .input-group {
+      margin-bottom: 15px;
+    }
+    .input-group label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .input-group input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 15px;
+    }
+    /* 進度條列 */
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #e8f0fe;
+      padding: 12px 15px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      position: sticky;
+      top: 10px;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    /* 簽名板區域樣式 */
+    .signature-container {
+      position: relative;
+      border: 2px dashed #1a73e8;
+      border-radius: 8px;
+      background-color: #ffffff;
+      padding: 2px;
+      margin-top: 8px;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    canvas#signatureCanvas {
+      width: 100%;
+      height: 200px;
+      display: block;
+      touch-action: none;
+      cursor: crosshair;
+      background-color: #ffffff;
+      border-radius: 6px;
+    }
+    .clear-btn {
+      float: right;
+      margin-top: 8px;
+      background: #e0e0e0;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    
+    /* 按鈕組樣式 */
+    .form-btn-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 25px;
+    }
+    .reset-all-btn {
+      flex: 1;
+      padding: 14px;
+      background-color: #f1f3f4;
+      color: #d93025;
+      border: 1px solid #dadce0;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .reset-all-btn:hover {
+      background-color: #fce8e6;
+    }
+    .submit-btn {
+      flex: 2;
+      padding: 14px;
+      background-color: #34a853;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 17px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .submit-btn:hover { background-color: #2d8e47; }
+    .submit-btn:disabled { background-color: #cccccc; cursor: not-allowed; }
+
+    /* 成功畫面填寫新表單按鈕 */
+    .new-form-btn {
+      margin-top: 20px;
+      padding: 12px 28px;
+      background-color: #1a73e8;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .new-form-btn:hover {
+      background-color: #1557b0;
+    }
+
+    #loadingOverlay {
+      display: none;
+      text-align: center;
+      margin-top: 15px;
+      color: #1a73e8;
+      font-weight: bold;
+    }
+    #successBox {
+      display: none;
+      text-align: center;
+      padding: 30px;
+    }
+    #successBox h3 { color: #34a853; font-size: 22px; }
+
+    .item-desc-text {
+      font-size: 12.5px;
+      color: #666;
+      margin-top: 2px;
+      margin-bottom: 6px;
+      margin-left: 28px;
+      line-height: 1.4;
+    }
+
+    @media (max-width: 600px) {
+      .form-btn-group {
+        flex-direction: column-reverse;
+      }
+      .reset-all-btn, .submit-btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <form id="mainForm">
+    <h2>學校運動教練輔導與管教規範暨不適任檢核表（完整整合版）</h2>
+    
+    <div class="header-desc">
+      本檢核表依據《學校訂定教師輔導與管教學生辦法注意事項》、《高級中等以下學校外聘運動教練進（運）用及不適任通報注意事項》、校園霸凌防制準則、刑法及兒童及少年福利與權益保障法（兒少權法第49條）等規定整編，供學校運動教練（含外聘教練與專任運動教練）於教學與訓練時據以遵循與自我檢核。
+    </div>
+
+    <!-- 基本資料 -->
+    <div class="input-group">
+      <label>填寫人姓名（教練/老師） <span style="color:red">*</span></label>
+      <input type="text" id="userName" placeholder="請輸入您的姓名" required>
+    </div>
+    <div class="input-group">
+      <label>服務單位 / 學校與運動隊別</label>
+      <input type="text" id="schoolUnit" placeholder="例如：XX國小 XX隊教練/老師">
+    </div>
+
+    <!-- 進度條列 -->
+    <div class="toolbar">
+      <span id="checkProgress" style="font-weight: bold;">條文確認進度：計算中...</span>
+    </div>
+
+    <!-- 大分類 一、核心管教原則（平等與比例原則） -->
+    <div class="section-card">
+      <div class="section-title">一、核心管教原則（平等與比例原則） <span style="color:red">*</span></div>
+      
+      <!-- 1. 平等原則 -->
+      <div class="sub-category-title">1. 平等原則（注意事項第十一條）</div>
+      <div class="section-desc"><b>法條規範：</b>教師輔導與管教學生，非有正當理由，不得為差別待遇。</div>
+      
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 對待團隊中所有選手（無論是主力球員、替補球員、資深學長或新生）一視同仁。</label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 訂定球隊或訓練場地之紀律與獎懲標準時，一體適用，不因選手之性別、家長背景、學業成績或運動天賦而有不同標準。</label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 若因身心狀況、特教需求或特殊醫療考量需調整訓練強度或管理方式，須具備客觀、正當之教育或醫學理由，並留下紀錄。</label>
+
+      <div class="example-box">
+        <div class="example-box-title">💡 運動訓練實例說明：</div>
+        • <b>違法/不當差別待遇：</b>球隊主力球員因技術好、常拿冠軍，練習遲到時教練選擇睜一隻眼閉一隻眼；但普通替補球員遲到，教練卻施予嚴厲的交互蹲跳處罰。此即違反平等原則。<br>
+        • <b>合法正當理由調整：</b>隊上某選手領有身心障礙證明，因體能狀況無法負荷全體標準的長跑訓練，教練基於醫師建議與個案特教需求，調整其訓練菜單為較短距離的緩步走。這屬於「有正當理由的合理差別對待」。
+      </div>
+
+      <!-- 2. 比例原則 -->
+      <div class="sub-category-title" style="margin-top: 18px;">2. 比例原則（注意事項第十二條）</div>
+      <div class="section-desc">
+        <b>法條規範：</b>教師採行之輔導與管教措施，應與學生違規行為之情節輕重相當，並依下列原則為之：<br>
+        (1) 採取之措施應有助於目的之達成。<br>
+        (2) 有多種同樣能達成目的之措施時，應選擇對學生權益損害較少者。<br>
+        (3) 採取之措施所造成之損害不得與欲達成目的之利益顯失均衡。
+      </div>
+
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 處罰或管教措施必須與違規情節成正比（例如：選手忘記帶水壺，不應直接處罰半小時交互蹲跳）。</label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 優先採用能達成教育導正目的、且對學生身心損害最小的方法。</label>
+
+      <div class="example-box">
+        <div class="example-box-title">💡 運動訓練實例說明：</div>
+        • <b>違法/違反比例原則：</b>選手在練習時不小心打破一顆排球，教練為了懲戒，直接罰全隊跑操場 50 圈並禁賽一個月。此處罰相較於打破球的輕微過失，造成全隊過度身心負擔與受教權受損，顯失均衡且違反比例原則。<br>
+        • <b>合法適當措施：</b>選手練習態度散漫、屢勸不聽，教練採取「暫時隔離反省（請其在場邊冷靜 5 分鐘後再歸隊）」，這有助於讓選手冷靜，且對其權益損害較少，符合比例原則。
+      </div>
+    </div>
+
+    <!-- 大分類 二、適當之正向管教措施（合法引導參考） -->
+    <div class="section-card">
+      <div class="section-title">二、適當之正向管教措施（合法引導參考） <span style="color:red">*</span></div>
+      <div class="section-desc">教練於指導選手、鍛鍊體能及管理團隊時，應秉持教育專業與愛心，得採取下列適當之正向管教措施：</div>
+      
+      <div class="sub-category-title">一般引導與勸戒</div>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 口頭勸戒與說服教育</label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 調整座位或訓練分組</label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 正向鼓勵、獎勵與建設性回饋</label>
+
+      <div class="sub-category-title">訓練紀律與行為導正措施</div>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 訓練場域中適當之暫時隔離反省（例如留在安全區域特定位置冷靜）</label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 留置學生於課後或訓練後進行補救/加強訓練（應注意學生交通安全並事先通知家長）</label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 要求合理之勞動服務（如清潔運動場地、整理器材，應符合比例原則）</label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 暫時保管妨害訓練或違禁物品（應妥善保管並於適時歸還）</label>
+    </div>
+
+    <!-- 大分類 三、運動教練違法處罰措施與不適任樣態 -->
+    <div class="section-card">
+      <div class="section-title">三、運動教練違法處罰措施與不適任樣態（含相關罰責及通報規定） <span style="color:red">*</span></div>
+      
+      <!-- 1. 體罰與身心暴力行為 -->
+      <div class="sub-category-title">1. 體罰與身心暴力行為</div>
+      <div class="section-desc">指教練對學生身體施加強制力，或命令他人施加強制力之行為：</div>
+      
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 親自施加強制力之體罰：毆打、鞭打、打耳光、打手心、打臀部、責打身體其他部位等。</label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 命令學生自殘身體之體罰：命令學生自打耳光等。</label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 命令第三者施加強制力之體罰：命令學生互打耳光等。</label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 命令學生採取特定身體動作之體罰（運動訓練中應特別避免）：交互蹲跳、半蹲、罰跪、蛙跳、兔子跳、學鴨子走路、提水桶過肩、單腳支撐地面、上下樓梯或其他類似之身體動作等。</label>
+
+      <div class="penalty-box">
+        <b>【相關罰責與不適任規範】</b><br>
+        • <b>外聘教練注意事項第5點第13款、第14款：</b>體罰或霸凌學生，造成身心嚴重侵害，不得進（運）用，或應終止契約且終身不得擔任外聘教練；造成身心侵害有終止契約必要者，經委員會議決1年至4年不得擔任。<br>
+        • <b>教師法 / 專任運動教練法規：</b>視情節輕重予以解聘、不續聘、停聘，並管制1年至終身不得聘任。
+      </div>
+
+      <!-- 2. 霸凌行為 -->
+      <div class="sub-category-title" style="margin-top: 18px;">2. 霸凌行為</div>
+      <div class="section-desc">指符合「校園霸凌防制準則」規定之各類霸凌行為：</div>
+      
+      <div class="sub-category-title" style="margin-left: 10px;">校園霸凌樣態</div>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 肢體霸凌：實體之肢體攻擊、推擠、施暴等。</label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 言語霸凌：透過語言、言詞辱罵、嘲弄、恐嚇或威脅等。</label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 關係/社交霸凌：惡意排擠、散播謠言、孤立或破壞團隊人際關係。</label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 網路霸凌：透過網路、社群媒體、通訊軟體等散布私密照、毀謗、侮辱或騷擾。</label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 性霸凌：與性或性別有關之霸凌，透過語言、肢體或其他暴力貶抑、攻擊或騷擾他人。</label>
+
+      <div class="penalty-box">
+        <b>【相關罰責與不適任規範】</b><br>
+        經調查確認有霸凌行為且情節重大致身心嚴重侵害，屬不得進（運）用或應終止契約並管制之列。
+      </div>
+
+      <!-- 3. 不當管教 -->
+      <div class="sub-category-title" style="margin-top: 18px;">3. 不當管教</div>
+      <div class="section-desc">指教練採取之管教措施違反輔導管教相關法令規定（含違反比例原則或平等原則），而使學生身心受到侵害之行為：</div>
+      
+      <div class="sub-category-title" style="margin-left: 10px;">身心受侵害之管教措施</div>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 站立反省逾時：每次超過一堂課，且每日累計超過兩小時。</label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 對學生罰錢</label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 非暫時保管之沒收或沒入學生物品</label>
+
+      <div class="penalty-box">
+        <b>【相關罰責】</b><br>
+        <b>教師成績考核辦法 / 相關管理辦法：</b>依情節輕重予以申誡、記過、大過，致身心嚴重受創者依法解聘。
+      </div>
+
+      <!-- 4. 運動教練特有違法與不適任樣態 -->
+      <div class="sub-category-title" style="margin-top: 18px;">4. 運動教練特有違法與不適任樣態（含運動禁藥及重大法規違反）</div>
+      
+      <div class="sub-category-title" style="margin-left: 10px;">運動禁藥違規（外聘教練注意事項第5點第15款、第16款）</div>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 授意或唆使選手使用運動禁藥，經權責機構團體查證屬實。</label>
+      <div class="penalty-box">
+        <b>【罰責】</b> 應終止契約，並經委員會議決 終身 或 1年至4年 不得擔任外聘教練。
+      </div>
+
+      <div class="sub-category-title" style="margin-left: 10px; margin-top: 14px;">涉及刑事法律之行為：</div>
+      
+      <div class="legal-explain-box">
+        <b>💡 刑事罰責用語白話解析（教練必須了解的法律衝擊）：</b><br>
+        • <b>有期徒刑：</b>指剝奪人身自由並入監服刑。一旦被判刑（即使獲得緩刑），在教育與運動界通常會面臨解聘、終止契約且終身或數年不得任用，教練生涯將徹底毀於一旦。<br>
+        • <b>拘役：</b>短期限制人身自由的刑罰（1日至59日），會留下刑事前科紀錄。<br>
+        • <b>罰金：</b>法院判決應繳納給國庫的金錢懲罰，同樣會寫入個人的良民證（警察刑事紀錄證明）中。
+      </div>
+
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <b>公然侮辱罪、誹謗罪（刑法第309條、第310條）：</b>於訓練場地或公開場合以言語貶損學生人格名譽。</label>
+      <div class="item-desc-text">
+        └ <b>法定刑責（白話說明）：</b>處拘役、罰金或1年以下有期徒刑。<br>
+        └ <b>對生涯實質影響：</b>易科罰金或易處拘役看似不用坐牢，但會留下刑事前科，學校可依規定予以解聘或不續聘。
+      </div>
+
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <b>強制罪（刑法第304條）：</b>以強暴、脅迫使學生行無義務之事。</label>
+      <div class="item-desc-text">
+        └ <b>法定刑責（白話說明）：</b>處3年以下有期徒刑、拘役或9千元以下罰金。<br>
+        └ <b>對生涯實質影響：</b>屬於較重的妨害自由罪名，一旦被判刑，幾乎確定會失去教練職位，且面臨長達數年的業界禁賽或不得任用處分。
+      </div>
+
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <b>傷害罪 / 過失傷害罪（刑法第277條、第284條）：</b>因過當訓練或體罰致學生受傷（如骨折、瘀青）。</label>
+      <div class="item-desc-text">
+        └ <b>法定刑責（白話說明）：</b>普通傷害處5年以下有期徒刑、拘役或罰金；過失傷害處1年以下有期徒刑、拘役或罰金。<br>
+        └ <b>對生涯實質影響：</b>刑度最高可達 5 年。只要學生驗傷提告且罪名成立，教練將面臨嚴重的監禁風險與民事巨額賠償，職業生涯徹底終結。
+      </div>
+
+      <div class="sub-category-title" style="margin-left: 10px; margin-top: 14px;">違反專業倫理與行政法規：</div>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <b>違反《性別平等教育法》：</b>涉及性侵害、性騷擾、性霸凌或違法處理相關事件致學生身心受創。➔ 依法解聘/終止契約，終身或1年至4年不得聘任/擔任外聘教練。</label>
+      
+      <div class="sub-category-title" style="margin-left: 10px; margin-top: 10px;">違反《兒童及少年福利與權益保障法》（兒少權法第49條各款禁止規定）：</div>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 第1款：吊打、毆打或使兒童少年身心受到其他虐待或不當管教。</label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 第3款：妨害兒童少年身心健康或發展之行為（如不當控制體重、過度飢餓或不當脫水）。</label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 第7款：供應兒童少年菸品、酒品、檳榔、毒品等。</label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> 第9款：其他對兒童少年犯罪或不正當行為。</label>
+
+      <div class="penalty-box">
+        <b>【兒少權法第49條罰責】</b><br>
+        依 <b>兒少權法第97條</b> 規定：處新臺幣 6萬元以上 60萬元以下 罰鍰，並得公布姓名或名稱。情節嚴重者，依外聘教練注意事項或相關法規予以終止契約、解聘，並管制1年至終身不得擔任教練。
+      </div>
+    </div>
+
+    <!-- 大分類 四、通報與查詢義務（外聘教練注意事項重點） -->
+    <div class="section-card">
+      <div class="section-title">四、通報與查詢義務（外聘教練注意事項重點） <span style="color:red">*</span></div>
+      
+      <label class="checkbox-item"><input type="checkbox" class="rule-check"> <b>進（運）用前查詢義務：</b>學校或家長會進（運）用外聘教練前，應由學校至「各教育場域不適任人員通報及查詢系統」查詢有無不得進用之情事。</label>
+      <label class="checkbox-item"><input type="checkbox" class="rule-check"> <b>事件發生後通報義務：</b>教練若有違法或不適任情形（如體罰、霸凌嚴重侵害身心、授意使用禁藥、違反兒少權法或性平法等），學校應予終止契約，並於書面通知送達後 7日內 至通報系統登載通報。</label>
+    </div>
+
+    <!-- 手寫簽名欄 (黑色墨水) -->
+    <div class="input-group">
+      <label>親筆簽名確認（請在此方框內手寫簽名） <span style="color:red">*</span></label>
+      <div class="signature-container">
+        <canvas id="signatureCanvas" width="700" height="200"></canvas>
+      </div>
+      <button type="button" class="clear-btn" id="clearBtn">清除重簽</button>
+      <div style="clear: both;"></div>
+    </div>
+
+    <!-- 表單底部按鈕組 -->
+    <div class="form-btn-group">
+      <button type="button" class="reset-all-btn" id="resetAllBtn">清除所有表單資料</button>
+      <button type="submit" class="submit-btn" id="submitBtn">我已完全了解並確認以上規範，送出表單</button>
+    </div>
+    <div id="loadingOverlay">資料上傳中，請稍候...</div>
+  </form>
+
+  <!-- 送出成功結果畫面 -->
+  <div id="successBox">
+    <h3>🎉 檢核表與簽名已成功提交！</h3>
+    <p>您的確認紀錄與親筆簽名已傳送至系統備查，感謝您的配合。</p>
+    <button type="button" class="new-form-btn" id="newFormBtn">填寫新表單</button>
+  </div>
+</div>
+
+<script>
+  // 您的 Google Apps Script 部署網址
+  const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxF1w99R0B0FhWPKLWbLn_X5rW5V1m2_ahXruTd3Oxl_OCVl-l7-0OMIawwm0sj2A2hbw/exec";
+
+  const checkboxes = document.querySelectorAll('.rule-check');
+  const checkProgress = document.getElementById('checkProgress');
+  const totalCount = checkboxes.length;
+
+  // 更新勾選計數進度
+  function updateCount() {
+    const checkedCount = document.querySelectorAll('.rule-check:checked').length;
+    checkProgress.innerText = `條文確認進度：${checkedCount} / ${totalCount} 項`;
+    checkProgress.style.color = (checkedCount === totalCount) ? '#34a853' : '#d93025';
+  }
+
+  checkboxes.forEach(box => box.addEventListener('change', updateCount));
+
+  // =========================================================================
+  // 原生手寫簽名引擎 (純黑色筆觸 + 動態座標映射)
+  // =========================================================================
+  const canvas = document.getElementById('signatureCanvas');
+  const ctx = canvas.getContext('2d');
+  let isDrawing = false;
+  let hasSigned = false;
+  let lastX = 0;
+  let lastY = 0;
+
+  // 初始化畫布底色與黑色筆觸
+  function initCanvas() {
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = '#000000'; // 黑色墨水
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+  }
+
+  // 自動根據螢幕顯示比例計算對應至 700x200 畫布內的真實座標
+  function getCanvasCoords(e) {
+    const rect = canvas.getBoundingClientRect();
+    let clientX = e.clientX;
+    let clientY = e.clientY;
+
+    if (e.touches && e.touches.length > 0) {
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    } else if (e.changedTouches && e.changedTouches.length > 0) {
+      clientX = e.changedTouches[0].clientX;
+      clientY = e.changedTouches[0].clientY;
+    }
+
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+
+    return {
+      x: (clientX - rect.left) * scaleX,
+      y: (clientY - rect.top) * scaleY
+    };
+  }
+
+  function startDrawing(e) {
+    e.preventDefault();
+    isDrawing = true;
+    const pos = getCanvasCoords(e);
+    lastX = pos.x;
+    lastY = pos.y;
+
+    ctx.beginPath();
+    ctx.arc(lastX, lastY, 1.5, 0, Math.PI * 2);
+    ctx.fillStyle = '#000000'; // 黑色
+    ctx.fill();
+    hasSigned = true;
+  }
+
+  function draw(e) {
+    if (!isDrawing) return;
+    e.preventDefault();
+    const pos = getCanvasCoords(e);
+
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY);
+    ctx.lineTo(pos.x, pos.y);
+    ctx.strokeStyle = '#000000'; // 黑色
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.stroke();
+
+    lastX = pos.x;
+    lastY = pos.y;
+    hasSigned = true;
+  }
+
+  function stopDrawing(e) {
+    if (isDrawing) {
+      isDrawing = false;
+      ctx.beginPath();
+    }
+  }
+
+  // 綁定全系統事件 (滑鼠 + 觸控 + 指標)
+  canvas.addEventListener('mousedown', startDrawing, { passive: false });
+  canvas.addEventListener('mousemove', draw, { passive: false });
+  window.addEventListener('mouseup', stopDrawing);
+
+  canvas.addEventListener('touchstart', startDrawing, { passive: false });
+  canvas.addEventListener('touchmove', draw, { passive: false });
+  canvas.addEventListener('touchend', stopDrawing, { passive: false });
+  canvas.addEventListener('touchcancel', stopDrawing, { passive: false });
+
+  if (window.PointerEvent) {
+    canvas.addEventListener('pointerdown', startDrawing, { passive: false });
+    canvas.addEventListener('pointermove', draw, { passive: false });
+    canvas.addEventListener('pointerup', stopDrawing, { passive: false });
+    canvas.addEventListener('pointercancel', stopDrawing, { passive: false });
+  }
+
+  // 清除簽名
+  function clearSignature() {
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    hasSigned = false;
+  }
+
+  document.getElementById('clearBtn').addEventListener('click', clearSignature);
+
+  // 初始化畫布
+  window.addEventListener('load', initCanvas);
+  initCanvas();
+
+  // =========================================================================
+  // 表單重置與清空邏輯 (Reset Logic)
+  // =========================================================================
+  function resetEntireForm() {
+    // 1. 清空文字輸入框
+    document.getElementById('userName').value = '';
+    document.getElementById('schoolUnit').value = '';
+
+    // 2. 清空所有條文勾選
+    checkboxes.forEach(box => box.checked = false);
+
+    // 3. 更新進度計數
+    updateCount();
+
+    // 4. 清空簽名板
+    clearSignature();
+
+    // 5. 恢復送出按鈕狀態
+    const submitBtn = document.getElementById('submitBtn');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    submitBtn.disabled = false;
+    loadingOverlay.style.display = 'none';
+  }
+
+  // 「清除所有表單資料」按鈕事件（防誤觸 confirm 彈窗）
+  document.getElementById('resetAllBtn').addEventListener('click', function() {
+    if (confirm("確定要清除所有填寫的資料與簽名嗎？")) {
+      resetEntireForm();
+    }
+  });
+
+  // 「填寫新表單」按鈕事件
+  document.getElementById('newFormBtn').addEventListener('click', function() {
+    resetEntireForm();
+    document.getElementById('successBox').style.display = 'none';
+    document.getElementById('mainForm').style.display = 'block';
+  });
+
+  // =========================================================================
+  // 表單驗證與送出處理
+  // =========================================================================
+  document.getElementById('mainForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const checkedCount = document.querySelectorAll('.rule-check:checked').length;
+    if (checkedCount < totalCount) {
+      alert(`您尚有條文未勾選！請勾選完全部 ${totalCount} 項條文。`);
+      return;
+    }
+
+    if (!hasSigned) {
+      alert("請在下方簽名框內完成親筆簽名！");
+      return;
+    }
+
+    const submitBtn = document.getElementById('submitBtn');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    
+    submitBtn.disabled = true;
+    loadingOverlay.style.display = 'block';
+
+    const payload = {
+      userName: document.getElementById('userName').value.trim(),
+      schoolUnit: document.getElementById('schoolUnit').value.trim(),
+      checkedCount: checkedCount,
+      signatureBase64: canvas.toDataURL('image/png')
+    };
+
+    fetch(GAS_WEB_APP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.result === 'success') {
+        document.getElementById('mainForm').style.display = 'none';
+        document.getElementById('successBox').style.display = 'block';
+      } else {
+        alert("提交失敗：" + data.message);
+        submitBtn.disabled = false;
+        loadingOverlay.style.display = 'none';
+      }
+    })
+    .catch(err => {
+      alert("系統發生錯誤，請稍後再試！");
+      submitBtn.disabled = false;
+      loadingOverlay.style.display = 'none';
+    });
+  });
+
+  updateCount();
+</script>
+
+</body>
+</html>
