@@ -4,8 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>學校運動教練輔導與管教專業規範及檢核表</title>
-  <!-- 引入 Signature Pad 套件 -->
-  <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -136,7 +134,7 @@
     }
     .toolbar-btn:hover { background-color: #1557b0; }
     
-    /* 簽名板樣式 */
+    /* 簽名板外框與畫布樣式 */
     .signature-container {
       position: relative;
       border: 2px dashed #1a73e8;
@@ -145,12 +143,14 @@
       height: 220px;
       margin-top: 8px;
       touch-action: none;
+      overflow: hidden;
     }
-    canvas {
+    canvas#signatureCanvas {
       width: 100%;
       height: 100%;
       display: block;
       touch-action: none;
+      cursor: crosshair;
     }
     .clear-btn {
       float: right;
@@ -318,11 +318,11 @@
       </div>
     </div>
 
-    <!-- 手寫簽名欄 (位置 1 修改：加入 touch-action 與行內寬高) -->
+    <!-- 手寫簽名欄 (原生 Canvas) -->
     <div class="input-group">
       <label>親筆簽名確認（請在此方框內手寫簽名） <span style="color:red">*</span></label>
       <div class="signature-container">
-        <canvas id="signatureCanvas" style="touch-action: none; width: 100%; height: 100%;"></canvas>
+        <canvas id="signatureCanvas"></canvas>
       </div>
       <button type="button" class="clear-btn" id="clearBtn">清除重簽</button>
       <div style="clear: both;"></div>
@@ -361,51 +361,119 @@
     updateCount();
   });
 
-  // 位置 2 修改：修正 Signature Pad 初始化邏輯與 Canvas 解析度重計算
+  // =========================================================================
+  // 重建：原生 HTML5 Canvas 手寫簽名引擎 (相容電腦滑鼠與手機觸控)
+  // =========================================================================
   const canvas = document.getElementById('signatureCanvas');
-  let signaturePad;
+  const ctx = canvas.getContext('2d');
+  let isDrawing = false;
+  let hasSigned = false;
+  let lastX = 0;
+  let lastY = 0;
 
-  function initSignaturePad() {
-    // 精確取得手寫區域的 DOM 實際寬高
+  // 動態分配畫布高解析度尺寸並塗白背景
+  function resizeCanvas() {
     const rect = canvas.getBoundingClientRect();
-    const width = rect.width || canvas.offsetWidth || 300;
-    const height = rect.height || canvas.offsetHeight || 200;
-
-    // 處理高 DPI 螢幕 (Retina / 手機螢幕)，防止劃線模糊
     const ratio = Math.max(window.devicePixelRatio || 1, 1);
-    canvas.width = width * ratio;
-    canvas.height = height * ratio;
-
-    const ctx = canvas.getContext("2d");
+    
+    // 設定實體畫布解析度
+    canvas.width = rect.width * ratio;
+    canvas.height = rect.height * ratio;
+    
+    // 縮放繪圖情境
     ctx.scale(ratio, ratio);
 
-    if (!signaturePad) {
-      signaturePad = new SignaturePad(canvas, {
-        backgroundColor: 'rgba(255, 255, 255, 0)',
-        penColor: 'rgb(0, 0, 0)', // 明確指定筆觸顏色為黑色
-        minWidth: 1.5,
-        maxWidth: 3.5
-      });
-    } else {
-      signaturePad.clear();
+    // 填滿白色背景 (確保匯出 PNG 時不會變成全黑或透明)
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, rect.width, rect.height);
+
+    // 重設筆觸樣式
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    hasSigned = false;
+  }
+
+  // 計算指標在 Canvas 內的精確座標 (排除視窗捲動影響)
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    };
+  }
+
+  // 開始繪圖 (對應滑鼠按下 / 手指接觸螢幕)
+  function startDrawing(e) {
+    e.preventDefault();
+    isDrawing = true;
+    const pos = getPos(e);
+    lastX = pos.x;
+    lastY = pos.y;
+
+    // 繪製單點 (防止使用者只點一下畫布時沒有反應)
+    ctx.beginPath();
+    ctx.arc(lastX, lastY, 1.2, 0, Math.PI * 2);
+    ctx.fillStyle = '#000000';
+    ctx.fill();
+    hasSigned = true;
+  }
+
+  // 繪製過程 (對應滑鼠移動 / 手指拖曳)
+  function draw(e) {
+    if (!isDrawing) return;
+    e.preventDefault();
+    const pos = getPos(e);
+
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY);
+    ctx.lineTo(pos.x, pos.y);
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.stroke();
+
+    lastX = pos.x;
+    lastY = pos.y;
+    hasSigned = true;
+  }
+
+  // 結束繪圖 (對應放開滑鼠 / 手指離開螢幕)
+  function stopDrawing(e) {
+    if (isDrawing) {
+      isDrawing = false;
+      ctx.beginPath();
     }
   }
 
-  // 確保 CSS 渲染完成後載入簽名畫布，並在視窗縮放時重新校正
-  window.addEventListener("load", initSignaturePad);
-  window.addEventListener("resize", initSignaturePad);
-  if (document.readyState === "complete" || document.readyState === "interactive") {
-    setTimeout(initSignaturePad, 100);
-  } else {
-    document.addEventListener("DOMContentLoaded", initSignaturePad);
+  // 綁定原生 PointerEvents (全平台通用：滑鼠 + 手機觸控 + 觸控筆)
+  canvas.addEventListener('pointerdown', startDrawing, { passive: false });
+  canvas.addEventListener('pointermove', draw, { passive: false });
+  canvas.addEventListener('pointerup', stopDrawing, { passive: false });
+  canvas.addEventListener('pointerleave', stopDrawing, { passive: false });
+  canvas.addEventListener('pointercancel', stopDrawing, { passive: false });
+
+  // 清除簽名功能
+  function clearSignature() {
+    const rect = canvas.getBoundingClientRect();
+    ctx.clearRect(0, 0, rect.width, rect.height);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, rect.width, rect.height);
+    hasSigned = false;
   }
 
-  // 清除重簽按鈕
-  document.getElementById('clearBtn').addEventListener('click', () => {
-    if (signaturePad) signaturePad.clear();
-  });
+  document.getElementById('clearBtn').addEventListener('click', clearSignature);
 
+  // 頁面載入與調整大小時重新初始化畫布
+  window.addEventListener('load', resizeCanvas);
+  window.addEventListener('resize', resizeCanvas);
+
+  // =========================================================================
   // 表單驗證與送出處理
+  // =========================================================================
   document.getElementById('mainForm').addEventListener('submit', function(e) {
     e.preventDefault();
 
@@ -415,7 +483,7 @@
       return;
     }
 
-    if (!signaturePad || signaturePad.isEmpty()) {
+    if (!hasSigned) {
       alert("請在下方簽名框內完成親筆簽名！");
       return;
     }
@@ -430,7 +498,7 @@
       userName: document.getElementById('userName').value.trim(),
       schoolUnit: document.getElementById('schoolUnit').value.trim(),
       checkedCount: checkedCount,
-      signatureBase64: signaturePad.toDataURL('image/png')
+      signatureBase64: canvas.toDataURL('image/png') // 直接從畫布獲取 PNG Base64
     };
 
     fetch(GAS_WEB_APP_URL, {
