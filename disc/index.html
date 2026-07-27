@@ -319,7 +319,7 @@
       </div>
     </div>
 
-    <!-- 手寫簽名欄 (原生 Canvas，不依賴外部套件) -->
+    <!-- 手寫簽名欄 (1:1 絕對渲染) -->
     <div class="input-group">
       <label>親筆簽名確認（請在此方框內手寫簽名） <span style="color:red">*</span></label>
       <div class="signature-container" id="sigContainer">
@@ -363,41 +363,37 @@
   });
 
   // =========================================================================
-  // 超高相容性原生手寫板引擎 (解決手機/電腦劃不出線條問題)
+  // 1:1 精確座標原生繪圖引擎 (徹底解決劃不出線問題)
   // =========================================================================
   const canvas = document.getElementById('signatureCanvas');
   const ctx = canvas.getContext('2d');
   let isDrawing = false;
   let hasSigned = false;
-  let lastX = 0;
-  let lastY = 0;
 
-  // 安全計算畫布寬高 (加入保底機制，防止抓到 0px)
-  function resizeCanvas() {
+  // 初始化畫布尺寸 (採 1:1 像素對應，絕不偏移)
+  function initCanvas() {
     const container = document.getElementById('sigContainer');
-    const w = container.clientWidth || canvas.offsetWidth || 350;
-    const h = container.clientHeight || canvas.offsetHeight || 200;
+    const w = container.clientWidth || 350;
+    const h = container.clientHeight || 200;
 
-    const ratio = Math.max(window.devicePixelRatio || 1, 1);
-    canvas.width = w * ratio;
-    canvas.height = h * ratio;
-    ctx.scale(ratio, ratio);
+    canvas.width = w;
+    canvas.height = h;
 
-    // 填滿白色背景
+    // 塗白背景
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, w, h);
 
-    // 筆觸設定
+    // 設定預設畫筆風格 (3.5px 粗黑線)
     ctx.strokeStyle = '#000000';
-    ctx.lineWidth = 2.5;
+    ctx.lineWidth = 3.5;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 
     hasSigned = false;
   }
 
-  // 取得精確座標 (相容 Touch 與 Pointer 事件)
-  function getCoords(e) {
+  // 精確計算絕對座標
+  function getPos(e) {
     const rect = canvas.getBoundingClientRect();
     let clientX = e.clientX;
     let clientY = e.clientY;
@@ -413,77 +409,74 @@
     };
   }
 
-  function startDraw(e) {
+  // 按下 / 觸控開始
+  function startDrawing(e) {
     e.preventDefault();
     isDrawing = true;
-    const pos = getCoords(e);
-    lastX = pos.x;
-    lastY = pos.y;
+    const pos = getPos(e);
 
     ctx.beginPath();
-    ctx.arc(lastX, lastY, 1.2, 0, Math.PI * 2);
-    ctx.fillStyle = '#000000';
-    ctx.fill();
-    hasSigned = true;
-  }
-
-  function moveDraw(e) {
-    if (!isDrawing) return;
-    e.preventDefault();
-    const pos = getCoords(e);
-
-    ctx.beginPath();
-    ctx.moveTo(lastX, lastY);
-    ctx.lineTo(pos.x, pos.y);
+    ctx.moveTo(pos.x, pos.y);
+    
+    // 設定繪圖風格
     ctx.strokeStyle = '#000000';
-    ctx.lineWidth = 2.5;
+    ctx.lineWidth = 3.5;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
+
+    // 點擊當下即劃出極小線條 (防止單點沒反應)
+    ctx.lineTo(pos.x + 0.1, pos.y + 0.1);
     ctx.stroke();
 
-    lastX = pos.x;
-    lastY = pos.y;
     hasSigned = true;
   }
 
-  function stopDraw(e) {
+  // 拖曳 / 移動繪圖
+  function draw(e) {
+    if (!isDrawing) return;
+    e.preventDefault();
+    const pos = getPos(e);
+
+    ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
+
+    hasSigned = true;
+  }
+
+  // 放開 / 結束繪圖
+  function stopDrawing(e) {
     if (isDrawing) {
       isDrawing = false;
-      ctx.beginPath();
+      ctx.closePath();
     }
   }
 
-  // 同時綁定 PointerEvents 與傳統 TouchEvents，確保全設備支援
-  if (window.PointerEvent) {
-    canvas.addEventListener('pointerdown', startDraw, { passive: false });
-    canvas.addEventListener('pointermove', moveDraw, { passive: false });
-    canvas.addEventListener('pointerup', stopDraw, { passive: false });
-    canvas.addEventListener('pointercancel', stopDraw, { passive: false });
-  } else {
-    // 舊型手機備用支援
-    canvas.addEventListener('touchstart', startDraw, { passive: false });
-    canvas.addEventListener('touchmove', moveDraw, { passive: false });
-    canvas.addEventListener('touchend', stopDraw, { passive: false });
+  // 滑鼠事件綁定
+  canvas.addEventListener('mousedown', startDrawing);
+  canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('mouseup', stopDrawing);
+  canvas.addEventListener('mouseleave', stopDrawing);
 
-    canvas.addEventListener('mousedown', startDraw);
-    canvas.addEventListener('mousemove', moveDraw);
-    canvas.addEventListener('mouseup', stopDraw);
-  }
+  // 觸控事件綁定 (手機/平板)
+  canvas.addEventListener('touchstart', startDrawing, { passive: false });
+  canvas.addEventListener('touchmove', draw, { passive: false });
+  canvas.addEventListener('touchend', stopDrawing, { passive: false });
+  canvas.addEventListener('touchcancel', stopDrawing, { passive: false });
 
+  // 清除重簽
   function clearSignature() {
-    const rect = canvas.getBoundingClientRect();
-    ctx.clearRect(0, 0, rect.width, rect.height);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, rect.width, rect.height);
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
     hasSigned = false;
   }
 
   document.getElementById('clearBtn').addEventListener('click', clearSignature);
 
-  // 初始化與防延遲調整
-  window.addEventListener('load', resizeCanvas);
-  window.addEventListener('resize', resizeCanvas);
-  setTimeout(resizeCanvas, 300); // 確保 DOM 渲染完畢後二次校正
+  // 初始化並在視窗縮放時自動校正
+  window.addEventListener('load', initCanvas);
+  window.addEventListener('resize', initCanvas);
+  setTimeout(initCanvas, 300);
 
   // =========================================================================
   // 表單驗證與送出處理
