@@ -72,7 +72,6 @@
       font-size: 18px;
       margin-right: 8px;
     }
-    /* 說明盒樣式 */
     .example-box {
       background-color: #f0f7ff;
       border-left: 4px solid #1a73e8;
@@ -149,7 +148,6 @@
       border-radius: 6px;
       font-size: 15px;
     }
-    /* 進度條列 */
     .toolbar {
       display: flex;
       justify-content: space-between;
@@ -163,8 +161,6 @@
       z-index: 100;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
-    
-    /* 簽名板區域樣式 */
     .signature-container {
       position: relative;
       border: 2px dashed #1a73e8;
@@ -195,8 +191,6 @@
       cursor: pointer;
       font-size: 13px;
     }
-    
-    /* 按鈕組樣式 */
     .form-btn-group {
       display: flex;
       gap: 12px;
@@ -214,9 +208,7 @@
       cursor: pointer;
       transition: background 0.2s;
     }
-    .reset-all-btn:hover {
-      background-color: #fce8e6;
-    }
+    .reset-all-btn:hover { background-color: #fce8e6; }
     .submit-btn {
       flex: 2;
       padding: 14px;
@@ -232,7 +224,7 @@
     .submit-btn:hover { background-color: #2d8e47; }
     .submit-btn:disabled { background-color: #cccccc; cursor: not-allowed; }
 
-    /* 查詢檔案專區樣式 */
+    /* 查詢專區樣式 */
     .query-card {
       background-color: #eef3fc;
       border: 1px solid #c2d7fa;
@@ -266,12 +258,8 @@
       font-weight: bold;
     }
     .query-btn:hover { background-color: #1557b0; }
-    .query-result {
-      margin-top: 10px;
-      font-size: 14px;
-    }
+    .query-result { margin-top: 10px; font-size: 14px; }
 
-    /* 成功畫面下載按鈕 */
     .download-btn {
       display: inline-block;
       margin-top: 15px;
@@ -286,16 +274,16 @@
     }
     .download-btn:hover { background-color: #b3261e; }
     .file-id-box {
-      background: #f1f3f4;
-      padding: 10px;
+      background: #e8f0fe;
+      padding: 12px;
       border-radius: 6px;
       font-family: monospace;
-      font-size: 16px;
-      color: #202124;
+      font-size: 24px;
+      font-weight: bold;
+      color: #1a73e8;
       margin: 10px 0;
-      word-break: break-all;
+      letter-spacing: 2px;
     }
-
     .new-form-btn {
       margin-top: 15px;
       padding: 10px 20px;
@@ -306,7 +294,6 @@
       font-size: 14px;
       cursor: pointer;
     }
-
     #loadingOverlay {
       display: none;
       text-align: center;
@@ -320,7 +307,6 @@
       padding: 30px;
     }
     #successBox h3 { color: #34a853; font-size: 22px; }
-
     .item-desc-text {
       font-size: 12.5px;
       color: #666;
@@ -329,17 +315,10 @@
       margin-left: 28px;
       line-height: 1.4;
     }
-
     @media (max-width: 600px) {
-      .form-btn-group {
-        flex-direction: column-reverse;
-      }
-      .reset-all-btn, .submit-btn {
-        width: 100%;
-      }
-      .query-input-group {
-        flex-direction: column;
-      }
+      .form-btn-group { flex-direction: column-reverse; }
+      .reset-all-btn, .submit-btn { width: 100%; }
+      .query-input-group { flex-direction: column; }
     }
   </style>
 </head>
@@ -350,7 +329,7 @@
   <div class="query-card">
     <div class="query-card-title">🔍 已填寫者檔案下載 / 重複查詢</div>
     <div class="query-input-group">
-      <input type="text" id="queryFileId" placeholder="請輸入您的「檔案 ID」">
+      <input type="text" id="queryFileId" placeholder="請輸入您的 6 位數檔案 ID（例如：849201）">
       <button type="button" class="query-btn" id="queryBtn">查詢 PDF 檔</button>
     </div>
     <div id="queryResult" class="query-result"></div>
@@ -382,7 +361,6 @@
     <div class="section-card">
       <div class="section-title">一、核心管教原則（平等與比例原則） <span style="color:red">*</span></div>
       
-      <!-- 1. 平等原則 -->
       <div class="sub-category-title">1. 平等原則（注意事項第十一條）</div>
       <div class="section-desc"><b>法條規範：</b>教師輔導與管教學生，非有正當理由，不得為差別待遇。</div>
       
@@ -396,7 +374,6 @@
         • <b>合法正當理由調整：</b>隊上某選手領有身心障礙證明，因體能狀況無法負荷全體標準的長跑訓練，教練基於醫師建議與個案特教需求，調整其訓練菜單為較短距離的緩步走。這屬於「有正當理由的合理差別對待」。
       </div>
 
-      <!-- 2. 比例原則 -->
       <div class="sub-category-title" style="margin-top: 18px;">2. 比例原則（注意事項第十二條）</div>
       <div class="section-desc">
         <b>法條規範：</b>教師採行之輔導與管教措施，應與學生違規行為之情節輕重相當，並依下列原則為之：<br>
@@ -415,7 +392,7 @@
       </div>
     </div>
 
-    <!-- 大分類 二、適當之正向管教措施（合法引導參考） -->
+    <!-- 大分類 二、適當之正向管教措施 -->
     <div class="section-card">
       <div class="section-title">二、適當之正向管教措施（合法引導參考） <span style="color:red">*</span></div>
       <div class="section-desc">教練於指導選手、鍛鍊體能及管理團隊時，應秉持教育專業與愛心，得採取下列適當之正向管教措施：</div>
@@ -436,7 +413,6 @@
     <div class="section-card">
       <div class="section-title">三、運動教練違法處罰措施與不適任樣態（含相關罰責及通報規定） <span style="color:red">*</span></div>
       
-      <!-- 1. 體罰與身心暴力行為 -->
       <div class="sub-category-title">1. 體罰與身心暴力行為</div>
       <div class="section-desc">指教練對學生身體施加強制力，或命令他人施加強制力之行為：</div>
       
@@ -451,7 +427,6 @@
         • <b>教師法 / 專任運動教練法規：</b>視情節輕重予以解聘、不續聘、停聘，並管制1年至終身不得聘任。
       </div>
 
-      <!-- 2. 霸凌行為 -->
       <div class="sub-category-title" style="margin-top: 18px;">2. 霸凌行為</div>
       <div class="section-desc">指符合「校園霸凌防制準則」規定之各類霸凌行為：</div>
       
@@ -467,7 +442,6 @@
         經調查確認有霸凌行為且情節重大致身心嚴重侵害，屬不得進（運）用或應終止契約並管制之列。
       </div>
 
-      <!-- 3. 不當管教 -->
       <div class="sub-category-title" style="margin-top: 18px;">3. 不當管教</div>
       <div class="section-desc">指教練採取之管教措施違反輔導管教相關法令規定（含違反比例原則或平等原則），而使學生身心受到侵害之行為：</div>
       
@@ -481,7 +455,6 @@
         <b>教師成績考核辦法 / 相關管理辦法：</b>依情節輕重予以申誡、記過、大過，致身心嚴重受創者依法解聘。
       </div>
 
-      <!-- 4. 運動教練特有違法與不適任樣態 -->
       <div class="sub-category-title" style="margin-top: 18px;">4. 運動教練特有違法與不適任樣態（含運動禁藥及重大法規違反）</div>
       
       <div class="sub-category-title" style="margin-left: 10px;">運動禁藥違規（外聘教練注意事項第5點第15款、第16款）</div>
@@ -499,7 +472,7 @@
         • <b>罰金：</b>法院判決應繳納給國庫的金錢懲罰，同樣會寫入個人的良民證（警察刑事紀錄證明）中。
       </div>
 
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span><b>公然侮辱罪、誹謗罪（刑法第309條、第310條）：</b>於訓練場地或公開場合法言語貶損學生人格名譽。</span></label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span><b>公然侮辱罪、誹謗罪（刑法第309條、第310條）：</b>於訓練場地或公開場合以言語貶損學生人格名譽。</span></label>
       <div class="item-desc-text">
         └ <b>法定刑責（白話說明）：</b>處拘役、罰金或1年以下有期徒刑。<br>
         └ <b>對生涯實質影響：</b>易科罰金或易處拘役看似不用坐牢，但會留下刑事前科，學校可依規定予以解聘或不續聘。
@@ -533,7 +506,7 @@
       </div>
     </div>
 
-    <!-- 大分類 四、通報與查詢義務（外聘教練注意事項重點） -->
+    <!-- 大分類 四、通報與查詢義務 -->
     <div class="section-card">
       <div class="section-title">四、通報與查詢義務（外聘教練注意事項重點） <span style="color:red">*</span></div>
       
@@ -562,9 +535,9 @@
   <!-- 送出成功結果畫面 -->
   <div id="successBox">
     <h3>🎉 檢核表與簽名已成功提交！</h3>
-    <p>您的確認紀錄與親筆簽名已合併生成 PDF 檔案。</p>
-    <div>請保存您的專屬檔案 ID，日後可憑此 ID 於本頁面重複下載：</div>
-    <div class="file-id-box" id="resFileId">-</div>
+    <p>您的確認紀錄與親筆簽名已寫入系統並生成 PDF 檔案。</p>
+    <div>請保存您的<b>專屬 6 位數檔案 ID</b>，日後可憑此 ID 於本頁面重複下載：</div>
+    <div class="file-id-box" id="resFileId">000000</div>
     <a href="#" target="_blank" class="download-btn" id="resDownloadBtn">📄 立即下載 PDF 檔 (.pdf)</a>
     <br><br>
     <button type="button" class="new-form-btn" id="newFormBtn">填寫新表單</button>
@@ -717,13 +690,13 @@
     document.getElementById('mainForm').style.display = 'block';
   });
 
-  // 查詢與重複下載 PDF
+  // 查詢與重複下載 PDF (使用 6 位數字 ID)
   document.getElementById('queryBtn').addEventListener('click', function() {
     const fileId = document.getElementById('queryFileId').value.trim();
     const resultDiv = document.getElementById('queryResult');
 
     if (!fileId) {
-      alert("請輸入檔案 ID！");
+      alert("請輸入您的 6 位數檔案 ID！");
       return;
     }
 
@@ -737,9 +710,9 @@
     .then(res => res.json())
     .then(data => {
       if (data.result === 'success') {
-        resultDiv.innerHTML = `✅ 找到檔案！<a href="${data.downloadUrl}" target="_blank" style="color:#d93025; font-weight:bold;">點此下載 PDF 檔 (.pdf)</a>`;
+        resultDiv.innerHTML = `✅ 找到檔案 (ID: ${data.fileId})！<a href="${data.downloadUrl}" target="_blank" style="color:#d93025; font-weight:bold;">點此下載 PDF 檔 (.pdf)</a>`;
       } else {
-        resultDiv.innerHTML = `<span style="color:#d93025;">❌ 查無此檔案，請確認 ID 是否正確。</span>`;
+        resultDiv.innerHTML = `<span style="color:#d93025;">❌ ${data.message}</span>`;
       }
     })
     .catch(err => {
@@ -747,7 +720,7 @@
     });
   });
 
-  // 提交並生成 PDF
+  // 提交表單
   document.getElementById('mainForm').addEventListener('submit', function(e) {
     e.preventDefault();
 
@@ -796,6 +769,7 @@
         document.getElementById('mainForm').style.display = 'none';
         document.getElementById('successBox').style.display = 'block';
 
+        // 顯示易記的 6 位數字 ID
         document.getElementById('resFileId').innerText = data.fileId;
         document.getElementById('resDownloadBtn').href = data.downloadUrl;
       } else {
