@@ -232,7 +232,7 @@
     .submit-btn:hover { background-color: #2d8e47; }
     .submit-btn:disabled { background-color: #cccccc; cursor: not-allowed; }
 
-    /* 新增：查詢檔案專區樣式 */
+    /* 查詢檔案專區樣式 */
     .query-card {
       background-color: #eef3fc;
       border: 1px solid #c2d7fa;
@@ -276,7 +276,7 @@
       display: inline-block;
       margin-top: 15px;
       padding: 12px 24px;
-      background-color: #34a853;
+      background-color: #d93025;
       color: white;
       text-decoration: none;
       border-radius: 6px;
@@ -284,7 +284,7 @@
       font-weight: bold;
       transition: background 0.2s;
     }
-    .download-btn:hover { background-color: #2d8e47; }
+    .download-btn:hover { background-color: #b3261e; }
     .file-id-box {
       background: #f1f3f4;
       padding: 10px;
@@ -346,12 +346,12 @@
 <body>
 
 <div class="container">
-  <!-- 新增：重複下載查詢區塊 -->
+  <!-- 重複下載查詢區塊 -->
   <div class="query-card">
     <div class="query-card-title">🔍 已填寫者檔案下載 / 重複查詢</div>
     <div class="query-input-group">
       <input type="text" id="queryFileId" placeholder="請輸入您的「檔案 ID」">
-      <button type="button" class="query-btn" id="queryBtn">查詢 WORD 檔</button>
+      <button type="button" class="query-btn" id="queryBtn">查詢 PDF 檔</button>
     </div>
     <div id="queryResult" class="query-result"></div>
   </div>
@@ -386,9 +386,9 @@
       <div class="sub-category-title">1. 平等原則（注意事項第十一條）</div>
       <div class="section-desc"><b>法條規範：</b>教師輔導與管教學生，非有正當理由，不得為差別待遇。</div>
       
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check" data-title="對待團隊中所有選手一視同仁"> <span>對待團隊中所有選手（無論是主力球員、替補球員、資深學長或新生）一視同仁。</span></label>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check" data-title="紀律與獎懲標準一體適用"> <span>訂定球隊或訓練場地之紀律與獎懲標準時，一體適用，不因選手之性別、家長背景、學業成績或運動天賦而有不同標準。</span></label>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check" data-title="特殊調整具備正當理由與紀錄"> <span>若因身心狀況、特教需求或特殊醫療考量需調整訓練強度或管理方式，須具備客觀、正當之教育或醫學理由，並留下紀錄。</span></label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>對待團隊中所有選手（無論是主力球員、替補球員、資深學長或新生）一視同仁。</span></label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>訂定球隊或訓練場地之紀律與獎懲標準時，一體適用，不因選手之性別、家長背景、學業成績或運動天賦而有不同標準。</span></label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>若因身心狀況、特教需求或特殊醫療考量需調整訓練強度或管理方式，須具備客觀、正當之教育或醫學理由，並留下紀錄。</span></label>
 
       <div class="example-box">
         <div class="example-box-title">💡 運動訓練實例說明：</div>
@@ -405,8 +405,8 @@
         (3) 採取之措施所造成之損害不得與欲達成目的之利益顯失均衡。
       </div>
 
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check" data-title="管教措施與違規情節成正比"> <span>處罰或管教措施必須與違規情節成正比（例如：選手忘記帶水壺，不應直接處罰半小時交互蹲跳）。</span></label>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check" data-title="優先採用損害最小方法"> <span>優先採用能達成教育導正目的、且對學生身心損害最小的方法。</span></label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>處罰或管教措施必須與違規情節成正比（例如：選手忘記帶水壺，不應直接處罰半小時交互蹲跳）。</span></label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>優先採用能達成教育導正目的、且對學生身心損害最小的方法。</span></label>
 
       <div class="example-box">
         <div class="example-box-title">💡 運動訓練實例說明：</div>
@@ -421,15 +421,15 @@
       <div class="section-desc">教練於指導選手、鍛鍊體能及管理團隊時，應秉持教育專業與愛心，得採取下列適當之正向管教措施：</div>
       
       <div class="sub-category-title">一般引導與勸戒</div>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check" data-title="口頭勸戒與說服教育"> <span>口頭勸戒與說服教育</span></label>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check" data-title="調整座位或訓練分組"> <span>調整座位或訓練分組</span></label>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check" data-title="正向鼓勵、獎勵與建設性回饋"> <span>正向鼓勵、獎勵與建設性回饋</span></label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>口頭勸戒與說服教育</span></label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>調整座位或訓練分組</span></label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>正向鼓勵、獎勵與建設性回饋</span></label>
 
       <div class="sub-category-title">訓練紀律與行為導正措施</div>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check" data-title="訓練場域適當暫時隔離反省"> <span>訓練場域中適當之暫時隔離反省（例如留在安全區域特定位置冷靜）</span></label>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check" data-title="課後或訓練後進行補救/加強訓練"> <span>留置學生於課後或訓練後進行補救/加強訓練（應注意學生交通安全並事先通知家長）</span></label>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check" data-title="要求合理之勞動服務"> <span>要求合理之勞動服務（如清潔運動場地、整理器材，應符合比例原則）</span></label>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check" data-title="暫時保管妨害訓練或違禁物品"> <span>暫時保管妨害訓練或違禁物品（應妥善保管並於適時歸還）</span></label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>訓練場域中適當之暫時隔離反省（例如留在安全區域特定位置冷靜）</span></label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>留置學生於課後或訓練後進行補救/加強訓練（應注意學生交通安全並事先通知家長）</span></label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>要求合理之勞動服務（如清潔運動場地、整理器材，應符合比例原則）</span></label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>暫時保管妨害訓練或違禁物品（應妥善保管並於適時歸還）</span></label>
     </div>
 
     <!-- 大分類 三、運動教練違法處罰措施與不適任樣態 -->
@@ -440,10 +440,10 @@
       <div class="sub-category-title">1. 體罰與身心暴力行為</div>
       <div class="section-desc">指教練對學生身體施加強制力，或命令他人施加強制力之行為：</div>
       
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check" data-title="禁止親自施加強制力體罰"> <span>親自施加強制力之體罰：毆打、鞭打、打耳光、打手心、打臀部、責打身體其他部位等。</span></label>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check" data-title="禁止命令學生自殘身體體罰"> <span>命令學生自殘身體之體罰：命令學生自打耳光等。</span></label>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check" data-title="禁止命令第三者施加體罰"> <span>命令第三者施加強制力之體罰：命令學生互打耳光等。</span></label>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check" data-title="禁止命令採取特定身體動作體罰"> <span>命令學生採取特定身體動作之體罰（運動訓練中應特別避免）：交互蹲跳、半蹲、罰跪、蛙跳、兔子跳、學鴨子走路、提水桶過肩、單腳支撐地面、上下樓梯或其他類似之身體動作等。</span></label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>親自施加強制力之體罰：毆打、鞭打、打耳光、打手心、打臀部、責打身體其他部位等。</span></label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>命令學生自殘身體之體罰：命令學生自打耳光等。</span></label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>命令第三者施加強制力之體罰：命令學生互打耳光等。</span></label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>命令學生採取特定身體動作之體罰（運動訓練中應特別避免）：交互蹲跳、半蹲、罰跪、蛙跳、兔子跳、學鴨子走路、提水桶過肩、單腳支撐地面、上下樓梯或其他類似之身體動作等。</span></label>
 
       <div class="penalty-box">
         <b>【相關罰責與不適任規範】</b><br>
@@ -456,11 +456,11 @@
       <div class="section-desc">指符合「校園霸凌防制準則」規定之各類霸凌行為：</div>
       
       <div class="sub-category-title" style="margin-left: 10px;">校園霸凌樣態</div>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check" data-title="禁止肢體霸凌"> <span>肢體霸凌：實體之肢體攻擊、推擠、施暴等。</span></label>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check" data-title="禁止言語霸凌"> <span>言語霸凌：透過語言、言詞辱罵、嘲弄、恐嚇或威脅等。</span></label>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check" data-title="禁止關係/社交霸凌"> <span>關係/社交霸凌：惡意排擠、散播謠言、孤立或破壞團隊人際關係。</span></label>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check" data-title="禁止網路霸凌"> <span>網路霸凌：透過網路、社群媒體、通訊軟體等散布私密照、毀謗、侮辱或騷擾。</span></label>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check" data-title="禁止性霸凌"> <span>性霸凌：與性或性別有關之霸凌，透過語言、肢體或其他暴力貶抑、攻擊或騷擾他人。</span></label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>肢體霸凌：實體之肢體攻擊、推擠、施暴等。</span></label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>言語霸凌：透過語言、言詞辱罵、嘲弄、恐嚇或威脅等。</span></label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>關係/社交霸凌：惡意排擠、散播謠言、孤立或破壞團隊人際關係。</span></label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>網路霸凌：透過網路、社群媒體、通訊軟體等散布私密照、毀謗、侮辱或騷擾。</span></label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>性霸凌：與性或性別有關之霸凌，透過語言、肢體或其他暴力貶抑、攻擊或騷擾他人。</span></label>
 
       <div class="penalty-box">
         <b>【相關罰責與不適任規範】</b><br>
@@ -472,9 +472,9 @@
       <div class="section-desc">指教練採取之管教措施違反輔導管教相關法令規定（含違反比例原則或平等原則），而使學生身心受到侵害之行為：</div>
       
       <div class="sub-category-title" style="margin-left: 10px;">身心受侵害之管教措施</div>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check" data-title="禁止站立反省逾時"> <span>站立反省逾時：每次超過一堂課，且每日累計超過兩小時。</span></label>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check" data-title="禁止對學生罰錢"> <span>對學生罰錢</span></label>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check" data-title="禁止非暫時保管之沒收"> <span>非暫時保管之沒收或沒入學生物品</span></label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>站立反省逾時：每次超過一堂課，且每日累計超過兩小時。</span></label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>對學生罰錢</span></label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>非暫時保管之沒收或沒入學生物品</span></label>
 
       <div class="penalty-box">
         <b>【相關罰責】</b><br>
@@ -485,7 +485,7 @@
       <div class="sub-category-title" style="margin-top: 18px;">4. 運動教練特有違法與不適任樣態（含運動禁藥及重大法規違反）</div>
       
       <div class="sub-category-title" style="margin-left: 10px;">運動禁藥違規（外聘教練注意事項第5點第15款、第16款）</div>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check" data-title="禁止授意或唆使使用運動禁藥"> <span>授意或唆使選手使用運動禁藥，經權責機構團體查證屬實。</span></label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>授意或唆使選手使用運動禁藥，經權責機構團體查證屬實。</span></label>
       <div class="penalty-box">
         <b>【罰責】</b> 應終止契約，並經委員會議決 終身 或 1年至4年 不得擔任外聘教練。
       </div>
@@ -499,19 +499,19 @@
         • <b>罰金：</b>法院判決應繳納給國庫的金錢懲罰，同樣會寫入個人的良民證（警察刑事紀錄證明）中。
       </div>
 
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check" data-title="遵守公然侮辱罪、誹謗罪規範"> <span><b>公然侮辱罪、誹謗罪（刑法第309條、第310條）：</b>於訓練場地或公開場合以言語貶損學生人格名譽。</span></label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span><b>公然侮辱罪、誹謗罪（刑法第309條、第310條）：</b>於訓練場地或公開場合法言語貶損學生人格名譽。</span></label>
       <div class="item-desc-text">
         └ <b>法定刑責（白話說明）：</b>處拘役、罰金或1年以下有期徒刑。<br>
         └ <b>對生涯實質影響：</b>易科罰金或易處拘役看似不用坐牢，但會留下刑事前科，學校可依規定予以解聘或不續聘。
       </div>
 
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check" data-title="遵守強制罪規範"> <span><b>強制罪（刑法第304條）：</b>以強暴、脅迫使學生行無義務之事。</span></label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span><b>強制罪（刑法第304條）：</b>以強暴、脅迫使學生行無義務之事。</span></label>
       <div class="item-desc-text">
         └ <b>法定刑責（白話說明）：</b>處3年以下有期徒刑、拘役或9千元以下罰金。<br>
         └ <b>對生涯實質影響：</b>屬於較重的妨害自由罪名，一旦被判刑，幾乎確定會失去教練職位，且面臨長達數年的業界禁賽或不得任用處分。
       </div>
 
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check" data-title="遵守傷害罪/過失傷害罪規範"> <span><b>傷害罪 / 過失傷害罪（刑法第277條、第284條）：</b>因過當訓練或體罰致學生受傷（如骨折、瘀青）。</span></label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span><b>傷害罪 / 過失傷害罪（刑法第277條、第284條）：</b>因過當訓練或體罰致學生受傷（如骨折、瘀青）。</span></label>
       <div class="item-desc-text">
         └ <b>法定刑責（白話說明）：</b>普通傷害處5年以下有期徒刑、拘役或罰金；過失傷害處1年以下有期徒刑、拘役或罰金。<br>
         └ <b>對生涯實質影響：</b>刑度最高可達 5 年。只要學生驗傷提告且罪名成立，教練將面臨嚴重的監禁風險與民事巨額賠償，職業生涯徹底終結。
@@ -519,13 +519,13 @@
 
       <div class="sub-category-title" style="margin-left: 10px; margin-top: 14px;">違反專業倫理與行政法規：</div>
       
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check" data-title="遵守性別平等教育法"> <span><b>違反《性別平等教育法》：</b>涉及性侵害、性騷擾、性霸凌或違法處理相關事件致學生身心受創。➔ 依法解聘/終止契約，終身或1年至4年不得聘任/擔任外聘教練。</span></label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span><b>違反《性別平等教育法》：</b>涉及性侵害、性騷擾、性霸凌或違法處理相關事件致學生身心受創。➔ 依法解聘/終止契約，終身或1年至4年不得聘任/擔任外聘教練。</span></label>
       
       <div class="sub-category-title" style="margin-left: 10px; margin-top: 10px;">違反《兒童及少年福利與權益保障法》（兒少權法第49條各款禁止規定）：</div>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check" data-title="遵守兒少權法第49條第1款"> <span>第1款：吊打、毆打或使兒童少年身心受到其他虐待或不當管教。</span></label>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check" data-title="遵守兒少權法第49條第3款"> <span>第3款：妨害兒童少年身心健康或發展之行為（如不當控制體重、過度飢餓或不當脫水）。</span></label>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check" data-title="遵守兒少權法第49條第7款"> <span>第7款：供應兒童少年菸品、酒品、檳榔、毒品等。</span></label>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check" data-title="遵守兒少權法第49條第9款"> <span>第9款：其他對兒童少年犯罪或不正當行為。</span></label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>第1款：吊打、毆打或使兒童少年身心受到其他虐待或不當管教。</span></label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>第3款：妨害兒童少年身心健康或發展之行為（如不當控制體重、過度飢餓或不當脫水）。</span></label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>第7款：供應兒童少年菸品、酒品、檳榔、毒品等。</span></label>
+      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>第9款：其他對兒童少年犯罪或不正當行為。</span></label>
 
       <div class="penalty-box">
         <b>【兒少權法第49條罰責】</b><br>
@@ -537,8 +537,8 @@
     <div class="section-card">
       <div class="section-title">四、通報與查詢義務（外聘教練注意事項重點） <span style="color:red">*</span></div>
       
-      <label class="checkbox-item"><input type="checkbox" class="rule-check" data-title="落實進用前查詢義務"> <span><b>進（運）用前查詢義務：</b>學校或家長會進（運）用外聘教練前，應由學校至「各教育場域不適任人員通報及查詢系統」查詢有無不得進用之情事。</span></label>
-      <label class="checkbox-item"><input type="checkbox" class="rule-check" data-title="落實事件發生後通報義務"> <span><b>事件發生後通報義務：</b>教練若有違法或不適任情形（如體罰、霸凌嚴重侵害身心、授意使用禁藥、違反兒少權法或性平法等），學校應予終止契約，並於書面通知送達後 7日內 至通報系統登載通報。</span></label>
+      <label class="checkbox-item"><input type="checkbox" class="rule-check"> <span><b>進（運）用前查詢義務：</b>學校或家長會進（運）用外聘教練前，應由學校至「各教育場域不適任人員通報及查詢系統」查詢有無不得進用之情事。</span></label>
+      <label class="checkbox-item"><input type="checkbox" class="rule-check"> <span><b>事件發生後通報義務：</b>教練若有違法或不適任情形（如體罰、霸凌嚴重侵害身心、授意使用禁藥、違反兒少權法或性平法等），學校應予終止契約，並於書面通知送達後 7日內 至通報系統登載通報。</span></label>
     </div>
 
     <!-- 手寫簽名欄 (黑色墨水) -->
@@ -556,30 +556,29 @@
       <button type="button" class="reset-all-btn" id="resetAllBtn">清除所有表單資料</button>
       <button type="submit" class="submit-btn" id="submitBtn">我已完全了解並確認以上規範，送出表單</button>
     </div>
-    <div id="loadingOverlay">資料上傳與 WORD 檔生成中，請稍候...</div>
+    <div id="loadingOverlay">資料上傳與 PDF 檔生成中，請稍候...</div>
   </form>
 
   <!-- 送出成功結果畫面 -->
   <div id="successBox">
     <h3>🎉 檢核表與簽名已成功提交！</h3>
-    <p>您的確認紀錄與親筆簽名已合併生成 WORD (.docx) 檔案。</p>
+    <p>您的確認紀錄與親筆簽名已合併生成 PDF 檔案。</p>
     <div>請保存您的專屬檔案 ID，日後可憑此 ID 於本頁面重複下載：</div>
     <div class="file-id-box" id="resFileId">-</div>
-    <a href="#" target="_blank" class="download-btn" id="resDownloadBtn">📥 立即下載 WORD 檔 (.docx)</a>
+    <a href="#" target="_blank" class="download-btn" id="resDownloadBtn">📄 立即下載 PDF 檔 (.pdf)</a>
     <br><br>
     <button type="button" class="new-form-btn" id="newFormBtn">填寫新表單</button>
   </div>
 </div>
 
 <script>
-  // 您的 Google Apps Script 部署網址 (請替換為您重新部署後的 Web App URL)
+  // 請替換為您重新部署後的 Web App URL
   const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzQNmItGYtVDoPUHltTwCCvPyvYpY1j6drT6ahf8g-7Hq48rc33NYOZZ-hzvVAjzvmh/exec";
 
   const checkboxes = document.querySelectorAll('.rule-check');
   const checkProgress = document.getElementById('checkProgress');
   const totalCount = checkboxes.length;
 
-  // 更新勾選計數進度
   function updateCount() {
     const checkedCount = document.querySelectorAll('.rule-check:checked').length;
     checkProgress.innerText = `條文確認進度：${checkedCount} / ${totalCount} 項`;
@@ -588,9 +587,7 @@
 
   checkboxes.forEach(box => box.addEventListener('change', updateCount));
 
-  // =========================================================================
-  // 原生手寫簽名引擎 (純黑色筆觸 + 動態座標映射)
-  // =========================================================================
+  // 手寫簽名引擎
   const canvas = document.getElementById('signatureCanvas');
   const ctx = canvas.getContext('2d');
   let isDrawing = false;
@@ -695,9 +692,6 @@
   window.addEventListener('load', initCanvas);
   initCanvas();
 
-  // =========================================================================
-  // 表單重置與清空邏輯
-  // =========================================================================
   function resetEntireForm() {
     document.getElementById('userName').value = '';
     document.getElementById('schoolUnit').value = '';
@@ -723,9 +717,7 @@
     document.getElementById('mainForm').style.display = 'block';
   });
 
-  // =========================================================================
-  // 查詢與重複下載 Word 功能
-  // =========================================================================
+  // 查詢與重複下載 PDF
   document.getElementById('queryBtn').addEventListener('click', function() {
     const fileId = document.getElementById('queryFileId').value.trim();
     const resultDiv = document.getElementById('queryResult');
@@ -745,7 +737,7 @@
     .then(res => res.json())
     .then(data => {
       if (data.result === 'success') {
-        resultDiv.innerHTML = `✅ 找到檔案！<a href="${data.downloadUrl}" target="_blank" style="color:#34a853; font-weight:bold;">點此下載 WORD 檔 (.docx)</a>`;
+        resultDiv.innerHTML = `✅ 找到檔案！<a href="${data.downloadUrl}" target="_blank" style="color:#d93025; font-weight:bold;">點此下載 PDF 檔 (.pdf)</a>`;
       } else {
         resultDiv.innerHTML = `<span style="color:#d93025;">❌ 查無此檔案，請確認 ID 是否正確。</span>`;
       }
@@ -755,9 +747,7 @@
     });
   });
 
-  // =========================================================================
-  // 表單驗證與送出處理 (生成 WORD 檔)
-  // =========================================================================
+  // 提交並生成 PDF
   document.getElementById('mainForm').addEventListener('submit', function(e) {
     e.preventDefault();
 
@@ -778,7 +768,6 @@
     submitBtn.disabled = true;
     loadingOverlay.style.display = 'block';
 
-    // 收集所有勾選的條文內容
     let checkedItemsList = [];
     checkboxes.forEach((box, index) => {
       const parentLabel = box.closest('label');
@@ -807,7 +796,6 @@
         document.getElementById('mainForm').style.display = 'none';
         document.getElementById('successBox').style.display = 'block';
 
-        // 渲染檔案 ID 與下載連結
         document.getElementById('resFileId').innerText = data.fileId;
         document.getElementById('resDownloadBtn').href = data.downloadUrl;
       } else {
