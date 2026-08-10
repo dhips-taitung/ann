@@ -21,7 +21,6 @@
       border-radius: 12px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.08);
     }
-    /* 頂部功能列 */
     .top-bar {
       display: flex;
       justify-content: space-between;
@@ -51,7 +50,6 @@
     }
     .admin-btn:hover { background: #f29900; }
 
-    /* 查詢專區 */
     .query-card {
       background-color: #eef3fc;
       border: 1px solid #c2d7fa;
@@ -162,7 +160,6 @@
     .input-group label { display: block; font-weight: bold; margin-bottom: 5px; }
     .input-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; }
 
-    /* 簽名板 */
     .signature-container {
       border: 2px dashed #1a73e8;
       border-radius: 8px;
@@ -185,7 +182,6 @@
       cursor: pointer;
     }
 
-    /* 按鈕組 */
     .submit-btn {
       width: 100%;
       padding: 14px;
@@ -199,8 +195,8 @@
       margin-top: 15px;
     }
     .submit-btn:hover { background-color: #2d8e47; }
+    .submit-btn:disabled { background-color: #cccccc; cursor: not-allowed; }
 
-    /* 後台管理 Modal */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -344,7 +340,7 @@
     <h3>🔐 管理者登入</h3>
     <div class="input-group">
       <label>請輸入管理者密碼：</label>
-      <input type="password" id="adminPasswordInput" placeholder="預設密碼: 1234">
+      <input type="password" id="adminPasswordInput" placeholder="密碼: 1234">
     </div>
     <button class="query-btn" style="width:100%;" onclick="submitAdminLogin()">登入後台</button>
     <button style="width:100%; margin-top:8px;" onclick="closeModal('loginModal')">取消</button>
@@ -378,14 +374,13 @@
       <textarea id="adminFormDesc" style="width:100%; height:80px; border-radius:6px; padding:8px;" placeholder="請輸入說明條文內容..."></textarea>
     </div>
 
-    <!-- 新增：檢核主題之參考網址與照片附件 -->
     <div class="input-group">
       <label>檢核主題參考網址 (選擇性)：</label>
       <input type="url" id="adminFormRefUrl" placeholder="例如：https://law.moj.gov.tw/...">
     </div>
 
     <div class="input-group">
-      <label>檢核主題照片附件 (選擇性)：</label>
+      <label>檢核主題照片附件 (限制 1MB 以內，選擇性)：</label>
       <input type="file" id="adminFormImgFile" accept="image/*" onchange="handleImageUpload(this, 'adminFormImgPreview', 'adminFormImgBase64')">
       <input type="hidden" id="adminFormImgBase64">
       <img id="adminFormImgPreview" class="img-preview">
@@ -402,7 +397,7 @@
     <div id="adminFormUrlBox" style="background:#e8f0fe; padding:10px; border-radius:6px; font-size:13px; display:none; word-break:break-all;"></div>
     <br>
 
-    <button type="button" class="submit-btn" onclick="saveAdminFormConfig()">💾 儲存表單並自動建立試算表工作表</button>
+    <button type="button" class="submit-btn" id="saveAdminFormBtn" onclick="saveAdminFormConfig()">💾 儲存表單並自動建立試算表工作表</button>
     <button type="button" style="width:100%; margin-top:8px; padding:10px;" onclick="closeModal('adminModal')">關閉後台</button>
   </div>
 </div>
@@ -423,10 +418,17 @@
     fetchFormList(formIdFromUrl);
   });
 
-  // 圖片上傳壓縮與處理引擎 (壓縮為 600px 寬度，自動瘦身)
+  // 圖片上傳壓縮與處理引擎 (限制 1MB 以內，並自動瘦身壓縮)
   function handleImageUpload(fileInput, previewImgId, base64HiddenId) {
     const file = fileInput.files[0];
     if (!file) return;
+
+    // 限制照片大小不能超過 1MB (1,048,576 Bytes)
+    if (file.size > 1048576) {
+      alert("⚠️ 照片附件檔案大小不能超過 1MB！請選擇較小的圖片。");
+      fileInput.value = "";
+      return;
+    }
 
     const reader = new FileReader();
     reader.onload = function(e) {
@@ -447,7 +449,6 @@
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
 
-        // 轉為輕量 JPG Base64
         const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
 
         document.getElementById(base64HiddenId).value = compressedBase64;
@@ -513,7 +514,7 @@
     loadFormConfig(currentFormId);
   }
 
-  // 載入特定表單設定並渲染前台畫面 (含照片與參考網址)
+  // 載入特定表單設定並渲染前台畫面
   function loadFormConfig(formId) {
     fetch(GAS_WEB_APP_URL, {
       method: 'POST',
@@ -527,7 +528,6 @@
         document.getElementById('displayTitle').innerText = data.formTitle;
         document.getElementById('displayDesc').innerText = data.formDesc || "";
 
-        // 標頭參考網址與照片
         const refUrlBox = document.getElementById('displayRefUrl');
         if (data.formRefUrl) {
           refUrlBox.style.display = 'block';
@@ -544,7 +544,6 @@
           headerImg.style.display = 'none';
         }
 
-        // 渲染檢核題目
         const container = document.getElementById('checklistContainer');
         container.innerHTML = "";
 
@@ -664,7 +663,6 @@
     submitBtn.disabled = true;
     loadingOverlay.style.display = 'block';
 
-    // 封裝詳細勾選項目結構發給後端做 PDF
     let checkedItemsDetail = [];
     checkboxes.forEach((box) => {
       const idx = box.getAttribute('data-index');
@@ -792,7 +790,7 @@
     addAdminItemRow("", "", "", "");
   }
 
-  // 動態新增/刪除題目編輯列 (含參考網址與照片上傳)
+  // 動態新增/刪除題目編輯列 (含限制 1MB 的照片上傳)
   function addAdminItemRow(title = "", desc = "", refUrl = "", imgBase64 = "") {
     const container = document.getElementById('adminItemsContainer');
     const rowId = "item_row_" + Date.now() + "_" + Math.floor(Math.random()*1000);
@@ -815,7 +813,7 @@
         <input type="url" class="admin-item-refurl" value="${refUrl}" placeholder="例如：https://..." style="width:100%; padding:4px;">
       </div>
       <div>
-        <label><b>題目照片附件：</b></label>
+        <label><b>題目照片附件 (限制 1MB 以內)：</b></label>
         <input type="file" accept="image/*" class="admin-item-img-file" onchange="handleItemImageUpload(this, '${rowId}')">
         <input type="hidden" class="admin-item-img-base64" value="${imgBase64}">
         <img class="img-preview admin-item-img-preview" src="${imgBase64}" style="${imgBase64 ? 'display:block;' : 'display:none;'}">
@@ -833,6 +831,13 @@
 
     const file = fileInput.files[0];
     if (!file) return;
+
+    // 限制照片大小不能超過 1MB (1,048,576 Bytes)
+    if (file.size > 1048576) {
+      alert("⚠️ 題目照片檔案大小不能超過 1MB！請選擇較小的圖片。");
+      fileInput.value = "";
+      return;
+    }
 
     const reader = new FileReader();
     reader.onload = function(e) {
@@ -870,8 +875,9 @@
     row.querySelector('.clear-item-img-btn').style.display = 'none';
   }
 
-  // 儲存表單後台設置
+  // 儲存表單後台設置 (含「執行中...」狀態與自動關閉後台)
   function saveAdminFormConfig() {
+    const saveBtn = document.getElementById('saveAdminFormBtn');
     const formId = document.getElementById('adminFormId').value;
     const formTitle = document.getElementById('adminFormTitle').value.trim();
     const formDesc = document.getElementById('adminFormDesc').value.trim();
@@ -892,6 +898,10 @@
       }
     });
 
+    // 變更按鈕文字為「執行中...」並暫停點擊
+    saveBtn.innerText = "執行中...";
+    saveBtn.disabled = true;
+
     const payload = {
       action: 'saveFormConfig',
       password: adminPasswordToken,
@@ -910,14 +920,22 @@
     })
     .then(res => res.json())
     .then(data => {
+      saveBtn.innerText = "💾 儲存表單並自動建立試算表工作表";
+      saveBtn.disabled = false;
+
       if (data.result === 'success') {
         alert(data.message);
         document.getElementById('adminFormId').value = data.formId;
         fetchFormList(data.formId);
-        loadFormToAdmin();
+        closeModal('adminModal'); // 儲存完成後自動關閉後台
       } else {
         alert("儲存失敗：" + data.message);
       }
+    })
+    .catch(err => {
+      saveBtn.innerText = "💾 儲存表單並自動建立試算表工作表";
+      saveBtn.disabled = false;
+      alert("系統發生錯誤，請稍後再試！");
     });
   }
 </script>
