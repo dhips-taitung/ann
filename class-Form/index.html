@@ -331,18 +331,13 @@
       <input type="text" id="userName" placeholder="請輸入姓名" required>
     </div>
 
-    <!-- 班級使用版：年級、班級、座號欄位 -->
+    <!-- 班級使用版：年級（動態生成選項）、班級、座號欄位 -->
     <div class="class-info-group">
       <div class="class-info-item">
         <label>年級 <span style="color:red">*</span></label>
+        <!-- [修改處 1] 年級選單改由 JavaScript 根據後台設定動態生成選項 -->
         <select id="userGrade" required>
           <option value="">請選擇年級</option>
-          <option value="一年">一年</option>
-          <option value="二年">二年</option>
-          <option value="三年">三年</option>
-          <option value="四年">四年</option>
-          <option value="五年">五年</option>
-          <option value="六年">六年</option>
         </select>
       </div>
 
@@ -397,7 +392,7 @@
     <h3>🔐 管理者登入</h3>
     <div class="input-group">
       <label>請輸入管理者密碼：</label>
-      <input type="password" id="adminPasswordInput" placeholder="密碼: 1234">
+      <input type="password" id="adminPasswordInput" placeholder="請輸入密碼">
     </div>
     <button class="query-btn" style="width:100%;" onclick="submitAdminLogin()">登入後台</button>
     <button style="width:100%; margin-top:8px;" onclick="closeModal('loginModal')">取消</button>
@@ -429,6 +424,12 @@
     <div class="input-group">
       <label>標題說明欄位 (表單說明)：</label>
       <textarea id="adminFormDesc" style="width:100%; height:80px; border-radius:6px; padding:8px;" placeholder="請輸入說明條文內容..."></textarea>
+    </div>
+
+    <!-- [修改處 2] 後台新增「自訂年級選單」設定輸入框 -->
+    <div class="input-group" style="background:#f8f9fa; padding:10px; border-radius:6px; border:1px solid #ddd;">
+      <label style="color:#1a73e8;">自訂年級下拉選單 (以逗號分隔，如：一年,二年,三年 ； 預設為 一年,二年,三年,四年,五年,六年)：</label>
+      <input type="text" id="adminGradeOptions" placeholder="例如：一年,二年,三年 或 幼兒園,一年">
     </div>
 
     <div class="input-group" style="background:#eef3fc; padding:10px; border-radius:6px; border:1px solid #c2d7fa;">
@@ -588,6 +589,15 @@
         currentFormConfig = data;
         document.getElementById('displayTitle').innerText = data.formTitle;
         document.getElementById('displayDesc').innerText = data.formDesc || "";
+
+        // [修改處 3] 前台依據後台設定，動態生成年級下拉選單選項
+        const gradeSelect = document.getElementById('userGrade');
+        gradeSelect.innerHTML = '<option value="">請選擇年級</option>';
+        const rawGradeStr = data.gradeOptions || "一年,二年,三年,四年,五年,六年";
+        const gradeList = rawGradeStr.split(/[,，]/).map(s => s.trim()).filter(Boolean);
+        gradeList.forEach(g => {
+          gradeSelect.innerHTML += `<option value="${g}">${g}</option>`;
+        });
 
         const refUrlBox = document.getElementById('displayRefUrl');
         if (data.formRefUrl) {
@@ -759,9 +769,8 @@
       }
     });
 
-    // [修改處] 將年級與班級合併，座號獨立傳送
-    const classGroupStr = `${grade}${userClass}`; // 例如：三年二班
-    const seatNoStr = seat;               // 例如：15
+    const classGroupStr = `${grade}${userClass}`;
+    const seatNoStr = seat;
 
     const payload = {
       action: 'submitForm',
@@ -771,8 +780,8 @@
       formRefUrl: currentFormConfig.formRefUrl || "",
       formImgBase64: currentFormConfig.formImgBase64 || "",
       userName: document.getElementById('userName').value.trim(),
-      classGroup: classGroupStr, // 合併後的年級班級
-      seatNo: seatNoStr,         // 獨立的座號
+      classGroup: classGroupStr,
+      seatNo: seatNoStr,
       checkedCount: checkedBoxes.length,
       totalCount: checkboxes.length,
       checkedItemsDetail: checkedItemsDetail,
@@ -822,6 +831,7 @@
     });
   }
 
+  // [修改處 4] 載入表單資料至後台編輯器
   function loadFormToAdmin() {
     const formId = document.getElementById('adminFormSelect').value;
     if (!formId) return;
@@ -837,6 +847,7 @@
         document.getElementById('adminFormId').value = data.formId;
         document.getElementById('adminFormTitle').value = data.formTitle;
         document.getElementById('adminFormDesc').value = data.formDesc || "";
+        document.getElementById('adminGradeOptions').value = data.gradeOptions || "一年,二年,三年,四年,五年,六年"; // 載入自訂年級
         document.getElementById('adminMinRequiredCount').value = data.minRequiredCount || 0;
         document.getElementById('adminFormRefUrl').value = data.formRefUrl || "";
         document.getElementById('adminFormImgBase64').value = data.formImgBase64 || "";
@@ -865,11 +876,13 @@
     });
   }
 
+  // [修改處 5] 新增全新表單時，預設帶入一年~六年
   function createNewFormInAdmin() {
     document.getElementById('adminFormSelect').value = "";
     document.getElementById('adminFormId').value = "";
     document.getElementById('adminFormTitle').value = "";
     document.getElementById('adminFormDesc').value = "";
+    document.getElementById('adminGradeOptions').value = "一年,二年,三年,四年,五年,六年";
     document.getElementById('adminMinRequiredCount').value = "0";
     document.getElementById('adminFormRefUrl').value = "";
     clearImageUpload('adminFormImgFile', 'adminFormImgPreview', 'adminFormImgBase64');
@@ -964,6 +977,7 @@
     row.querySelector('.clear-item-img-btn').style.display = 'none';
   }
 
+  // [修改處 6] 儲存後台表單設定，帶入自訂年級參數
   function saveAdminFormConfig() {
     const saveBtn = document.getElementById('saveAdminFormBtn');
     const formId = document.getElementById('adminFormId').value;
@@ -972,6 +986,7 @@
     const formRefUrl = document.getElementById('adminFormRefUrl').value.trim();
     const formImgBase64 = document.getElementById('adminFormImgBase64').value;
     const minRequiredCount = document.getElementById('adminMinRequiredCount').value || 0;
+    const gradeOptions = document.getElementById('adminGradeOptions').value.trim() || "一年,二年,三年,四年,五年,六年";
 
     if (!formTitle) return alert("請填寫表單主題！");
 
@@ -1001,6 +1016,7 @@
       formRefUrl: formRefUrl,
       formImgBase64: formImgBase64,
       minRequiredCount: minRequiredCount,
+      gradeOptions: gradeOptions, // 送出自訂年級選項
       items: items
     };
 
