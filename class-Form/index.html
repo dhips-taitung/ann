@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>動態檢核表單系統</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background-color: #f4f6f9;
+      margin: 0;
+      padding: 15px 10px;
+      color: #333;
+    }
+    .container {
+      max-width: 820px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 25px 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #1a73e8;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .top-bar select {
+      padding: 6px 12px;
+      border-radius: 4px;
+      border: none;
+      font-weight: bold;
+    }
+    .admin-btn {
+      background: #fbbc04;
+      color: #202124;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .admin-btn:hover { background: #f29900; }
+
+    .query-card {
+      background-color: #eef3fc;
+      border: 1px solid #c2d7fa;
+      border-radius: 8px;
+      padding: 12px 18px;
+      margin-bottom: 20px;
+    }
+    .query-input-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 6px;
+    }
+    .query-input-group input {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .query-btn {
+      padding: 8px 16px;
+      background-color: #1a73e8;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    h2 { text-align: center; color: #1a73e8; margin-top: 0; }
+    .header-desc {
+      font-size: 14px;
+      color: #5f6368;
+      line-height: 1.6;
+      background-color: #f8f9fa;
+      border: 1px solid #e8eaed;
+      padding: 12px 15px;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      white-space: pre-wrap;
+    }
+
+    .ref-link-box {
+      background: #f0f7ff;
+      border: 1px solid #c2d7fa;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 13.5px;
+      margin-bottom: 15px;
+      word-break: break-all;
+    }
+    .ref-link-box a { color: #1a73e8; font-weight: bold; text-decoration: underline; }
+
+    .header-img-display {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      display: block;
+    }
+
+    .section-card {
+      background: #fafafa;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 18px 20px;
+      margin-bottom: 20px;
+    }
+    .checkbox-item {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 10px;
+      font-size: 15px;
+      line-height: 1.5;
+      cursor: pointer;
+    }
+    .checkbox-item input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      margin-right: 12px;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+    .item-desc-box {
+      background-color: #f0f7ff;
+      border-left: 4px solid #1a73e8;
+      padding: 8px 12px;
+      font-size: 13px;
+      color: #333;
+      margin-top: 4px;
+      margin-bottom: 10px;
+      margin-left: 32px;
+      border-radius: 0 4px 4px 0;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+    .item-img-display {
+      max-width: 280px;
+      max-height: 200px;
+      border-radius: 6px;
+      margin-top: 6px;
+      margin-bottom: 10px;
+      margin-left: 32px;
+      display: block;
+      border: 1px solid #ddd;
+    }
+
+    .input-group { margin-bottom: 15px; }
+    .input-group label { display: block; font-weight: bold; margin-bottom: 5px; }
+    .input-group input, .input-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
+
+    /* [修改處] 增設三欄流動排版（班級、年級、座號） */
+    .class-info-group {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+    .class-info-item {
+      flex: 1;
+      min-width: 100px;
+    }
+    .class-info-item label { display: block; font-weight: bold; margin-bottom: 5px; }
+    .class-info-item select, .class-info-item input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    .signature-container {
+      border: 2px dashed #1a73e8;
+      border-radius: 8px;
+      background-color: #ffffff;
+      margin-top: 8px;
+    }
+    canvas#signatureCanvas {
+      width: 100%;
+      height: 180px;
+      display: block;
+      cursor: crosshair;
+    }
+    .clear-btn {
+      float: right;
+      margin-top: 6px;
+      background: #e0e0e0;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 14px;
+      background-color: #34a853;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+    .submit-btn:hover { background-color: #2d8e47; }
+    .submit-btn:disabled { background-color: #cccccc; cursor: not-allowed; }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top:0; left:0; right:0; bottom:0;
+      background: rgba(0,0,0,0.6);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      padding: 10px;
+    }
+    .modal-card {
+      background: white;
+      border-radius: 10px;
+      padding: 25px;
+      width: 100%;
+      max-width: 750px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .admin-item-row {
+      background: #f8f9fa;
+      border: 1px solid #ddd;
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      position: relative;
+    }
+    .del-item-btn {
+      float: right;
+      background: #d93025;
+      color: white;
+      border: none;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .img-preview {
+      max-width: 150px;
+      max-height: 100px;
+      border-radius: 4px;
+      margin-top: 6px;
+      display: none;
+      border: 1px solid #ccc;
+    }
+
+    #loadingOverlay { display: none; text-align: center; margin-top: 15px; color: #1a73e8; font-weight: bold; }
+    #successBox { display: none; text-align: center; padding: 20px; }
+    .file-id-box {
+      background: #e8f0fe;
+      padding: 10px;
+      font-size: 24px;
+      font-weight: bold;
+      color: #1a73e8;
+      border-radius: 6px;
+      margin: 10px 0;
+    }
+    .download-btn {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 12px 24px;
+      background: #d93025;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- 頂部功能列 -->
+  <div class="top-bar">
+    <div>
+      <span>📋 切換表單：</span>
+      <select id="formSelect" onchange="switchForm()"></select>
+    </div>
+    <button class="admin-btn" onclick="openAdminLogin()">🔐 管理者後台設定</button>
+  </div>
+
+  <!-- 重複下載查詢區塊 -->
+  <div class="query-card">
+    <div style="font-weight: bold; color: #1a73e8;">🔍 查詢已填寫表單 (下載 PDF)</div>
+    <div class="query-input-group">
+      <input type="text" id="queryFileId" placeholder="請輸入 6 位數檔案 ID (例如：849201)">
+      <button type="button" class="query-btn" onclick="queryPDF()">查詢</button>
+    </div>
+    <div id="queryResult"></div>
+  </div>
+
+  <!-- 前台填表畫面 -->
+  <form id="mainForm">
+    <h2 id="displayTitle">載入中...</h2>
+    <div class="header-desc" id="displayDesc">正在讀取表單設定內容...</div>
+    
+    <!-- 標題參考網址與照片展示區 -->
+    <div id="displayRefUrl" class="ref-link-box" style="display:none;"></div>
+    <img id="displayImg" class="header-img-display" style="display:none;">
+
+    <!-- 個人基本資料 -->
+    <div class="input-group">
+      <label>填寫人姓名 <span style="color:red">*</span></label>
+      <input type="text" id="userName" placeholder="請輸入姓名" required>
+    </div>
+
+    <!-- [修改處] 班級使用版：年級、班級、座號欄位 -->
+    <div class="class-info-group">
+      <div class="class-info-item">
+        <label>年級 <span style="color:red">*</span></label>
+        <select id="userGrade" required>
+          <option value="">請選擇年級</option>
+          <option value="一年">一年</option>
+          <option value="二年">二年</option>
+          <option value="三年">三年</option>
+          <option value="四年">四年</option>
+          <option value="五年">五年</option>
+          <option value="六年">六年</option>
+        </select>
+      </div>
+
+      <div class="class-info-item">
+        <label>班級 <span style="color:red">*</span></label>
+        <select id="userClass" required>
+          <option value="">請選擇班級</option>
+          <option value="一班">一班</option>
+          <option value="二班">二班</option>
+          <option value="三班">三班</option>
+          <option value="四班">四班</option>
+        </select>
+      </div>
+
+      <div class="class-info-item">
+        <label>座號 <span style="color:red">*</span></label>
+        <input type="number" id="userSeat" min="1" max="99" placeholder="例如: 1" required>
+      </div>
+    </div>
+
+    <!-- 動態檢核題目渲染區 -->
+    <div id="checklistContainer"></div>
+
+    <!-- 手寫簽名 -->
+    <div class="input-group">
+      <label>親筆簽名確認 <span style="color:red">*</span></label>
+      <div class="signature-container">
+        <canvas id="signatureCanvas" width="700" height="180"></canvas>
+      </div>
+      <button type="button" class="clear-btn" onclick="clearSignature()">清除重簽</button>
+      <div style="clear: both;"></div>
+    </div>
+
+    <button type="submit" class="submit-btn" id="submitBtn">確認送出表單並生成 PDF</button>
+    <div id="loadingOverlay">資料處理中，請稍候...</div>
+  </form>
+
+  <!-- 送出成功結果 -->
+  <div id="successBox">
+    <h3 style="color:#34a853;">🎉 表單與簽名已成功提交！</h3>
+    <p>請保存您的專屬 6 位數檔案 ID：</p>
+    <div class="file-id-box" id="resFileId">000000</div>
+    <a href="#" target="_blank" class="download-btn" id="resDownloadBtn">📄 立即下載 PDF 檔</a>
+    <br><br>
+    <button type="button" onclick="location.reload()" style="padding:8px 16px; cursor:pointer;">填寫新表單</button>
+  </div>
+</div>
+
+<!-- 管理者登入 Modal -->
+<div class="modal-overlay" id="loginModal">
+  <div class="modal-card" style="max-width: 400px;">
+    <h3>🔐 管理者登入</h3>
+    <div class="input-group">
+      <label>請輸入管理者密碼：</label>
+      <input type="password" id="adminPasswordInput" placeholder="密碼: 1234">
+    </div>
+    <button class="query-btn" style="width:100%;" onclick="submitAdminLogin()">登入後台</button>
+    <button style="width:100%; margin-top:8px;" onclick="closeModal('loginModal')">取消</button>
+  </div>
+</div>
+
+<!-- 管理者後台設定 Modal -->
+<div class="modal-overlay" id="adminModal">
+  <div class="modal-card">
+    <h3>⚙️ 管理者表單設置後台</h3>
+    <hr>
+    
+    <div class="input-group">
+      <label>選擇要編輯的表單：</label>
+      <select id="adminFormSelect" onchange="loadFormToAdmin()"></select>
+      <button type="button" onclick="createNewFormInAdmin()" style="margin-top:5px;">➕ 新增全新表單</button>
+    </div>
+
+    <div class="input-group">
+      <label>表單編號 (ID)：</label>
+      <input type="text" id="adminFormId" readonly placeholder="系統自動生成">
+    </div>
+
+    <div class="input-group">
+      <label>檢核主題 (標題)：</label>
+      <input type="text" id="adminFormTitle" placeholder="請輸入表單主題">
+    </div>
+
+    <div class="input-group">
+      <label>標題說明欄位 (表單說明)：</label>
+      <textarea id="adminFormDesc" style="width:100%; height:80px; border-radius:6px; padding:8px;" placeholder="請輸入說明條文內容..."></textarea>
+    </div>
+
+    <div class="input-group">
+      <label>檢核主題參考網址 (選擇性)：</label>
+      <input type="url" id="adminFormRefUrl" placeholder="例如：https://law.moj.gov.tw/...">
+    </div>
+
+    <div class="input-group">
+      <label>檢核主題照片附件 (限制 1MB 以內，選擇性)：</label>
+      <input type="file" id="adminFormImgFile" accept="image/*" onchange="handleImageUpload(this, 'adminFormImgPreview', 'adminFormImgBase64')">
+      <input type="hidden" id="adminFormImgBase64">
+      <img id="adminFormImgPreview" class="img-preview">
+      <button type="button" onclick="clearImageUpload('adminFormImgFile', 'adminFormImgPreview', 'adminFormImgBase64')" style="display:none;" id="clearHeaderImgBtn">清除照片</button>
+    </div>
+
+    <hr style="margin:20px 0;">
+
+    <h4>檢核項目設定 (可自由增刪)</h4>
+    <div id="adminItemsContainer"></div>
+    <button type="button" onclick="addAdminItemRow()" style="padding:8px 14px; background:#1a73e8; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">➕ 新增檢核項目</button>
+
+    <br><br>
+    <div id="adminFormUrlBox" style="background:#e8f0fe; padding:10px; border-radius:6px; font-size:13px; display:none; word-break:break-all;"></div>
+    <br>
+
+    <button type="button" class="submit-btn" id="saveAdminFormBtn" onclick="saveAdminFormConfig()">💾 儲存表單並自動建立試算表工作表</button>
+    <button type="button" style="width:100%; margin-top:8px; padding:10px;" onclick="closeModal('adminModal')">關閉後台</button>
+  </div>
+</div>
+
+<script>
+  // 保留您的 Apps Script Web App URL
+  const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxfVdlAp3HM31A3fbyw6W_XngDI0VRUoQHD2Z-Xjp6raF2mFKkMGoBUu9kFsvIrR2QNoA/exec";
+
+  let currentFormId = "";
+  let currentFormConfig = null;
+  let adminPasswordToken = "";
+
+  // 網頁載入初始化
+  window.addEventListener('load', () => {
+    initCanvas();
+    const urlParams = new URLSearchParams(window.location.search);
+    const formIdFromUrl = urlParams.get('formId');
+    fetchFormList(formIdFromUrl);
+  });
+
+  // 圖片上傳壓縮與處理引擎 (限制 1MB 以內，並自動縮放瘦身)
+  function handleImageUpload(fileInput, previewImgId, base64HiddenId) {
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    if (file.size > 1048576) {
+      alert("⚠️ 照片附件檔案大小不能超過 1MB！請選擇較小的圖片。");
+      fileInput.value = "";
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = new Image();
+      img.onload = function() {
+        const canvas = document.createElement('canvas');
+        const maxWidth = 500;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.6);
+
+        document.getElementById(base64HiddenId).value = compressedBase64;
+        const preview = document.getElementById(previewImgId);
+        preview.src = compressedBase64;
+        preview.style.display = 'block';
+
+        const clearBtn = previewImgId === 'adminFormImgPreview' ? document.getElementById('clearHeaderImgBtn') : null;
+        if (clearBtn) clearBtn.style.display = 'inline-block';
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function clearImageUpload(fileInputId, previewImgId, base64HiddenId) {
+    document.getElementById(fileInputId).value = "";
+    document.getElementById(base64HiddenId).value = "";
+    const preview = document.getElementById(previewImgId);
+    preview.src = "";
+    preview.style.display = 'none';
+
+    if (fileInputId === 'adminFormImgFile') {
+      document.getElementById('clearHeaderImgBtn').style.display = 'none';
+    }
+  }
+
+  // 抓取所有表單選單
+  function fetchFormList(targetFormId) {
+    fetch(GAS_WEB_APP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'getFormList' })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.result === 'success' && data.list.length > 0) {
+        const select = document.getElementById('formSelect');
+        const adminSelect = document.getElementById('adminFormSelect');
+        select.innerHTML = "";
+        adminSelect.innerHTML = "<option value=''>-- 選擇表單進行編輯 --</option>";
+
+        data.list.forEach(item => {
+          select.innerHTML += `<option value="${item.formId}">${item.formTitle}</option>`;
+          adminSelect.innerHTML += `<option value="${item.formId}">${item.formTitle}</option>`;
+        });
+
+        currentFormId = targetFormId || data.list[0].formId;
+        select.value = currentFormId;
+        loadFormConfig(currentFormId);
+      } else {
+        document.getElementById('displayTitle').innerText = "尚未建立任何表單";
+        document.getElementById('displayDesc').innerText = "請點選右上角「管理者後台設定」建立第一份表單。";
+      }
+    });
+  }
+
+  // 切換選單表單
+  function switchForm() {
+    currentFormId = document.getElementById('formSelect').value;
+    const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?formId=' + currentFormId;
+    window.history.pushState({path:newUrl}, '', newUrl);
+    loadFormConfig(currentFormId);
+  }
+
+  // 載入特定表單設定並渲染前台畫面
+  function loadFormConfig(formId) {
+    fetch(GAS_WEB_APP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'getFormConfig', formId: formId })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.result === 'success') {
+        currentFormConfig = data;
+        document.getElementById('displayTitle').innerText = data.formTitle;
+        document.getElementById('displayDesc').innerText = data.formDesc || "";
+
+        const refUrlBox = document.getElementById('displayRefUrl');
+        if (data.formRefUrl) {
+          refUrlBox.style.display = 'block';
+          refUrlBox.innerHTML = `🔗 <b>參考網址：</b><a href="${data.formRefUrl}" target="_blank">${data.formRefUrl}</a>`;
+        } else {
+          refUrlBox.style.display = 'none';
+        }
+
+        const headerImg = document.getElementById('displayImg');
+        if (data.formImgBase64) {
+          headerImg.src = data.formImgBase64;
+          headerImg.style.display = 'block';
+        } else {
+          headerImg.style.display = 'none';
+        }
+
+        const container = document.getElementById('checklistContainer');
+        container.innerHTML = "";
+
+        if (data.items && data.items.length > 0) {
+          const card = document.createElement('div');
+          card.className = "section-card";
+
+          data.items.forEach((item, index) => {
+            let html = `
+              <label class="checkbox-item">
+                <input type="checkbox" class="rule-check" data-index="${index}">
+                <span><b>${index + 1}. ${item.title}</b></span>
+              </label>
+            `;
+            if (item.desc) {
+              html += `<div class="item-desc-box">${item.desc}</div>`;
+            }
+            if (item.refUrl) {
+              html += `<div class="item-desc-box" style="background:#eef3fc;">🔗 <b>參考網址：</b><a href="${item.refUrl}" target="_blank" style="color:#1a73e8; font-weight:bold;">${item.refUrl}</a></div>`;
+            }
+            if (item.imgBase64) {
+              html += `<img src="${item.imgBase64}" class="item-img-display">`;
+            }
+            card.innerHTML += html;
+          });
+          container.appendChild(card);
+        }
+      }
+    });
+  }
+
+  // 手寫簽名引擎
+  const canvas = document.getElementById('signatureCanvas');
+  const ctx = canvas.getContext('2d');
+  let isDrawing = false, hasSigned = false, lastX = 0, lastY = 0;
+
+  function initCanvas() {
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+  }
+
+  function getCanvasCoords(e) {
+    const rect = canvas.getBoundingClientRect();
+    let clientX = e.clientX, clientY = e.clientY;
+    if (e.touches && e.touches.length > 0) {
+      clientX = e.touches[0].clientX; clientY = e.touches[0].clientY;
+    }
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
+  }
+
+  function startDrawing(e) {
+    e.preventDefault(); isDrawing = true;
+    const pos = getCanvasCoords(e); lastX = pos.x; lastY = pos.y;
+    ctx.beginPath(); ctx.arc(lastX, lastY, 1.5, 0, Math.PI * 2); ctx.fill(); hasSigned = true;
+  }
+  function draw(e) {
+    if (!isDrawing) return; e.preventDefault();
+    const pos = getCanvasCoords(e);
+    ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(pos.x, pos.y); ctx.stroke();
+    lastX = pos.x; lastY = pos.y; hasSigned = true;
+  }
+  function stopDrawing() { isDrawing = false; }
+
+  canvas.addEventListener('mousedown', startDrawing); canvas.addEventListener('mousemove', draw); window.addEventListener('mouseup', stopDrawing);
+  canvas.addEventListener('touchstart', startDrawing); canvas.addEventListener('touchmove', draw); canvas.addEventListener('touchend', stopDrawing);
+
+  function clearSignature() {
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height); hasSigned = false;
+  }
+
+  // 查詢 PDF 檔
+  function queryPDF() {
+    const queryId = document.getElementById('queryFileId').value.trim();
+    const resultDiv = document.getElementById('queryResult');
+    if (!queryId) return alert("請輸入 6 位數檔案 ID");
+
+    resultDiv.innerHTML = "查詢中...";
+    fetch(GAS_WEB_APP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'querySubmission', queryId: queryId, formId: currentFormId })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.result === 'success') {
+        resultDiv.innerHTML = `✅ 找到檔案 (ID: ${data.fileId})！<a href="${data.downloadUrl}" target="_blank" style="color:#d93025; font-weight:bold;">點此下載 PDF 檔</a>`;
+      } else {
+        resultDiv.innerHTML = `<span style="color:red;">❌ ${data.message}</span>`;
+      }
+    });
+  }
+
+  // 送出填寫表單
+  document.getElementById('mainForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const checkboxes = document.querySelectorAll('.rule-check');
+    const checkedBoxes = document.querySelectorAll('.rule-check:checked');
+
+    if (checkboxes.length > 0 && checkedBoxes.length < checkboxes.length) {
+      return alert(`尚有檢核項目未勾選！請勾選全部 ${checkboxes.length} 項。`);
+    }
+
+    // [修改處] 讀取 年級、班級與座號
+    const grade = document.getElementById('userGrade').value;
+    const userClass = document.getElementById('userClass').value;
+    const seat = document.getElementById('userSeat').value.trim();
+
+    if (!grade || !userClass || !seat) {
+      return alert("請完整選擇並填寫【年級、班級與座號】！");
+    }
+
+    if (!hasSigned) return alert("請完成手寫親筆簽名！");
+
+    const submitBtn = document.getElementById('submitBtn');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    submitBtn.disabled = true;
+    loadingOverlay.style.display = 'block';
+
+    let checkedItemsDetail = [];
+    checkboxes.forEach((box) => {
+      const idx = box.getAttribute('data-index');
+      const itemObj = currentFormConfig.items[idx];
+      checkedItemsDetail.push({
+        title: itemObj.title,
+        desc: itemObj.desc || "",
+        refUrl: itemObj.refUrl || "",
+        imgBase64: itemObj.imgBase64 || ""
+      });
+    });
+
+    // [修改處] 自動組合為文字傳送（範例：三年二班 5號）
+    const formattedClassInfo = `${grade}${userClass} ${seat}號`;
+
+    const payload = {
+      action: 'submitForm',
+      formId: currentFormId,
+      formTitle: currentFormConfig.formTitle,
+      formDesc: currentFormConfig.formDesc,
+      formRefUrl: currentFormConfig.formRefUrl || "",
+      formImgBase64: currentFormConfig.formImgBase64 || "",
+      userName: document.getElementById('userName').value.trim(),
+      schoolUnit: formattedClassInfo, // 將班級資訊賦予此欄位，相容原有邏輯
+      checkedCount: checkedBoxes.length,
+      totalCount: checkboxes.length,
+      checkedItemsDetail: checkedItemsDetail,
+      signatureBase64: canvas.toDataURL('image/png')
+    };
+
+    fetch(GAS_WEB_APP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.result === 'success') {
+        document.getElementById('mainForm').style.display = 'none';
+        document.getElementById('successBox').style.display = 'block';
+        document.getElementById('resFileId').innerText = data.fileId;
+        document.getElementById('resDownloadBtn').href = data.downloadUrl;
+      } else {
+        alert("提交失敗：" + data.message);
+        submitBtn.disabled = false;
+        loadingOverlay.style.display = 'none';
+      }
+    });
+  });
+
+  // 管理者後台功能
+  function openAdminLogin() { document.getElementById('loginModal').style.display = 'flex'; }
+  function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+  function submitAdminLogin() {
+    const pwd = document.getElementById('adminPasswordInput').value;
+    fetch(GAS_WEB_APP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'adminLogin', password: pwd })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.result === 'success') {
+        adminPasswordToken = pwd;
+        closeModal('loginModal');
+        document.getElementById('adminModal').style.display = 'flex';
+      } else {
+        alert(data.message);
+      }
+    });
+  }
+
+  function loadFormToAdmin() {
+    const formId = document.getElementById('adminFormSelect').value;
+    if (!formId) return;
+
+    fetch(GAS_WEB_APP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'getFormConfig', formId: formId })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.result === 'success') {
+        document.getElementById('adminFormId').value = data.formId;
+        document.getElementById('adminFormTitle').value = data.formTitle;
+        document.getElementById('adminFormDesc').value = data.formDesc || "";
+        document.getElementById('adminFormRefUrl').value = data.formRefUrl || "";
+        document.getElementById('adminFormImgBase64').value = data.formImgBase64 || "";
+
+        const headerPreview = document.getElementById('adminFormImgPreview');
+        if (data.formImgBase64) {
+          headerPreview.src = data.formImgBase64;
+          headerPreview.style.display = 'block';
+          document.getElementById('clearHeaderImgBtn').style.display = 'inline-block';
+        } else {
+          headerPreview.style.display = 'none';
+          document.getElementById('clearHeaderImgBtn').style.display = 'none';
+        }
+
+        const container = document.getElementById('adminItemsContainer');
+        container.innerHTML = "";
+        if (data.items) {
+          data.items.forEach(item => addAdminItemRow(item.title, item.desc, item.refUrl, item.imgBase64));
+        }
+
+        const formUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?formId=' + data.formId;
+        const urlBox = document.getElementById('adminFormUrlBox');
+        urlBox.style.display = 'block';
+        urlBox.innerHTML = `🔗 <b>此表單專屬網址：</b><br><a href="${formUrl}" target="_blank">${formUrl}</a>`;
+      }
+    });
+  }
+
+  function createNewFormInAdmin() {
+    document.getElementById('adminFormSelect').value = "";
+    document.getElementById('adminFormId').value = "";
+    document.getElementById('adminFormTitle').value = "";
+    document.getElementById('adminFormDesc').value = "";
+    document.getElementById('adminFormRefUrl').value = "";
+    clearImageUpload('adminFormImgFile', 'adminFormImgPreview', 'adminFormImgBase64');
+    document.getElementById('adminItemsContainer').innerHTML = "";
+    document.getElementById('adminFormUrlBox').style.display = 'none';
+    addAdminItemRow("", "", "", "");
+  }
+
+  function addAdminItemRow(title = "", desc = "", refUrl = "", imgBase64 = "") {
+    const container = document.getElementById('adminItemsContainer');
+    const rowId = "item_row_" + Date.now() + "_" + Math.floor(Math.random()*1000);
+
+    const div = document.createElement('div');
+    div.className = "admin-item-row";
+    div.id = rowId;
+    div.innerHTML = `
+      <button type="button" class="del-item-btn" onclick="this.parentElement.remove()">🗑️ 刪除本題</button>
+      <div style="margin-bottom:6px;">
+        <label><b>檢核題目：</b></label>
+        <input type="text" class="admin-item-title" value="${title}" placeholder="請輸入檢核題目" style="width:70%; padding:4px;">
+      </div>
+      <div style="margin-bottom:6px;">
+        <label><b>題目詳細說明：</b></label>
+        <textarea class="admin-item-desc" style="width:100%; height:50px; padding:4px;" placeholder="請輸入本題說明/實例內容...">${desc}</textarea>
+      </div>
+      <div style="margin-bottom:6px;">
+        <label><b>題目參考網址：</b></label>
+        <input type="url" class="admin-item-refurl" value="${refUrl}" placeholder="例如：https://..." style="width:100%; padding:4px;">
+      </div>
+      <div>
+        <label><b>題目照片附件 (限制 1MB 以內)：</b></label>
+        <input type="file" accept="image/*" class="admin-item-img-file" onchange="handleItemImageUpload(this, '${rowId}')">
+        <input type="hidden" class="admin-item-img-base64" value="${imgBase64}">
+        <img class="img-preview admin-item-img-preview" src="${imgBase64}" style="${imgBase64 ? 'display:block;' : 'display:none;'}">
+        <button type="button" class="clear-item-img-btn" onclick="clearItemImage('${rowId}')" style="${imgBase64 ? 'display:inline-block;' : 'display:none;'}">刪除照片</button>
+      </div>
+    `;
+    container.appendChild(div);
+  }
+
+  function handleItemImageUpload(fileInput, rowId) {
+    const row = document.getElementById(rowId);
+    const preview = row.querySelector('.admin-item-img-preview');
+    const hidden = row.querySelector('.admin-item-img-base64');
+    const clearBtn = row.querySelector('.clear-item-img-btn');
+
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    if (file.size > 1048576) {
+      alert("⚠️ 題目照片檔案大小不能超過 1MB！請選擇較小的圖片。");
+      fileInput.value = "";
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = new Image();
+      img.onload = function() {
+        const canvas = document.createElement('canvas');
+        const maxWidth = 500;
+        let width = img.width, height = img.height;
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+        canvas.width = width; canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.6);
+
+        hidden.value = compressedBase64;
+        preview.src = compressedBase64;
+        preview.style.display = 'block';
+        clearBtn.style.display = 'inline-block';
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function clearItemImage(rowId) {
+    const row = document.getElementById(rowId);
+    row.querySelector('.admin-item-img-file').value = "";
+    row.querySelector('.admin-item-img-base64').value = "";
+    const preview = row.querySelector('.admin-item-img-preview');
+    preview.src = "";
+    preview.style.display = 'none';
+    row.querySelector('.clear-item-img-btn').style.display = 'none';
+  }
+
+  function saveAdminFormConfig() {
+    const saveBtn = document.getElementById('saveAdminFormBtn');
+    const formId = document.getElementById('adminFormId').value;
+    const formTitle = document.getElementById('adminFormTitle').value.trim();
+    const formDesc = document.getElementById('adminFormDesc').value.trim();
+    const formRefUrl = document.getElementById('adminFormRefUrl').value.trim();
+    const formImgBase64 = document.getElementById('adminFormImgBase64').value;
+
+    if (!formTitle) return alert("請填寫表單主題！");
+
+    const itemRows = document.querySelectorAll('.admin-item-row');
+    let items = [];
+    itemRows.forEach(row => {
+      const t = row.querySelector('.admin-item-title').value.trim();
+      const d = row.querySelector('.admin-item-desc').value.trim();
+      const u = row.querySelector('.admin-item-refurl').value.trim();
+      const img = row.querySelector('.admin-item-img-base64').value;
+      if (t) {
+        items.push({ title: t, desc: d, refUrl: u, imgBase64: img });
+      }
+    });
+
+    saveBtn.innerText = "執行中...";
+    saveBtn.disabled = true;
+
+    const payload = {
+      action: 'saveFormConfig',
+      password: adminPasswordToken,
+      formId: formId,
+      formTitle: formTitle,
+      formDesc: formDesc,
+      formRefUrl: formRefUrl,
+      formImgBase64: formImgBase64,
+      items: items
+    };
+
+    fetch(GAS_WEB_APP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+      saveBtn.innerText = "💾 儲存表單並自動建立試算表工作表";
+      saveBtn.disabled = false;
+
+      if (data.result === 'success') {
+        alert(data.message);
+        document.getElementById('adminFormId').value = data.formId;
+        fetchFormList(data.formId);
+        closeModal('adminModal');
+      } else {
+        alert("儲存失敗：" + data.message);
+      }
+    })
+    .catch(err => {
+      saveBtn.innerText = "💾 儲存表單並自動建立試算表工作表";
+      saveBtn.disabled = false;
+      alert("儲存失敗：請求過程發生錯誤或回應異常，請重試。(" + err.toString() + ")");
+    });
+  }
+</script>
+
+</body>
+</html>
