@@ -418,12 +418,11 @@
     fetchFormList(formIdFromUrl);
   });
 
-  // 圖片上傳壓縮與處理引擎 (限制 1MB 以內，並自動瘦身壓縮)
+  // 圖片上傳壓縮與處理引擎 (限制 1MB 以內，並自動縮放瘦身)
   function handleImageUpload(fileInput, previewImgId, base64HiddenId) {
     const file = fileInput.files[0];
     if (!file) return;
 
-    // 限制照片大小不能超過 1MB (1,048,576 Bytes)
     if (file.size > 1048576) {
       alert("⚠️ 照片附件檔案大小不能超過 1MB！請選擇較小的圖片。");
       fileInput.value = "";
@@ -435,7 +434,7 @@
       const img = new Image();
       img.onload = function() {
         const canvas = document.createElement('canvas');
-        const maxWidth = 600;
+        const maxWidth = 500;
         let width = img.width;
         let height = img.height;
 
@@ -449,7 +448,7 @@
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
 
-        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.6);
 
         document.getElementById(base64HiddenId).value = compressedBase64;
         const preview = document.getElementById(previewImgId);
@@ -790,7 +789,7 @@
     addAdminItemRow("", "", "", "");
   }
 
-  // 動態新增/刪除題目編輯列 (含限制 1MB 的照片上傳)
+  // 動態新增/刪除題目編輯列 (限制 1MB 以內照片)
   function addAdminItemRow(title = "", desc = "", refUrl = "", imgBase64 = "") {
     const container = document.getElementById('adminItemsContainer');
     const rowId = "item_row_" + Date.now() + "_" + Math.floor(Math.random()*1000);
@@ -832,7 +831,6 @@
     const file = fileInput.files[0];
     if (!file) return;
 
-    // 限制照片大小不能超過 1MB (1,048,576 Bytes)
     if (file.size > 1048576) {
       alert("⚠️ 題目照片檔案大小不能超過 1MB！請選擇較小的圖片。");
       fileInput.value = "";
@@ -853,7 +851,7 @@
         canvas.width = width; canvas.height = height;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
-        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.6);
 
         hidden.value = compressedBase64;
         preview.src = compressedBase64;
@@ -875,7 +873,7 @@
     row.querySelector('.clear-item-img-btn').style.display = 'none';
   }
 
-  // 儲存表單後台設置 (含「執行中...」狀態與自動關閉後台)
+  // 儲存表單後台設置 (顯示「執行中...」並於儲存成功後自動關閉後台)
   function saveAdminFormConfig() {
     const saveBtn = document.getElementById('saveAdminFormBtn');
     const formId = document.getElementById('adminFormId').value;
@@ -898,7 +896,6 @@
       }
     });
 
-    // 變更按鈕文字為「執行中...」並暫停點擊
     saveBtn.innerText = "執行中...";
     saveBtn.disabled = true;
 
@@ -927,7 +924,7 @@
         alert(data.message);
         document.getElementById('adminFormId').value = data.formId;
         fetchFormList(data.formId);
-        closeModal('adminModal'); // 儲存完成後自動關閉後台
+        closeModal('adminModal'); // 儲存成功後自動關閉後台 Modal
       } else {
         alert("儲存失敗：" + data.message);
       }
@@ -935,7 +932,7 @@
     .catch(err => {
       saveBtn.innerText = "💾 儲存表單並自動建立試算表工作表";
       saveBtn.disabled = false;
-      alert("系統發生錯誤，請稍後再試！");
+      alert("儲存失敗：請求過程發生錯誤或回應異常，請重試。(" + err.toString() + ")");
     });
   }
 </script>
