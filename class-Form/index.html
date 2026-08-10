@@ -261,7 +261,6 @@
       border: 1px solid #ccc;
     }
 
-    /* [新增] 必選標籤樣式 */
     .required-badge {
       color: #d93025;
       font-size: 12px;
@@ -398,7 +397,7 @@
     <h3>🔐 管理者登入</h3>
     <div class="input-group">
       <label>請輸入管理者密碼：</label>
-      <input type="password" id="adminPasswordInput" placeholder="密碼: 12**">
+      <input type="password" id="adminPasswordInput" placeholder="密碼: 1234">
     </div>
     <button class="query-btn" style="width:100%;" onclick="submitAdminLogin()">登入後台</button>
     <button style="width:100%; margin-top:8px;" onclick="closeModal('loginModal')">取消</button>
@@ -432,7 +431,6 @@
       <textarea id="adminFormDesc" style="width:100%; height:80px; border-radius:6px; padding:8px;" placeholder="請輸入說明條文內容..."></textarea>
     </div>
 
-    <!-- [修改處 2] 新增「最少需勾選數量」設定 -->
     <div class="input-group" style="background:#eef3fc; padding:10px; border-radius:6px; border:1px solid #c2d7fa;">
       <label style="color:#1a73e8;">全表單最少需勾選數量 (0 表不限制數量；若項目均未設必選，例如同意/不同意二選一可填 1)：</label>
       <input type="number" id="adminMinRequiredCount" min="0" value="0" placeholder="0">
@@ -615,7 +613,6 @@
           card.className = "section-card";
 
           data.items.forEach((item, index) => {
-            // [修改處 3] 前台渲染：若為「必選」，顯示紅框必選標籤
             const requiredHtml = item.required ? `<span class="required-badge">必選</span>` : "";
             let html = `
               <label class="checkbox-item">
@@ -712,7 +709,6 @@
     const checkboxes = document.querySelectorAll('.rule-check');
     const checkedBoxes = document.querySelectorAll('.rule-check:checked');
 
-    // [修改處 4] 動態驗證邏輯：必選檢查與最少數量檢查
     // A. 檢查「必選」項目
     let missingRequiredList = [];
     checkboxes.forEach((box) => {
@@ -751,7 +747,7 @@
 
     let checkedItemsDetail = [];
     checkboxes.forEach((box) => {
-      if (box.checked) { // 僅將已勾選項目列入產出文件（可選）
+      if (box.checked) {
         const idx = box.getAttribute('data-index');
         const itemObj = currentFormConfig.items[idx];
         checkedItemsDetail.push({
@@ -763,7 +759,9 @@
       }
     });
 
-    const formattedClassInfo = `${grade}${userClass} ${seat}號`;
+    // [修改處] 將年級與班級合併，座號獨立傳送
+    const classGroupStr = `${grade}${userClass}`; // 例如：三年二班
+    const seatNoStr = `${seat}號`;               // 例如：15號
 
     const payload = {
       action: 'submitForm',
@@ -773,7 +771,8 @@
       formRefUrl: currentFormConfig.formRefUrl || "",
       formImgBase64: currentFormConfig.formImgBase64 || "",
       userName: document.getElementById('userName').value.trim(),
-      schoolUnit: formattedClassInfo,
+      classGroup: classGroupStr, // 合併後的年級班級
+      seatNo: seatNoStr,         // 獨立的座號
       checkedCount: checkedBoxes.length,
       totalCount: checkboxes.length,
       checkedItemsDetail: checkedItemsDetail,
@@ -838,7 +837,7 @@
         document.getElementById('adminFormId').value = data.formId;
         document.getElementById('adminFormTitle').value = data.formTitle;
         document.getElementById('adminFormDesc').value = data.formDesc || "";
-        document.getElementById('adminMinRequiredCount').value = data.minRequiredCount || 0; // [新增] 載入最少數量
+        document.getElementById('adminMinRequiredCount').value = data.minRequiredCount || 0;
         document.getElementById('adminFormRefUrl').value = data.formRefUrl || "";
         document.getElementById('adminFormImgBase64').value = data.formImgBase64 || "";
 
@@ -879,7 +878,6 @@
     addAdminItemRow("", "", "", "", false);
   }
 
-  // [修改處 5] 後台題目設定區：新增「必選」核取按鈕
   function addAdminItemRow(title = "", desc = "", refUrl = "", imgBase64 = "", required = false) {
     const container = document.getElementById('adminItemsContainer');
     const rowId = "item_row_" + Date.now() + "_" + Math.floor(Math.random()*1000);
@@ -925,7 +923,7 @@
     if (!file) return;
 
     if (file.size > 1048576) {
-      alert("⚠️ 題目照片檔案大小不能超過 1MB！請選擇較小的圖片。");
+      alert("⚠️ 照片附件檔案大小不能超過 1MB！請選擇較小的圖片。");
       fileInput.value = "";
       return;
     }
@@ -984,7 +982,7 @@
       const d = row.querySelector('.admin-item-desc').value.trim();
       const u = row.querySelector('.admin-item-refurl').value.trim();
       const img = row.querySelector('.admin-item-img-base64').value;
-      const isReq = row.querySelector('.admin-item-required').checked; // [新增] 讀取必選狀態
+      const isReq = row.querySelector('.admin-item-required').checked;
 
       if (t) {
         items.push({ title: t, desc: d, refUrl: u, imgBase64: img, required: isReq });
@@ -1002,7 +1000,7 @@
       formDesc: formDesc,
       formRefUrl: formRefUrl,
       formImgBase64: formImgBase64,
-      minRequiredCount: minRequiredCount, // [新增] 送出最少數量設定
+      minRequiredCount: minRequiredCount,
       items: items
     };
 
