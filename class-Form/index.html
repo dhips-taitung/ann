@@ -761,7 +761,7 @@
 
     // [修改處] 將年級與班級合併，座號獨立傳送
     const classGroupStr = `${grade}${userClass}`; // 例如：三年二班
-    const seatNoStr = `${seat}號`;               // 例如：15號
+    const seatNoStr = seat;               // 例如：15
 
     const payload = {
       action: 'submitForm',
