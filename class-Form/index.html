@@ -160,7 +160,6 @@
     .input-group label { display: block; font-weight: bold; margin-bottom: 5px; }
     .input-group input, .input-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
 
-    /* [修改處] 增設三欄流動排版（班級、年級、座號） */
     .class-info-group {
       display: flex;
       gap: 12px;
@@ -262,6 +261,17 @@
       border: 1px solid #ccc;
     }
 
+    /* [新增] 必選標籤樣式 */
+    .required-badge {
+      color: #d93025;
+      font-size: 12px;
+      border: 1px solid #d93025;
+      border-radius: 3px;
+      padding: 1px 5px;
+      margin-left: 6px;
+      font-weight: bold;
+    }
+
     #loadingOverlay { display: none; text-align: center; margin-top: 15px; color: #1a73e8; font-weight: bold; }
     #successBox { display: none; text-align: center; padding: 20px; }
     .file-id-box {
@@ -322,7 +332,7 @@
       <input type="text" id="userName" placeholder="請輸入姓名" required>
     </div>
 
-    <!-- [修改處] 班級使用版：年級、班級、座號欄位 -->
+    <!-- 班級使用版：年級、班級、座號欄位 -->
     <div class="class-info-group">
       <div class="class-info-item">
         <label>年級 <span style="color:red">*</span></label>
@@ -388,7 +398,7 @@
     <h3>🔐 管理者登入</h3>
     <div class="input-group">
       <label>請輸入管理者密碼：</label>
-      <input type="password" id="adminPasswordInput" placeholder="密碼: 1234">
+      <input type="password" id="adminPasswordInput" placeholder="密碼: 12**">
     </div>
     <button class="query-btn" style="width:100%;" onclick="submitAdminLogin()">登入後台</button>
     <button style="width:100%; margin-top:8px;" onclick="closeModal('loginModal')">取消</button>
@@ -420,6 +430,12 @@
     <div class="input-group">
       <label>標題說明欄位 (表單說明)：</label>
       <textarea id="adminFormDesc" style="width:100%; height:80px; border-radius:6px; padding:8px;" placeholder="請輸入說明條文內容..."></textarea>
+    </div>
+
+    <!-- [修改處 2] 新增「最少需勾選數量」設定 -->
+    <div class="input-group" style="background:#eef3fc; padding:10px; border-radius:6px; border:1px solid #c2d7fa;">
+      <label style="color:#1a73e8;">全表單最少需勾選數量 (0 表不限制數量；若項目均未設必選，例如同意/不同意二選一可填 1)：</label>
+      <input type="number" id="adminMinRequiredCount" min="0" value="0" placeholder="0">
     </div>
 
     <div class="input-group">
@@ -599,10 +615,12 @@
           card.className = "section-card";
 
           data.items.forEach((item, index) => {
+            // [修改處 3] 前台渲染：若為「必選」，顯示紅框必選標籤
+            const requiredHtml = item.required ? `<span class="required-badge">必選</span>` : "";
             let html = `
               <label class="checkbox-item">
                 <input type="checkbox" class="rule-check" data-index="${index}">
-                <span><b>${index + 1}. ${item.title}</b></span>
+                <span><b>${index + 1}. ${item.title}</b> ${requiredHtml}</span>
               </label>
             `;
             if (item.desc) {
@@ -694,11 +712,28 @@
     const checkboxes = document.querySelectorAll('.rule-check');
     const checkedBoxes = document.querySelectorAll('.rule-check:checked');
 
-    if (checkboxes.length > 0 && checkedBoxes.length < checkboxes.length) {
-      return alert(`尚有檢核項目未勾選！請勾選全部 ${checkboxes.length} 項。`);
+    // [修改處 4] 動態驗證邏輯：必選檢查與最少數量檢查
+    // A. 檢查「必選」項目
+    let missingRequiredList = [];
+    checkboxes.forEach((box) => {
+      const idx = box.getAttribute('data-index');
+      const itemObj = currentFormConfig.items[idx];
+      if (itemObj.required && !box.checked) {
+        missingRequiredList.push(`第 ${parseInt(idx) + 1} 題：${itemObj.title}`);
+      }
+    });
+
+    if (missingRequiredList.length > 0) {
+      return alert("⚠️ 以下為「必選項」，請確認勾選：\n\n• " + missingRequiredList.join("\n• "));
     }
 
-    // [修改處] 讀取 年級、班級與座號
+    // B. 檢查「最少需勾選數量」
+    const minReqCount = parseInt(currentFormConfig.minRequiredCount || 0, 10);
+    if (minReqCount > 0 && checkedBoxes.length < minReqCount) {
+      return alert(`⚠️ 本表單設定最少需勾選 ${minReqCount} 項！（您目前已勾選 ${checkedBoxes.length} 項）`);
+    }
+
+    // 讀取 年級、班級與座號
     const grade = document.getElementById('userGrade').value;
     const userClass = document.getElementById('userClass').value;
     const seat = document.getElementById('userSeat').value.trim();
@@ -716,17 +751,18 @@
 
     let checkedItemsDetail = [];
     checkboxes.forEach((box) => {
-      const idx = box.getAttribute('data-index');
-      const itemObj = currentFormConfig.items[idx];
-      checkedItemsDetail.push({
-        title: itemObj.title,
-        desc: itemObj.desc || "",
-        refUrl: itemObj.refUrl || "",
-        imgBase64: itemObj.imgBase64 || ""
-      });
+      if (box.checked) { // 僅將已勾選項目列入產出文件（可選）
+        const idx = box.getAttribute('data-index');
+        const itemObj = currentFormConfig.items[idx];
+        checkedItemsDetail.push({
+          title: itemObj.title,
+          desc: itemObj.desc || "",
+          refUrl: itemObj.refUrl || "",
+          imgBase64: itemObj.imgBase64 || ""
+        });
+      }
     });
 
-    // [修改處] 自動組合為文字傳送（範例：三年二班 5號）
     const formattedClassInfo = `${grade}${userClass} ${seat}號`;
 
     const payload = {
@@ -737,7 +773,7 @@
       formRefUrl: currentFormConfig.formRefUrl || "",
       formImgBase64: currentFormConfig.formImgBase64 || "",
       userName: document.getElementById('userName').value.trim(),
-      schoolUnit: formattedClassInfo, // 將班級資訊賦予此欄位，相容原有邏輯
+      schoolUnit: formattedClassInfo,
       checkedCount: checkedBoxes.length,
       totalCount: checkboxes.length,
       checkedItemsDetail: checkedItemsDetail,
@@ -802,6 +838,7 @@
         document.getElementById('adminFormId').value = data.formId;
         document.getElementById('adminFormTitle').value = data.formTitle;
         document.getElementById('adminFormDesc').value = data.formDesc || "";
+        document.getElementById('adminMinRequiredCount').value = data.minRequiredCount || 0; // [新增] 載入最少數量
         document.getElementById('adminFormRefUrl').value = data.formRefUrl || "";
         document.getElementById('adminFormImgBase64').value = data.formImgBase64 || "";
 
@@ -818,7 +855,7 @@
         const container = document.getElementById('adminItemsContainer');
         container.innerHTML = "";
         if (data.items) {
-          data.items.forEach(item => addAdminItemRow(item.title, item.desc, item.refUrl, item.imgBase64));
+          data.items.forEach(item => addAdminItemRow(item.title, item.desc, item.refUrl, item.imgBase64, item.required));
         }
 
         const formUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?formId=' + data.formId;
@@ -834,14 +871,16 @@
     document.getElementById('adminFormId').value = "";
     document.getElementById('adminFormTitle').value = "";
     document.getElementById('adminFormDesc').value = "";
+    document.getElementById('adminMinRequiredCount').value = "0";
     document.getElementById('adminFormRefUrl').value = "";
     clearImageUpload('adminFormImgFile', 'adminFormImgPreview', 'adminFormImgBase64');
     document.getElementById('adminItemsContainer').innerHTML = "";
     document.getElementById('adminFormUrlBox').style.display = 'none';
-    addAdminItemRow("", "", "", "");
+    addAdminItemRow("", "", "", "", false);
   }
 
-  function addAdminItemRow(title = "", desc = "", refUrl = "", imgBase64 = "") {
+  // [修改處 5] 後台題目設定區：新增「必選」核取按鈕
+  function addAdminItemRow(title = "", desc = "", refUrl = "", imgBase64 = "", required = false) {
     const container = document.getElementById('adminItemsContainer');
     const rowId = "item_row_" + Date.now() + "_" + Math.floor(Math.random()*1000);
 
@@ -850,9 +889,12 @@
     div.id = rowId;
     div.innerHTML = `
       <button type="button" class="del-item-btn" onclick="this.parentElement.remove()">🗑️ 刪除本題</button>
-      <div style="margin-bottom:6px;">
+      <div style="margin-bottom:6px; display:flex; align-items:center; gap:10px;">
         <label><b>檢核題目：</b></label>
-        <input type="text" class="admin-item-title" value="${title}" placeholder="請輸入檢核題目" style="width:70%; padding:4px;">
+        <input type="text" class="admin-item-title" value="${title}" placeholder="請輸入檢核題目" style="flex:1; padding:4px;">
+        <label style="color:#d93025; font-weight:bold; cursor:pointer;">
+          <input type="checkbox" class="admin-item-required" ${required ? 'checked' : ''}> 設為必選項
+        </label>
       </div>
       <div style="margin-bottom:6px;">
         <label><b>題目詳細說明：</b></label>
@@ -931,6 +973,7 @@
     const formDesc = document.getElementById('adminFormDesc').value.trim();
     const formRefUrl = document.getElementById('adminFormRefUrl').value.trim();
     const formImgBase64 = document.getElementById('adminFormImgBase64').value;
+    const minRequiredCount = document.getElementById('adminMinRequiredCount').value || 0;
 
     if (!formTitle) return alert("請填寫表單主題！");
 
@@ -941,8 +984,10 @@
       const d = row.querySelector('.admin-item-desc').value.trim();
       const u = row.querySelector('.admin-item-refurl').value.trim();
       const img = row.querySelector('.admin-item-img-base64').value;
+      const isReq = row.querySelector('.admin-item-required').checked; // [新增] 讀取必選狀態
+
       if (t) {
-        items.push({ title: t, desc: d, refUrl: u, imgBase64: img });
+        items.push({ title: t, desc: d, refUrl: u, imgBase64: img, required: isReq });
       }
     });
 
@@ -957,6 +1002,7 @@
       formDesc: formDesc,
       formRefUrl: formRefUrl,
       formImgBase64: formImgBase64,
+      minRequiredCount: minRequiredCount, // [新增] 送出最少數量設定
       items: items
     };
 
