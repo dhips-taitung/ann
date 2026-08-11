@@ -242,6 +242,17 @@
       border: 1px solid #ccc;
     }
 
+    /* [新增] 必選標籤樣式 */
+    .required-badge {
+      color: #d93025;
+      font-size: 12px;
+      border: 1px solid #d93025;
+      border-radius: 3px;
+      padding: 1px 5px;
+      margin-left: 6px;
+      font-weight: bold;
+    }
+
     #loadingOverlay { display: none; text-align: center; margin-top: 15px; color: #1a73e8; font-weight: bold; }
     #successBox { display: none; text-align: center; padding: 20px; }
     .file-id-box {
@@ -302,8 +313,8 @@
       <input type="text" id="userName" placeholder="請輸入姓名" required>
     </div>
     <div class="input-group">
-      <label>服務單位 / 學校與隊別</label>
-      <input type="text" id="schoolUnit" placeholder="例如：XX國小 體育組/教練">
+      <label>單位名稱 / 學校與隊別</label>
+      <input type="text" id="schoolUnit" placeholder="例如：XX國小 體育組長/教練">
     </div>
 
     <!-- 動態檢核題目渲染區 -->
@@ -340,7 +351,7 @@
     <h3>🔐 管理者登入</h3>
     <div class="input-group">
       <label>請輸入管理者密碼：</label>
-      <input type="password" id="adminPasswordInput" placeholder="密碼: 1234">
+      <input type="password" id="adminPasswordInput" placeholder="密碼: 1127">
     </div>
     <button class="query-btn" style="width:100%;" onclick="submitAdminLogin()">登入後台</button>
     <button style="width:100%; margin-top:8px;" onclick="closeModal('loginModal')">取消</button>
@@ -372,6 +383,12 @@
     <div class="input-group">
       <label>標題說明欄位 (表單說明)：</label>
       <textarea id="adminFormDesc" style="width:100%; height:80px; border-radius:6px; padding:8px;" placeholder="請輸入說明條文內容..."></textarea>
+    </div>
+
+    <!-- [修改處 1] 新增「最少需勾選數量」設定 -->
+    <div class="input-group" style="background:#eef3fc; padding:10px; border-radius:6px; border:1px solid #c2d7fa;">
+      <label style="color:#1a73e8;">全表單最少需勾選數量 (0 表不限制數量；若項目均未設必選，例如同意/不同意二選一可填 1)：</label>
+      <input type="number" id="adminMinRequiredCount" min="0" value="0" placeholder="0">
     </div>
 
     <div class="input-group">
@@ -551,10 +568,12 @@
           card.className = "section-card";
 
           data.items.forEach((item, index) => {
+            // [修改處 2] 前台渲染：若設定為「必選」，顯示紅框必選標籤
+            const requiredHtml = item.required ? `<span class="required-badge">必選</span>` : "";
             let html = `
               <label class="checkbox-item">
                 <input type="checkbox" class="rule-check" data-index="${index}">
-                <span><b>${index + 1}. ${item.title}</b></span>
+                <span><b>${index + 1}. ${item.title}</b> ${requiredHtml}</span>
               </label>
             `;
             if (item.desc) {
@@ -574,9 +593,7 @@
     });
   }
 
-  // =========================================================================
   // 手寫簽名引擎
-  // =========================================================================
   const canvas = document.getElementById('signatureCanvas');
   const ctx = canvas.getContext('2d');
   let isDrawing = false, hasSigned = false, lastX = 0, lastY = 0;
@@ -620,9 +637,7 @@
     ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height); hasSigned = false;
   }
 
-  // =========================================================================
   // 查詢 PDF 檔
-  // =========================================================================
   function queryPDF() {
     const queryId = document.getElementById('queryFileId').value.trim();
     const resultDiv = document.getElementById('queryResult');
@@ -644,17 +659,33 @@
     });
   }
 
-  // =========================================================================
   // 送出填寫表單
-  // =========================================================================
   document.getElementById('mainForm').addEventListener('submit', function(e) {
     e.preventDefault();
     const checkboxes = document.querySelectorAll('.rule-check');
     const checkedBoxes = document.querySelectorAll('.rule-check:checked');
 
-    if (checkboxes.length > 0 && checkedBoxes.length < checkboxes.length) {
-      return alert(`尚有檢核項目未勾選！請勾選全部 ${checkboxes.length} 項。`);
+    // [修改處 3] 動態驗證：必選項目與最少勾選數量檢查
+    // A. 檢查標註為「必選」的項目
+    let missingRequiredList = [];
+    checkboxes.forEach((box) => {
+      const idx = box.getAttribute('data-index');
+      const itemObj = currentFormConfig.items[idx];
+      if (itemObj.required && !box.checked) {
+        missingRequiredList.push(`第 ${parseInt(idx) + 1} 題：${itemObj.title}`);
+      }
+    });
+
+    if (missingRequiredList.length > 0) {
+      return alert("⚠️ 以下為「必選項」，請確認勾選：\n\n• " + missingRequiredList.join("\n• "));
     }
+
+    // B. 檢查全表單「最少需勾選數量」
+    const minReqCount = parseInt(currentFormConfig.minRequiredCount || 0, 10);
+    if (minReqCount > 0 && checkedBoxes.length < minReqCount) {
+      return alert(`⚠️ 本表單設定最少需勾選 ${minReqCount} 項！（您目前已勾選 ${checkedBoxes.length} 項）`);
+    }
+
     if (!hasSigned) return alert("請完成手寫親筆簽名！");
 
     const submitBtn = document.getElementById('submitBtn');
@@ -664,14 +695,16 @@
 
     let checkedItemsDetail = [];
     checkboxes.forEach((box) => {
-      const idx = box.getAttribute('data-index');
-      const itemObj = currentFormConfig.items[idx];
-      checkedItemsDetail.push({
-        title: itemObj.title,
-        desc: itemObj.desc || "",
-        refUrl: itemObj.refUrl || "",
-        imgBase64: itemObj.imgBase64 || ""
-      });
+      if (box.checked) {
+        const idx = box.getAttribute('data-index');
+        const itemObj = currentFormConfig.items[idx];
+        checkedItemsDetail.push({
+          title: itemObj.title,
+          desc: itemObj.desc || "",
+          refUrl: itemObj.refUrl || "",
+          imgBase64: itemObj.imgBase64 || ""
+        });
+      }
     });
 
     const payload = {
@@ -709,9 +742,7 @@
     });
   });
 
-  // =========================================================================
   // 管理者後台功能
-  // =========================================================================
   function openAdminLogin() { document.getElementById('loginModal').style.display = 'flex'; }
   function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
@@ -734,7 +765,7 @@
     });
   }
 
-  // 載入表單進行後台編輯
+  // 載入表單資料至後台編輯器
   function loadFormToAdmin() {
     const formId = document.getElementById('adminFormSelect').value;
     if (!formId) return;
@@ -750,6 +781,7 @@
         document.getElementById('adminFormId').value = data.formId;
         document.getElementById('adminFormTitle').value = data.formTitle;
         document.getElementById('adminFormDesc').value = data.formDesc || "";
+        document.getElementById('adminMinRequiredCount').value = data.minRequiredCount || 0; // [修改處 4] 載入最少勾選數量
         document.getElementById('adminFormRefUrl').value = data.formRefUrl || "";
         document.getElementById('adminFormImgBase64').value = data.formImgBase64 || "";
 
@@ -766,7 +798,7 @@
         const container = document.getElementById('adminItemsContainer');
         container.innerHTML = "";
         if (data.items) {
-          data.items.forEach(item => addAdminItemRow(item.title, item.desc, item.refUrl, item.imgBase64));
+          data.items.forEach(item => addAdminItemRow(item.title, item.desc, item.refUrl, item.imgBase64, item.required));
         }
 
         const formUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?formId=' + data.formId;
@@ -782,15 +814,16 @@
     document.getElementById('adminFormId').value = "";
     document.getElementById('adminFormTitle').value = "";
     document.getElementById('adminFormDesc').value = "";
+    document.getElementById('adminMinRequiredCount').value = "0";
     document.getElementById('adminFormRefUrl').value = "";
     clearImageUpload('adminFormImgFile', 'adminFormImgPreview', 'adminFormImgBase64');
     document.getElementById('adminItemsContainer').innerHTML = "";
     document.getElementById('adminFormUrlBox').style.display = 'none';
-    addAdminItemRow("", "", "", "");
+    addAdminItemRow("", "", "", "", false);
   }
 
-  // 動態新增/刪除題目編輯列 (限制 1MB 以內照片)
-  function addAdminItemRow(title = "", desc = "", refUrl = "", imgBase64 = "") {
+  // [修改處 5] 後台題目列：新增「設為必選項」核取方塊
+  function addAdminItemRow(title = "", desc = "", refUrl = "", imgBase64 = "", required = false) {
     const container = document.getElementById('adminItemsContainer');
     const rowId = "item_row_" + Date.now() + "_" + Math.floor(Math.random()*1000);
 
@@ -799,9 +832,12 @@
     div.id = rowId;
     div.innerHTML = `
       <button type="button" class="del-item-btn" onclick="this.parentElement.remove()">🗑️ 刪除本題</button>
-      <div style="margin-bottom:6px;">
+      <div style="margin-bottom:6px; display:flex; align-items:center; gap:10px;">
         <label><b>檢核題目：</b></label>
-        <input type="text" class="admin-item-title" value="${title}" placeholder="請輸入檢核題目" style="width:70%; padding:4px;">
+        <input type="text" class="admin-item-title" value="${title}" placeholder="請輸入檢核題目" style="flex:1; padding:4px;">
+        <label style="color:#d93025; font-weight:bold; cursor:pointer;">
+          <input type="checkbox" class="admin-item-required" ${required ? 'checked' : ''}> 設為必選項
+        </label>
       </div>
       <div style="margin-bottom:6px;">
         <label><b>題目詳細說明：</b></label>
@@ -832,7 +868,7 @@
     if (!file) return;
 
     if (file.size > 1048576) {
-      alert("⚠️ 題目照片檔案大小不能超過 1MB！請選擇較小的圖片。");
+      alert("⚠️ 照片附件檔案大小不能超過 1MB！請選擇較小的圖片。");
       fileInput.value = "";
       return;
     }
@@ -873,7 +909,7 @@
     row.querySelector('.clear-item-img-btn').style.display = 'none';
   }
 
-  // 儲存表單後台設置 (顯示「執行中...」並於儲存成功後自動關閉後台)
+  // 儲存表單後台設定
   function saveAdminFormConfig() {
     const saveBtn = document.getElementById('saveAdminFormBtn');
     const formId = document.getElementById('adminFormId').value;
@@ -881,6 +917,7 @@
     const formDesc = document.getElementById('adminFormDesc').value.trim();
     const formRefUrl = document.getElementById('adminFormRefUrl').value.trim();
     const formImgBase64 = document.getElementById('adminFormImgBase64').value;
+    const minRequiredCount = document.getElementById('adminMinRequiredCount').value || 0;
 
     if (!formTitle) return alert("請填寫表單主題！");
 
@@ -891,8 +928,10 @@
       const d = row.querySelector('.admin-item-desc').value.trim();
       const u = row.querySelector('.admin-item-refurl').value.trim();
       const img = row.querySelector('.admin-item-img-base64').value;
+      const isReq = row.querySelector('.admin-item-required').checked; // [修改處 6] 讀取必選狀態
+
       if (t) {
-        items.push({ title: t, desc: d, refUrl: u, imgBase64: img });
+        items.push({ title: t, desc: d, refUrl: u, imgBase64: img, required: isReq });
       }
     });
 
@@ -907,6 +946,7 @@
       formDesc: formDesc,
       formRefUrl: formRefUrl,
       formImgBase64: formImgBase64,
+      minRequiredCount: minRequiredCount, // 送出最少需勾選數量
       items: items
     };
 
@@ -924,7 +964,7 @@
         alert(data.message);
         document.getElementById('adminFormId').value = data.formId;
         fetchFormList(data.formId);
-        closeModal('adminModal'); // 儲存成功後自動關閉後台 Modal
+        closeModal('adminModal');
       } else {
         alert("儲存失敗：" + data.message);
       }
