@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>學校運動教練輔導與管教規範檢核表</title>
+  <title>動態檢核表單系統</title>
   <style>
     * { box-sizing: border-box; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
       background-color: #f4f6f9;
       margin: 0;
-      padding: 20px 10px;
+      padding: 15px 10px;
       color: #333;
     }
     .container {
@@ -21,226 +21,46 @@
       border-radius: 12px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.08);
     }
-    h2 {
-      text-align: center;
-      color: #1a73e8;
-      margin-top: 0;
-      margin-bottom: 12px;
-    }
-    .header-desc {
-      font-size: 13px;
-      color: #5f6368;
-      line-height: 1.6;
-      background-color: #f8f9fa;
-      border: 1px solid #e8eaed;
-      padding: 12px 15px;
-      border-radius: 6px;
-      margin-bottom: 20px;
-    }
-    .section-card {
-      background: #fafafa;
-      border: 1px solid #e0e0e0;
-      border-radius: 8px;
-      padding: 18px 20px;
-      margin-bottom: 20px;
-    }
-    .section-title {
-      font-size: 16px;
-      font-weight: bold;
-      color: #1a73e8;
-      margin-top: 0;
-      margin-bottom: 8px;
-    }
-    .section-desc {
-      font-size: 13.5px;
-      color: #444;
-      margin-bottom: 12px;
-      line-height: 1.5;
-    }
-    .sub-category-title {
-      font-weight: bold;
-      color: #202124;
-      font-size: 15px;
-      margin-top: 14px;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-    }
-    .sub-category-title::before {
-      content: "▪";
-      color: #1a73e8;
-      font-size: 18px;
-      margin-right: 8px;
-    }
-    .example-box {
-      background-color: #f0f7ff;
-      border-left: 4px solid #1a73e8;
-      padding: 10px 14px;
-      font-size: 13px;
-      color: #155724;
-      margin-top: 10px;
-      margin-bottom: 12px;
-      border-radius: 0 4px 4px 0;
-      line-height: 1.6;
-    }
-    .example-box-title {
-      font-weight: bold;
-      color: #1a73e8;
-      margin-bottom: 4px;
-    }
-    .legal-explain-box {
-      background-color: #fff8e1;
-      border-left: 4px solid #f57c00;
-      padding: 10px 14px;
-      font-size: 13px;
-      color: #5d4037;
-      margin-top: 10px;
-      margin-bottom: 12px;
-      border-radius: 0 4px 4px 0;
-      line-height: 1.6;
-    }
-    .penalty-box {
-      background-color: #fce8e6;
-      border-left: 4px solid #d93025;
-      padding: 10px 14px;
-      font-size: 13px;
-      color: #a50e0e;
-      margin-top: 12px;
-      margin-bottom: 10px;
-      border-radius: 0 4px 4px 0;
-      line-height: 1.5;
-    }
-    .checkbox-item {
-      display: flex;
-      align-items: flex-start;
-      margin-bottom: 8px;
-      font-size: 14px;
-      line-height: 1.5;
-      cursor: pointer;
-    }
-    .checkbox-item.sub-item {
-      margin-left: 20px;
-      color: #444;
-    }
-    .checkbox-item input[type="checkbox"] {
-      width: 18px;
-      height: 18px;
-      margin-right: 10px;
-      margin-top: 2px;
-      cursor: pointer;
-      flex-shrink: 0;
-    }
-    .checkbox-item span {
-      flex: 1;
-    }
-    .input-group {
-      margin-bottom: 15px;
-    }
-    .input-group label {
-      display: block;
-      font-weight: bold;
-      margin-bottom: 5px;
-    }
-    .input-group input {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 15px;
-    }
-    .toolbar {
+    .top-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background-color: #e8f0fe;
-      padding: 12px 15px;
-      border-radius: 6px;
-      margin-bottom: 20px;
-      position: sticky;
-      top: 10px;
-      z-index: 100;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    .signature-container {
-      position: relative;
-      border: 2px dashed #1a73e8;
+      background: #1a73e8;
+      color: white;
+      padding: 10px 15px;
       border-radius: 8px;
-      background-color: #ffffff;
-      padding: 2px;
-      margin-top: 8px;
-      touch-action: none;
-      user-select: none;
-      -webkit-user-select: none;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 10px;
     }
-    canvas#signatureCanvas {
-      width: 100%;
-      height: 200px;
-      display: block;
-      touch-action: none;
-      cursor: crosshair;
-      background-color: #ffffff;
-      border-radius: 6px;
-    }
-    .clear-btn {
-      float: right;
-      margin-top: 8px;
-      background: #e0e0e0;
-      border: none;
+    .top-bar select {
       padding: 6px 12px;
       border-radius: 4px;
-      cursor: pointer;
-      font-size: 13px;
-    }
-    .form-btn-group {
-      display: flex;
-      gap: 12px;
-      margin-top: 25px;
-    }
-    .reset-all-btn {
-      flex: 1;
-      padding: 14px;
-      background-color: #f1f3f4;
-      color: #d93025;
-      border: 1px solid #dadce0;
-      border-radius: 6px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .reset-all-btn:hover { background-color: #fce8e6; }
-    .submit-btn {
-      flex: 2;
-      padding: 14px;
-      background-color: #34a853;
-      color: white;
       border: none;
-      border-radius: 6px;
-      font-size: 17px;
       font-weight: bold;
-      cursor: pointer;
-      transition: background 0.2s;
     }
-    .submit-btn:hover { background-color: #2d8e47; }
-    .submit-btn:disabled { background-color: #cccccc; cursor: not-allowed; }
+    .admin-btn {
+      background: #fbbc04;
+      color: #202124;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .admin-btn:hover { background: #f29900; }
 
-    /* 查詢專區樣式 */
     .query-card {
       background-color: #eef3fc;
       border: 1px solid #c2d7fa;
       border-radius: 8px;
-      padding: 15px 20px;
+      padding: 12px 18px;
       margin-bottom: 20px;
-    }
-    .query-card-title {
-      font-weight: bold;
-      color: #1a73e8;
-      font-size: 15px;
-      margin-bottom: 8px;
     }
     .query-input-group {
       display: flex;
       gap: 10px;
+      margin-top: 6px;
     }
     .query-input-group input {
       flex: 1;
@@ -257,316 +77,611 @@
       cursor: pointer;
       font-weight: bold;
     }
-    .query-btn:hover { background-color: #1557b0; }
-    .query-result { margin-top: 10px; font-size: 14px; }
 
-    .download-btn {
-      display: inline-block;
-      margin-top: 15px;
-      padding: 12px 24px;
-      background-color: #d93025;
-      color: white;
-      text-decoration: none;
+    h2 { text-align: center; color: #1a73e8; margin-top: 0; }
+    .header-desc {
+      font-size: 14px;
+      color: #5f6368;
+      line-height: 1.6;
+      background-color: #f8f9fa;
+      border: 1px solid #e8eaed;
+      padding: 12px 15px;
       border-radius: 6px;
-      font-size: 16px;
-      font-weight: bold;
-      transition: background 0.2s;
+      margin-bottom: 15px;
+      white-space: pre-wrap;
     }
-    .download-btn:hover { background-color: #b3261e; }
-    .file-id-box {
-      background: #e8f0fe;
-      padding: 12px;
+
+    .ref-link-box {
+      background: #f0f7ff;
+      border: 1px solid #c2d7fa;
+      padding: 8px 12px;
       border-radius: 6px;
-      font-family: monospace;
-      font-size: 24px;
-      font-weight: bold;
-      color: #1a73e8;
-      margin: 10px 0;
-      letter-spacing: 2px;
+      font-size: 13.5px;
+      margin-bottom: 15px;
+      word-break: break-all;
     }
-    .new-form-btn {
-      margin-top: 15px;
-      padding: 10px 20px;
-      background-color: #5f6368;
+    .ref-link-box a { color: #1a73e8; font-weight: bold; text-decoration: underline; }
+
+    .header-img-display {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      display: block;
+    }
+
+    .section-card {
+      background: #fafafa;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 18px 20px;
+      margin-bottom: 20px;
+    }
+    .checkbox-item {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 10px;
+      font-size: 15px;
+      line-height: 1.5;
+      cursor: pointer;
+    }
+    .checkbox-item input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      margin-right: 12px;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+    .item-desc-box {
+      background-color: #f0f7ff;
+      border-left: 4px solid #1a73e8;
+      padding: 8px 12px;
+      font-size: 13px;
+      color: #333;
+      margin-top: 4px;
+      margin-bottom: 10px;
+      margin-left: 32px;
+      border-radius: 0 4px 4px 0;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+    .item-img-display {
+      max-width: 280px;
+      max-height: 200px;
+      border-radius: 6px;
+      margin-top: 6px;
+      margin-bottom: 10px;
+      margin-left: 32px;
+      display: block;
+      border: 1px solid #ddd;
+    }
+
+    .input-group { margin-bottom: 15px; }
+    .input-group label { display: block; font-weight: bold; margin-bottom: 5px; }
+    .input-group input, .input-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
+
+    .class-info-group {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+    .class-info-item {
+      flex: 1;
+      min-width: 100px;
+    }
+    .class-info-item label { display: block; font-weight: bold; margin-bottom: 5px; }
+    .class-info-item select, .class-info-item input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    .signature-container {
+      border: 2px dashed #1a73e8;
+      border-radius: 8px;
+      background-color: #ffffff;
+      margin-top: 8px;
+    }
+    /* [修改處 1] 簽名框高度增加 10% (由 180px 增至 198px) */
+    canvas#signatureCanvas {
+      width: 100%;
+      height: 198px;
+      display: block;
+      cursor: crosshair;
+    }
+    .clear-btn {
+      float: right;
+      margin-top: 6px;
+      background: #e0e0e0;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 14px;
+      background-color: #34a853;
       color: white;
       border: none;
       border-radius: 6px;
-      font-size: 14px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+    .submit-btn:hover { background-color: #2d8e47; }
+    .submit-btn:disabled { background-color: #cccccc; cursor: not-allowed; }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top:0; left:0; right:0; bottom:0;
+      background: rgba(0,0,0,0.6);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      padding: 10px;
+    }
+    .modal-card {
+      background: white;
+      border-radius: 10px;
+      padding: 25px;
+      width: 100%;
+      max-width: 750px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .admin-item-row {
+      background: #f8f9fa;
+      border: 1px solid #ddd;
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      position: relative;
+    }
+    .del-item-btn {
+      float: right;
+      background: #d93025;
+      color: white;
+      border: none;
+      padding: 4px 8px;
+      border-radius: 4px;
       cursor: pointer;
     }
-    #loadingOverlay {
+    .img-preview {
+      max-width: 150px;
+      max-height: 100px;
+      border-radius: 4px;
+      margin-top: 6px;
       display: none;
-      text-align: center;
-      margin-top: 15px;
-      color: #1a73e8;
+      border: 1px solid #ccc;
+    }
+
+    .required-badge {
+      color: #d93025;
+      font-size: 12px;
+      border: 1px solid #d93025;
+      border-radius: 3px;
+      padding: 1px 5px;
+      margin-left: 6px;
       font-weight: bold;
     }
-    #successBox {
-      display: none;
-      text-align: center;
-      padding: 30px;
+
+    #loadingOverlay { display: none; text-align: center; margin-top: 15px; color: #1a73e8; font-weight: bold; }
+    #successBox { display: none; text-align: center; padding: 20px; }
+    .file-id-box {
+      background: #e8f0fe;
+      padding: 10px;
+      font-size: 24px;
+      font-weight: bold;
+      color: #1a73e8;
+      border-radius: 6px;
+      margin: 10px 0;
     }
-    #successBox h3 { color: #34a853; font-size: 22px; }
-    .item-desc-text {
-      font-size: 12.5px;
-      color: #666;
-      margin-top: 2px;
-      margin-bottom: 6px;
-      margin-left: 28px;
-      line-height: 1.4;
-    }
-    @media (max-width: 600px) {
-      .form-btn-group { flex-direction: column-reverse; }
-      .reset-all-btn, .submit-btn { width: 100%; }
-      .query-input-group { flex-direction: column; }
+    .download-btn {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 12px 24px;
+      background: #d93025;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <!-- 重複下載查詢區塊 -->
-  <div class="query-card">
-    <div class="query-card-title">🔍 已填寫者檔案下載 / 重複查詢</div>
-    <div class="query-input-group">
-      <input type="text" id="queryFileId" placeholder="請輸入您的 6 位數檔案 ID（例如：849201）">
-      <button type="button" class="query-btn" id="queryBtn">查詢 PDF 檔</button>
+  <!-- 頂部功能列 -->
+  <div class="top-bar">
+    <div>
+      <span>📋 切換表單：</span>
+      <select id="formSelect" onchange="switchForm()"></select>
     </div>
-    <div id="queryResult" class="query-result"></div>
+    <button class="admin-btn" onclick="openAdminLogin()">🔐 管理者後台設定</button>
   </div>
 
+  <!-- 重複下載查詢區塊 -->
+  <div class="query-card">
+    <div style="font-weight: bold; color: #1a73e8;">🔍 查詢已填寫表單 (下載 PDF)</div>
+    <div class="query-input-group">
+      <input type="text" id="queryFileId" placeholder="請輸入 6 位數檔案 ID (例如：849201)">
+      <button type="button" class="query-btn" onclick="queryPDF()">查詢</button>
+    </div>
+    <div id="queryResult"></div>
+  </div>
+
+  <!-- 前台填表畫面 -->
   <form id="mainForm">
-    <h2>學校運動教練輔導與管教規範檢核表</h2>
+    <h2 id="displayTitle">載入中...</h2>
+    <div class="header-desc" id="displayDesc">正在讀取表單設定內容...</div>
     
-    <div class="header-desc">
-      本檢核表依據《學校訂定教師輔導與管教學生辦法注意事項》、《高級中等以下學校外聘運動教練進（運）用及不適任通報注意事項》、校園霸凌防制準則、刑法及兒童及少年福利與權益保障法（兒少權法第49條）等規定整編，供學校運動教練（含本校外聘教練、社團老師）於教學與訓練時據以遵循與自我檢核。
+    <!-- 標題參考網址與照片展示區 -->
+    <div id="displayRefUrl" class="ref-link-box" style="display:none;"></div>
+    <img id="displayImg" class="header-img-display" style="display:none;">
+
+    <!-- [修改處 2] 個人基本資料渲染區（改為可後台自訂欄位與名稱） -->
+    <div id="userFieldsContainer"></div>
+
+    <!-- 班級使用版：年級（動態生成選項）、班級、座號欄位 -->
+    <div class="class-info-group">
+      <div class="class-info-item">
+        <label>年級 <span style="color:red">*</span></label>
+        <select id="userGrade" required>
+          <option value="">請選擇年級</option>
+        </select>
+      </div>
+
+      <div class="class-info-item">
+        <label>班級 <span style="color:red">*</span></label>
+        <select id="userClass" required>
+          <option value="">請選擇班級</option>
+          <option value="一班">一班</option>
+          <option value="二班">二班</option>
+          <option value="三班">三班</option>
+          <option value="四班">四班</option>
+        </select>
+      </div>
+
+      <div class="class-info-item">
+        <label>座號 <span style="color:red">*</span></label>
+        <input type="number" id="userSeat" min="1" max="99" placeholder="例如: 1" required>
+      </div>
     </div>
 
-    <!-- 基本資料 -->
+    <!-- 動態檢核題目渲染區 -->
+    <div id="checklistContainer"></div>
+
+    <!-- 手寫簽名（簽名標題由後台自訂，簽名框高度增加 10%） -->
     <div class="input-group">
-      <label>填寫人姓名（教練/老師） <span style="color:red">*</span></label>
-      <input type="text" id="userName" placeholder="請輸入您的姓名" required>
-    </div>
-    <div class="input-group">
-      <label>服務單位 / 學校與運動隊別</label>
-      <input type="text" id="schoolUnit" placeholder="例如：XX國小 XX隊教練/老師">
-    </div>
-
-    <!-- 進度條列 -->
-    <div class="toolbar">
-      <span id="checkProgress" style="font-weight: bold;">條文確認進度：計算中...</span>
-    </div>
-
-    <!-- 大分類 一、核心管教原則（平等與比例原則） -->
-    <div class="section-card">
-      <div class="section-title">一、核心管教原則（平等與比例原則） <span style="color:red">*</span></div>
-      
-      <div class="sub-category-title">1. 平等原則（注意事項第十一條）</div>
-      <div class="section-desc"><b>法條規範：</b>教師輔導與管教學生，非有正當理由，不得為差別待遇。</div>
-      
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>對待團隊中所有選手（無論是主力球員、替補球員、資深學長或新生）一視同仁。</span></label>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>訂定球隊或訓練場地之紀律與獎懲標準時，一體適用，不因選手之性別、家長背景、學業成績或運動天賦而有不同標準。</span></label>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>若因身心狀況、特教需求或特殊醫療考量需調整訓練強度或管理方式，須具備客觀、正當之教育或醫學理由，並留下紀錄。</span></label>
-
-      <div class="example-box">
-        <div class="example-box-title">💡 運動訓練實例說明：</div>
-        • <b>違法/不當差別待遇：</b>球隊主力球員因技術好、常拿冠軍，練習遲到時教練選擇睜一隻眼閉一隻眼；但普通替補球員遲到，教練卻施予嚴厲的交互蹲跳處罰。此即違反平等原則。<br>
-        • <b>合法正當理由調整：</b>隊上某選手領有身心障礙證明，因體能狀況無法負荷全體標準的長跑訓練，教練基於醫師建議與個案特教需求，調整其訓練菜單為較短距離的緩步走。這屬於「有正當理由的合理差別對待」。
-      </div>
-
-      <div class="sub-category-title" style="margin-top: 18px;">2. 比例原則（注意事項第十二條）</div>
-      <div class="section-desc">
-        <b>法條規範：</b>教師採行之輔導與管教措施，應與學生違規行為之情節輕重相當，並依下列原則為之：<br>
-        (1) 採取之措施應有助於目的之達成。<br>
-        (2) 有多種同樣能達成目的之措施時，應選擇對學生權益損害較少者。<br>
-        (3) 採取之措施所造成之損害不得與欲達成目的之利益顯失均衡。
-      </div>
-
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>處罰或管教措施必須與違規情節成正比（例如：選手忘記帶水壺，不應直接處罰半小時交互蹲跳）。</span></label>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>優先採用能達成教育導正目的、且對學生身心損害最小的方法。</span></label>
-
-      <div class="example-box">
-        <div class="example-box-title">💡 運動訓練實例說明：</div>
-        • <b>違法/違反比例原則：</b>選手在練習時不小心打破一顆排球，教練為了懲戒，直接罰全隊跑操場 50 圈並禁賽一個月。此處罰相較於打破球的輕微過失，造成全隊過度身心負擔與受教權受損，顯失均衡且違反比例原則。<br>
-        • <b>合法適當措施：</b>選手練習態度散漫、屢勸不聽，教練採取「暫時隔離反省（請其在場邊冷靜 5 分鐘後再歸隊）」，這有助於讓選手冷靜，且對其權益損害較少，符合比例原則。
-      </div>
-    </div>
-
-    <!-- 大分類 二、適當之正向管教措施 -->
-    <div class="section-card">
-      <div class="section-title">二、適當之正向管教措施（合法引導參考） <span style="color:red">*</span></div>
-      <div class="section-desc">教練於指導選手、鍛鍊體能及管理團隊時，應秉持教育專業與愛心，得採取下列適當之正向管教措施：</div>
-      
-      <div class="sub-category-title">一般引導與勸戒</div>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>口頭勸戒與說服教育</span></label>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>調整座位或訓練分組</span></label>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>正向鼓勵、獎勵與建設性回饋</span></label>
-
-      <div class="sub-category-title">訓練紀律與行為導正措施</div>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>訓練場域中適當之暫時隔離反省（例如留在安全區域特定位置冷靜）</span></label>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>留置學生於課後或訓練後進行補救/加強訓練（應注意學生交通安全並事先通知家長）</span></label>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>要求合理之勞動服務（如清潔運動場地、整理器材，應符合比例原則）</span></label>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>暫時保管妨害訓練或違禁物品（應妥善保管並於適時歸還）</span></label>
-    </div>
-
-    <!-- 大分類 三、運動教練違法處罰措施與不適任樣態 -->
-    <div class="section-card">
-      <div class="section-title">三、運動教練違法處罰措施與不適任樣態（含相關罰責及通報規定） <span style="color:red">*</span></div>
-      
-      <div class="sub-category-title">1. 體罰與身心暴力行為</div>
-      <div class="section-desc">指教練對學生身體施加強制力，或命令他人施加強制力之行為：</div>
-      
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>親自施加強制力之體罰：毆打、鞭打、打耳光、打手心、打臀部、責打身體其他部位等。</span></label>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>命令學生自殘身體之體罰：命令學生自打耳光等。</span></label>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>命令第三者施加強制力之體罰：命令學生互打耳光等。</span></label>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>命令學生採取特定身體動作之體罰（運動訓練中應特別避免）：交互蹲跳、半蹲、罰跪、蛙跳、兔子跳、學鴨子走路、提水桶過肩、單腳支撐地面、上下樓梯或其他類似之身體動作等。</span></label>
-
-      <div class="penalty-box">
-        <b>【相關罰責與不適任規範】</b><br>
-        • <b>外聘教練注意事項第5點第13款、第14款：</b>體罰或霸凌學生，造成身心嚴重侵害，不得進（運）用，或應終止契約且終身不得擔任外聘教練；造成身心侵害有終止契約必要者，經委員會議決1年至4年不得擔任。<br>
-        • <b>教師法 / 專任運動教練法規：</b>視情節輕重予以解聘、不續聘、停聘，並管制1年至終身不得聘任。
-      </div>
-
-      <div class="sub-category-title" style="margin-top: 18px;">2. 霸凌行為</div>
-      <div class="section-desc">指符合「校園霸凌防制準則」規定之各類霸凌行為：</div>
-      
-      <div class="sub-category-title" style="margin-left: 10px;">校園霸凌樣態</div>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>肢體霸凌：實體之肢體攻擊、推擠、施暴等。</span></label>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>言語霸凌：透過語言、言詞辱罵、嘲弄、恐嚇或威脅等。</span></label>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>關係/社交霸凌：惡意排擠、散播謠言、孤立或破壞團隊人際關係。</span></label>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>網路霸凌：透過網路、社群媒體、通訊軟體等散布私密照、毀謗、侮辱或騷擾。</span></label>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>性霸凌：與性或性別有關之霸凌，透過語言、肢體或其他暴力貶抑、攻擊或騷擾他人。</span></label>
-
-      <div class="penalty-box">
-        <b>【相關罰責與不適任規範】</b><br>
-        經調查確認有霸凌行為且情節重大致身心嚴重侵害，屬不得進（運）用或應終止契約並管制之列。
-      </div>
-
-      <div class="sub-category-title" style="margin-top: 18px;">3. 不當管教</div>
-      <div class="section-desc">指教練採取之管教措施違反輔導管教相關法令規定（含違反比例原則或平等原則），而使學生身心受到侵害之行為：</div>
-      
-      <div class="sub-category-title" style="margin-left: 10px;">身心受侵害之管教措施</div>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>站立反省逾時：每次超過一堂課，且每日累計超過兩小時。</span></label>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>對學生罰錢</span></label>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>非暫時保管之沒收或沒入學生物品</span></label>
-
-      <div class="penalty-box">
-        <b>【相關罰責】</b><br>
-        <b>教師成績考核辦法 / 相關管理辦法：</b>依情節輕重予以申誡、記過、大過，致身心嚴重受創者依法解聘。
-      </div>
-
-      <div class="sub-category-title" style="margin-top: 18px;">4. 運動教練特有違法與不適任樣態（含運動禁藥及重大法規違反）</div>
-      
-      <div class="sub-category-title" style="margin-left: 10px;">運動禁藥違規（外聘教練注意事項第5點第15款、第16款）</div>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>授意或唆使選手使用運動禁藥，經權責機構團體查證屬實。</span></label>
-      <div class="penalty-box">
-        <b>【罰責】</b> 應終止契約，並經委員會議決 終身 或 1年至4年 不得擔任外聘教練。
-      </div>
-
-      <div class="sub-category-title" style="margin-left: 10px; margin-top: 14px;">涉及刑事法律之行為：</div>
-      
-      <div class="legal-explain-box">
-        <b>💡 刑事罰責用語白話解析（教練必須了解的法律衝擊）：</b><br>
-        • <b>有期徒刑：</b>指剝奪人身自由並入監服刑。一旦被判刑（即使獲得緩刑），在教育與運動界通常會面臨解聘、終止契約且終身或數年不得任用，教練生涯將徹底毀於一旦。<br>
-        • <b>拘役：</b>短期限制人身自由的刑罰（1日至59日），會留下刑事前科紀錄。<br>
-        • <b>罰金：</b>法院判決應繳納給國庫的金錢懲罰，同樣會寫入個人的良民證（警察刑事紀錄證明）中。
-      </div>
-
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span><b>公然侮辱罪、誹謗罪（刑法第309條、第310條）：</b>於訓練場地或公開場合以言語貶損學生人格名譽。</span></label>
-      <div class="item-desc-text">
-        └ <b>法定刑責（白話說明）：</b>處拘役、罰金或1年以下有期徒刑。<br>
-        └ <b>對生涯實質影響：</b>易科罰金或易處拘役看似不用坐牢，但會留下刑事前科，學校可依規定予以解聘或不續聘。
-      </div>
-
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span><b>強制罪（刑法第304條）：</b>以強暴、脅迫使學生行無義務之事。</span></label>
-      <div class="item-desc-text">
-        └ <b>法定刑責（白話說明）：</b>處3年以下有期徒刑、拘役或9千元以下罰金。<br>
-        └ <b>對生涯實質影響：</b>屬於較重的妨害自由罪名，一旦被判刑，幾乎確定會失去教練職位，且面臨長達數年的業界禁賽或不得任用處分。
-      </div>
-
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span><b>傷害罪 / 過失傷害罪（刑法第277條、第284條）：</b>因過當訓練或體罰致學生受傷（如骨折、瘀青）。</span></label>
-      <div class="item-desc-text">
-        └ <b>法定刑責（白話說明）：</b>普通傷害處5年以下有期徒刑、拘役或罰金；過失傷害處1年以下有期徒刑、拘役或罰金。<br>
-        └ <b>對生涯實質影響：</b>刑度最高可達 5 年。只要學生驗傷提告且罪名成立，教練將面臨嚴重的監禁風險與民事巨額賠償，職業生涯徹底終結。
-      </div>
-
-      <div class="sub-category-title" style="margin-left: 10px; margin-top: 14px;">違反專業倫理與行政法規：</div>
-      
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span><b>違反《性別平等教育法》：</b>涉及性侵害、性騷擾、性霸凌或違法處理相關事件致學生身心受創。➔ 依法解聘/終止契約，終身或1年至4年不得聘任/擔任外聘教練。</span></label>
-      
-      <div class="sub-category-title" style="margin-left: 10px; margin-top: 10px;">違反《兒童及少年福利與權益保障法》（兒少權法第49條各款禁止規定）：</div>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>第1款：吊打、毆打或使兒童少年身心受到其他虐待或不當管教。</span></label>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>第3款：妨害兒童少年身心健康或發展之行為（如不當控制體重、過度飢餓或不當脫水）。</span></label>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>第7款：供應兒童少年菸品、酒品、檳榔、毒品等。</span></label>
-      <label class="checkbox-item sub-item"><input type="checkbox" class="rule-check"> <span>第9款：其他對兒童少年犯罪或不正當行為。</span></label>
-
-      <div class="penalty-box">
-        <b>【兒少權法第49條罰責】</b><br>
-        依 <b>兒少權法第97條</b> 規定：處新臺幣 6萬元以上 60萬元以下 罰鍰，並得公布姓名或名稱。情節嚴重者，依外聘教練注意事項或相關法規予以終止契約、解聘，並管制1年至終身不得擔任教練。
-      </div>
-    </div>
-
-    <!-- 大分類 四、通報與查詢義務 -->
-    <div class="section-card">
-      <div class="section-title">四、通報與查詢義務（外聘教練注意事項重點） <span style="color:red">*</span></div>
-      
-      <label class="checkbox-item"><input type="checkbox" class="rule-check"> <span><b>進（運）用前查詢義務：</b>學校或家長會進（運）用外聘教練前，應由學校至「各教育場域不適任人員通報及查詢系統」查詢有無不得進用之情事。</span></label>
-      <label class="checkbox-item"><input type="checkbox" class="rule-check"> <span><b>事件發生後通報義務：</b>教練若有違法或不適任情形（如體罰、霸凌嚴重侵害身心、授意使用禁藥、違反兒少權法或性平法等），學校應予終止契約，並於書面通知送達後 7日內 至通報系統登載通報。</span></label>
-    </div>
-
-    <!-- 手寫簽名欄 (黑色墨水) -->
-    <div class="input-group">
-      <label>親筆簽名確認（請在此方框內手寫簽名） <span style="color:red">*</span></label>
+      <!-- [修改處 3] 動態簽名標題 -->
+      <label id="displaySignatureLabel">親筆簽名確認 <span style="color:red">*</span></label>
       <div class="signature-container">
-        <canvas id="signatureCanvas" width="700" height="200"></canvas>
+        <!-- [修改處 4] 畫布高度從 180 提高為 198 (增加10%) -->
+        <canvas id="signatureCanvas" width="700" height="198"></canvas>
       </div>
-      <button type="button" class="clear-btn" id="clearBtn">清除重簽</button>
+      <button type="button" class="clear-btn" onclick="clearSignature()">清除重簽</button>
       <div style="clear: both;"></div>
     </div>
 
-    <!-- 表單底部按鈕組 -->
-    <div class="form-btn-group">
-      <button type="button" class="reset-all-btn" id="resetAllBtn">清除所有表單資料</button>
-      <button type="submit" class="submit-btn" id="submitBtn">我已完全了解並確認以上規範，送出表單</button>
-    </div>
-    <div id="loadingOverlay">資料上傳與 PDF 檔生成中，請稍候...</div>
+    <button type="submit" class="submit-btn" id="submitBtn">確認送出表單並生成 PDF</button>
+    <div id="loadingOverlay">資料處理中，請稍候...</div>
   </form>
 
-  <!-- 送出成功結果畫面 -->
+  <!-- 送出成功結果 -->
   <div id="successBox">
-    <h3>🎉 檢核表與簽名已成功提交！</h3>
-    <p>您的確認紀錄與親筆簽名已寫入系統並生成 PDF 檔案。</p>
-    <div>請保存您的<b>專屬 6 位數檔案 ID</b>，日後可憑此 ID 於本頁面重複下載：</div>
+    <h3 style="color:#34a853;">🎉 表單與簽名已成功提交！</h3>
+    <p>請保存您的專屬 6 位數檔案 ID：</p>
     <div class="file-id-box" id="resFileId">000000</div>
-    <a href="#" target="_blank" class="download-btn" id="resDownloadBtn">📄 立即下載 PDF 檔 (.pdf)</a>
+    <a href="#" target="_blank" class="download-btn" id="resDownloadBtn">📄 立即下載 PDF 檔</a>
     <br><br>
-    <button type="button" class="new-form-btn" id="newFormBtn">填寫新表單</button>
+    <button type="button" onclick="location.reload()" style="padding:8px 16px; cursor:pointer;">填寫新表單</button>
+  </div>
+</div>
+
+<!-- 管理者登入 Modal -->
+<div class="modal-overlay" id="loginModal">
+  <div class="modal-card" style="max-width: 400px;">
+    <h3>🔐 管理者登入</h3>
+    <div class="input-group">
+      <label>請輸入管理者密碼：</label>
+      <input type="password" id="adminPasswordInput" placeholder="請輸入密碼">
+    </div>
+    <button class="query-btn" style="width:100%;" onclick="submitAdminLogin()">登入後台</button>
+    <button style="width:100%; margin-top:8px;" onclick="closeModal('loginModal')">取消</button>
+  </div>
+</div>
+
+<!-- 管理者後台設定 Modal -->
+<div class="modal-overlay" id="adminModal">
+  <div class="modal-card">
+    <h3>⚙️ 管理者表單設置後台</h3>
+    <hr>
+    
+    <div class="input-group">
+      <label>選擇要編輯的表單：</label>
+      <select id="adminFormSelect" onchange="loadFormToAdmin()"></select>
+      <button type="button" onclick="createNewFormInAdmin()" style="margin-top:5px;">➕ 新增全新表單</button>
+    </div>
+
+    <div class="input-group">
+      <label>表單編號 (ID)：</label>
+      <input type="text" id="adminFormId" readonly placeholder="系統自動生成">
+    </div>
+
+    <div class="input-group">
+      <label>檢核主題 (標題)：</label>
+      <input type="text" id="adminFormTitle" placeholder="請輸入表單主題">
+    </div>
+
+    <div class="input-group">
+      <label>標題說明欄位 (表單說明)：</label>
+      <textarea id="adminFormDesc" style="width:100%; height:80px; border-radius:6px; padding:8px;" placeholder="請輸入說明條文內容..."></textarea>
+    </div>
+
+    <!-- [修改處 5] 後台新增「填表人個人資料欄位設定」專區（可自由增刪與修改標題） -->
+    <div style="background:#f8f9fa; padding:12px; border-radius:6px; border:1px solid #ddd; margin-bottom:15px;">
+      <h4 style="margin-top:0; color:#1a73e8;">👤 填表人個人資料欄位設定 (可增刪欄位與自訂標題)</h4>
+      <div id="adminUserFieldsContainer"></div>
+      <button type="button" onclick="addAdminUserFieldRow()" style="padding:6px 12px; background:#1a73e8; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold; margin-top:5px;">➕ 新增個人資料欄位</button>
+    </div>
+
+    <!-- [修改處 6] 後台新增「親筆簽名欄位標題」自訂設定 -->
+    <div style="background:#f8f9fa; padding:12px; border-radius:6px; border:1px solid #ddd; margin-bottom:15px;">
+      <h4 style="margin-top:0; color:#1a73e8;">✍️ 親筆簽名欄位標題設定</h4>
+      <label>簽名欄位提示文字 (例如：家長簽名、本人親筆簽名)：</label>
+      <input type="text" id="adminSignatureLabel" placeholder="預設：親筆簽名確認" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px; margin-top:4px;">
+    </div>
+
+    <div class="input-group" style="background:#f8f9fa; padding:10px; border-radius:6px; border:1px solid #ddd;">
+      <label style="color:#1a73e8;">自訂年級下拉選單 (以逗號分隔，如：一年,二年,三年 ； 預設為 一年,二年,三年,四年,五年,六年)：</label>
+      <input type="text" id="adminGradeOptions" placeholder="例如：一年,二年,三年 或 幼兒園,一年">
+    </div>
+
+    <div class="input-group" style="background:#eef3fc; padding:10px; border-radius:6px; border:1px solid #c2d7fa;">
+      <label style="color:#1a73e8;">全表單最少需勾選數量 (0 表不限制數量；若項目均未設必選，例如同意/不同意二選一可填 1)：</label>
+      <input type="number" id="adminMinRequiredCount" min="0" value="0" placeholder="0">
+    </div>
+
+    <div class="input-group">
+      <label>檢核主題參考網址 (選擇性)：</label>
+      <input type="url" id="adminFormRefUrl" placeholder="例如：https://law.moj.gov.tw/...">
+    </div>
+
+    <div class="input-group">
+      <label>檢核主題照片附件 (限制 1MB 以內，選擇性)：</label>
+      <input type="file" id="adminFormImgFile" accept="image/*" onchange="handleImageUpload(this, 'adminFormImgPreview', 'adminFormImgBase64')">
+      <input type="hidden" id="adminFormImgBase64">
+      <img id="adminFormImgPreview" class="img-preview">
+      <button type="button" onclick="clearImageUpload('adminFormImgFile', 'adminFormImgPreview', 'adminFormImgBase64')" style="display:none;" id="clearHeaderImgBtn">清除照片</button>
+    </div>
+
+    <hr style="margin:20px 0;">
+
+    <h4>檢核項目設定 (可自由增刪)</h4>
+    <div id="adminItemsContainer"></div>
+    <button type="button" onclick="addAdminItemRow()" style="padding:8px 14px; background:#1a73e8; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">➕ 新增檢核項目</button>
+
+    <br><br>
+    <div id="adminFormUrlBox" style="background:#e8f0fe; padding:10px; border-radius:6px; font-size:13px; display:none; word-break:break-all;"></div>
+    <br>
+
+    <button type="button" class="submit-btn" id="saveAdminFormBtn" onclick="saveAdminFormConfig()">💾 儲存表單並自動建立試算表工作表</button>
+    <button type="button" style="width:100%; margin-top:8px; padding:10px;" onclick="closeModal('adminModal')">關閉後台</button>
   </div>
 </div>
 
 <script>
-  // 請替換為您重新部署後的 Web App URL
-  const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzQNmItGYtVDoPUHltTwCCvPyvYpY1j6drT6ahf8g-7Hq48rc33NYOZZ-hzvVAjzvmh/exec";
+  // 保留您的 Apps Script Web App URL
+  const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwKeyNxDR-u3y1-s4aP2zbwvDH-gfSI2Xs1EOT7W82O5afKhRQKOaNczKpR9g8SCRG7/exec";
 
-  const checkboxes = document.querySelectorAll('.rule-check');
-  const checkProgress = document.getElementById('checkProgress');
-  const totalCount = checkboxes.length;
+  let currentFormId = "";
+  let currentFormConfig = null;
+  let adminPasswordToken = "";
 
-  function updateCount() {
-    const checkedCount = document.querySelectorAll('.rule-check:checked').length;
-    checkProgress.innerText = `條文確認進度：${checkedCount} / ${totalCount} 項`;
-    checkProgress.style.color = (checkedCount === totalCount) ? '#34a853' : '#d93025';
+  // 網頁載入初始化
+  window.addEventListener('load', () => {
+    initCanvas();
+    const urlParams = new URLSearchParams(window.location.search);
+    const formIdFromUrl = urlParams.get('formId');
+    fetchFormList(formIdFromUrl);
+  });
+
+  // 圖片上傳壓縮與處理引擎 (限制 1MB 以內，並自動縮放瘦身)
+  function handleImageUpload(fileInput, previewImgId, base64HiddenId) {
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    if (file.size > 1048576) {
+      alert("⚠️ 照片附件檔案大小不能超過 1MB！請選擇較小的圖片。");
+      fileInput.value = "";
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = new Image();
+      img.onload = function() {
+        const canvas = document.createElement('canvas');
+        const maxWidth = 500;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.6);
+
+        document.getElementById(base64HiddenId).value = compressedBase64;
+        const preview = document.getElementById(previewImgId);
+        preview.src = compressedBase64;
+        preview.style.display = 'block';
+
+        const clearBtn = previewImgId === 'adminFormImgPreview' ? document.getElementById('clearHeaderImgBtn') : null;
+        if (clearBtn) clearBtn.style.display = 'inline-block';
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
   }
 
-  checkboxes.forEach(box => box.addEventListener('change', updateCount));
+  function clearImageUpload(fileInputId, previewImgId, base64HiddenId) {
+    document.getElementById(fileInputId).value = "";
+    document.getElementById(base64HiddenId).value = "";
+    const preview = document.getElementById(previewImgId);
+    preview.src = "";
+    preview.style.display = 'none';
+
+    if (fileInputId === 'adminFormImgFile') {
+      document.getElementById('clearHeaderImgBtn').style.display = 'none';
+    }
+  }
+
+  // 抓取所有表單選單
+  function fetchFormList(targetFormId) {
+    fetch(GAS_WEB_APP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'getFormList' })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.result === 'success' && data.list.length > 0) {
+        const select = document.getElementById('formSelect');
+        const adminSelect = document.getElementById('adminFormSelect');
+        select.innerHTML = "";
+        adminSelect.innerHTML = "<option value=''>-- 選擇表單進行編輯 --</option>";
+
+        data.list.forEach(item => {
+          select.innerHTML += `<option value="${item.formId}">${item.formTitle}</option>`;
+          adminSelect.innerHTML += `<option value="${item.formId}">${item.formTitle}</option>`;
+        });
+
+        currentFormId = targetFormId || data.list[0].formId;
+        select.value = currentFormId;
+        loadFormConfig(currentFormId);
+      } else {
+        document.getElementById('displayTitle').innerText = "尚未建立任何表單";
+        document.getElementById('displayDesc').innerText = "請點選右上角「管理者後台設定」建立第一份表單。";
+      }
+    });
+  }
+
+  // 切換選單表單
+  function switchForm() {
+    currentFormId = document.getElementById('formSelect').value;
+    const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?formId=' + currentFormId;
+    window.history.pushState({path:newUrl}, '', newUrl);
+    loadFormConfig(currentFormId);
+  }
+
+  // 載入特定表單設定並渲染前台畫面
+  function loadFormConfig(formId) {
+    fetch(GAS_WEB_APP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'getFormConfig', formId: formId })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.result === 'success') {
+        currentFormConfig = data;
+        document.getElementById('displayTitle').innerText = data.formTitle;
+        document.getElementById('displayDesc').innerText = data.formDesc || "";
+
+        // [修改處 7] 動態渲染填表人個人資料欄位
+        const ufContainer = document.getElementById('userFieldsContainer');
+        ufContainer.innerHTML = "";
+        const uFields = data.userFields || [{ label: "學生姓名", required: true }];
+        uFields.forEach(uf => {
+          const reqStar = uf.required ? '<span style="color:red">*</span>' : '';
+          const reqAttr = uf.required ? 'required' : '';
+          ufContainer.innerHTML += `
+            <div class="input-group">
+              <label>${uf.label} ${reqStar}</label>
+              <input type="text" class="user-field-input" data-label="${uf.label}" data-required="${uf.required}" placeholder="請輸入${uf.label}" ${reqAttr}>
+            </div>
+          `;
+        });
+
+        // [修改處 8] 動態渲染簽名欄位標題
+        const sigLabel = data.signatureLabel || "親筆簽名確認";
+        document.getElementById('displaySignatureLabel').innerHTML = `${sigLabel} <span style="color:red">*</span>`;
+
+        // 動態生成年級下拉選單選項
+        const gradeSelect = document.getElementById('userGrade');
+        gradeSelect.innerHTML = '<option value="">請選擇年級</option>';
+        const rawGradeStr = data.gradeOptions || "一年,二年,三年,四年,五年,六年";
+        const gradeList = rawGradeStr.split(/[,，]/).map(s => s.trim()).filter(Boolean);
+        gradeList.forEach(g => {
+          gradeSelect.innerHTML += `<option value="${g}">${g}</option>`;
+        });
+
+        const refUrlBox = document.getElementById('displayRefUrl');
+        if (data.formRefUrl) {
+          refUrlBox.style.display = 'block';
+          refUrlBox.innerHTML = `🔗 <b>參考網址：</b><a href="${data.formRefUrl}" target="_blank">${data.formRefUrl}</a>`;
+        } else {
+          refUrlBox.style.display = 'none';
+        }
+
+        const headerImg = document.getElementById('displayImg');
+        if (data.formImgBase64) {
+          headerImg.src = data.formImgBase64;
+          headerImg.style.display = 'block';
+        } else {
+          headerImg.style.display = 'none';
+        }
+
+        const container = document.getElementById('checklistContainer');
+        container.innerHTML = "";
+
+        if (data.items && data.items.length > 0) {
+          const card = document.createElement('div');
+          card.className = "section-card";
+
+          data.items.forEach((item, index) => {
+            const requiredHtml = item.required ? `<span class="required-badge">必選</span>` : "";
+            let html = `
+              <label class="checkbox-item">
+                <input type="checkbox" class="rule-check" data-index="${index}">
+                <span><b>${index + 1}. ${item.title}</b> ${requiredHtml}</span>
+              </label>
+            `;
+            if (item.desc) {
+              html += `<div class="item-desc-box">${item.desc}</div>`;
+            }
+            if (item.refUrl) {
+              html += `<div class="item-desc-box" style="background:#eef3fc;">🔗 <b>參考網址：</b><a href="${item.refUrl}" target="_blank" style="color:#1a73e8; font-weight:bold;">${item.refUrl}</a></div>`;
+            }
+            if (item.imgBase64) {
+              html += `<img src="${item.imgBase64}" class="item-img-display">`;
+            }
+            card.innerHTML += html;
+          });
+          container.appendChild(card);
+        }
+      }
+    });
+  }
 
   // 手寫簽名引擎
   const canvas = document.getElementById('signatureCanvas');
   const ctx = canvas.getContext('2d');
-  let isDrawing = false;
-  let hasSigned = false;
-  let lastX = 0;
-  let lastY = 0;
+  let isDrawing = false, hasSigned = false, lastX = 0, lastY = 0;
 
   function initCanvas() {
     ctx.fillStyle = '#ffffff';
@@ -574,187 +689,161 @@
     ctx.strokeStyle = '#000000';
     ctx.lineWidth = 3;
     ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
   }
 
   function getCanvasCoords(e) {
     const rect = canvas.getBoundingClientRect();
-    let clientX = e.clientX;
-    let clientY = e.clientY;
-
+    let clientX = e.clientX, clientY = e.clientY;
     if (e.touches && e.touches.length > 0) {
-      clientX = e.touches[0].clientX;
-      clientY = e.touches[0].clientY;
-    } else if (e.changedTouches && e.changedTouches.length > 0) {
-      clientX = e.changedTouches[0].clientX;
-      clientY = e.changedTouches[0].clientY;
+      clientX = e.touches[0].clientX; clientY = e.touches[0].clientY;
     }
-
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
-
-    return {
-      x: (clientX - rect.left) * scaleX,
-      y: (clientY - rect.top) * scaleY
-    };
+    return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
   }
 
   function startDrawing(e) {
-    e.preventDefault();
-    isDrawing = true;
-    const pos = getCanvasCoords(e);
-    lastX = pos.x;
-    lastY = pos.y;
-
-    ctx.beginPath();
-    ctx.arc(lastX, lastY, 1.5, 0, Math.PI * 2);
-    ctx.fillStyle = '#000000';
-    ctx.fill();
-    hasSigned = true;
+    e.preventDefault(); isDrawing = true;
+    const pos = getCanvasCoords(e); lastX = pos.x; lastY = pos.y;
+    ctx.beginPath(); ctx.arc(lastX, lastY, 1.5, 0, Math.PI * 2); ctx.fill(); hasSigned = true;
   }
-
   function draw(e) {
-    if (!isDrawing) return;
-    e.preventDefault();
+    if (!isDrawing) return; e.preventDefault();
     const pos = getCanvasCoords(e);
-
-    ctx.beginPath();
-    ctx.moveTo(lastX, lastY);
-    ctx.lineTo(pos.x, pos.y);
-    ctx.strokeStyle = '#000000';
-    ctx.lineWidth = 3;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.stroke();
-
-    lastX = pos.x;
-    lastY = pos.y;
-    hasSigned = true;
+    ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(pos.x, pos.y); ctx.stroke();
+    lastX = pos.x; lastY = pos.y; hasSigned = true;
   }
+  function stopDrawing() { isDrawing = false; }
 
-  function stopDrawing(e) {
-    if (isDrawing) {
-      isDrawing = false;
-      ctx.beginPath();
-    }
-  }
-
-  canvas.addEventListener('mousedown', startDrawing, { passive: false });
-  canvas.addEventListener('mousemove', draw, { passive: false });
-  window.addEventListener('mouseup', stopDrawing);
-
-  canvas.addEventListener('touchstart', startDrawing, { passive: false });
-  canvas.addEventListener('touchmove', draw, { passive: false });
-  canvas.addEventListener('touchend', stopDrawing, { passive: false });
-  canvas.addEventListener('touchcancel', stopDrawing, { passive: false });
-
-  if (window.PointerEvent) {
-    canvas.addEventListener('pointerdown', startDrawing, { passive: false });
-    canvas.addEventListener('pointermove', draw, { passive: false });
-    canvas.addEventListener('pointerup', stopDrawing, { passive: false });
-    canvas.addEventListener('pointercancel', stopDrawing, { passive: false });
-  }
+  canvas.addEventListener('mousedown', startDrawing); canvas.addEventListener('mousemove', draw); window.addEventListener('mouseup', stopDrawing);
+  canvas.addEventListener('touchstart', startDrawing); canvas.addEventListener('touchmove', draw); canvas.addEventListener('touchend', stopDrawing);
 
   function clearSignature() {
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    hasSigned = false;
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height); hasSigned = false;
   }
 
-  document.getElementById('clearBtn').addEventListener('click', clearSignature);
-  window.addEventListener('load', initCanvas);
-  initCanvas();
-
-  function resetEntireForm() {
-    document.getElementById('userName').value = '';
-    document.getElementById('schoolUnit').value = '';
-    checkboxes.forEach(box => box.checked = false);
-    updateCount();
-    clearSignature();
-
-    const submitBtn = document.getElementById('submitBtn');
-    const loadingOverlay = document.getElementById('loadingOverlay');
-    submitBtn.disabled = false;
-    loadingOverlay.style.display = 'none';
-  }
-
-  document.getElementById('resetAllBtn').addEventListener('click', function() {
-    if (confirm("確定要清除所有填寫的資料與簽名嗎？")) {
-      resetEntireForm();
-    }
-  });
-
-  document.getElementById('newFormBtn').addEventListener('click', function() {
-    resetEntireForm();
-    document.getElementById('successBox').style.display = 'none';
-    document.getElementById('mainForm').style.display = 'block';
-  });
-
-  // 查詢與重複下載 PDF (使用 6 位數字 ID)
-  document.getElementById('queryBtn').addEventListener('click', function() {
-    const fileId = document.getElementById('queryFileId').value.trim();
+  // 查詢 PDF 檔
+  function queryPDF() {
+    const queryId = document.getElementById('queryFileId').value.trim();
     const resultDiv = document.getElementById('queryResult');
+    if (!queryId) return alert("請輸入 6 位數檔案 ID");
 
-    if (!fileId) {
-      alert("請輸入您的 6 位數檔案 ID！");
-      return;
-    }
-
-    resultDiv.innerHTML = "<span style='color:#1a73e8;'>查詢中...</span>";
-
+    resultDiv.innerHTML = "查詢中...";
     fetch(GAS_WEB_APP_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'query', fileId: fileId })
+      body: JSON.stringify({ action: 'querySubmission', queryId: queryId, formId: currentFormId })
     })
     .then(res => res.json())
     .then(data => {
       if (data.result === 'success') {
-        resultDiv.innerHTML = `✅ 找到檔案 (ID: ${data.fileId})！<a href="${data.downloadUrl}" target="_blank" style="color:#d93025; font-weight:bold;">點此下載 PDF 檔 (.pdf)</a>`;
+        resultDiv.innerHTML = `✅ 找到檔案 (ID: ${data.fileId})！<a href="${data.downloadUrl}" target="_blank" style="color:#d93025; font-weight:bold;">點此下載 PDF 檔</a>`;
       } else {
-        resultDiv.innerHTML = `<span style="color:#d93025;">❌ ${data.message}</span>`;
+        resultDiv.innerHTML = `<span style="color:red;">❌ ${data.message}</span>`;
       }
-    })
-    .catch(err => {
-      resultDiv.innerHTML = `<span style="color:#d93025;">系統發生錯誤，請稍後再試。</span>`;
     });
-  });
+  }
 
-  // 提交表單
+  // 送出填寫表單
   document.getElementById('mainForm').addEventListener('submit', function(e) {
     e.preventDefault();
 
-    const checkedCount = document.querySelectorAll('.rule-check:checked').length;
-    if (checkedCount < totalCount) {
-      alert(`您尚有條文未勾選！請勾選完全部 ${totalCount} 項條文。`);
-      return;
+    // [修改處 9] 收集並驗證填表人個人資料欄位
+    let userFieldsDetail = [];
+    let primaryUserName = "";
+    let missingUserFields = [];
+
+    const userInputs = document.querySelectorAll('.user-field-input');
+    userInputs.forEach((input, idx) => {
+      const lbl = input.getAttribute('data-label');
+      const req = input.getAttribute('data-required') === 'true';
+      const val = input.value.trim();
+
+      if (req && !val) {
+        missingUserFields.push(lbl);
+      }
+      if (idx === 0) primaryUserName = val;
+      userFieldsDetail.push({ label: lbl, value: val });
+    });
+
+    if (missingUserFields.length > 0) {
+      return alert("⚠️ 請填寫以下必填欄位：\n\n• " + missingUserFields.join("\n• "));
     }
 
-    if (!hasSigned) {
-      alert("請在下方簽名框內完成親筆簽名！");
-      return;
+    const checkboxes = document.querySelectorAll('.rule-check');
+    const checkedBoxes = document.querySelectorAll('.rule-check:checked');
+
+    // 檢查「必選」項目
+    let missingRequiredList = [];
+    checkboxes.forEach((box) => {
+      const idx = box.getAttribute('data-index');
+      const itemObj = currentFormConfig.items[idx];
+      if (itemObj.required && !box.checked) {
+        missingRequiredList.push(`第 ${parseInt(idx) + 1} 題：${itemObj.title}`);
+      }
+    });
+
+    if (missingRequiredList.length > 0) {
+      return alert("⚠️ 以下為「必選項」，請確認勾選：\n\n• " + missingRequiredList.join("\n• "));
     }
+
+    // 檢查「最少需勾選數量」
+    const minReqCount = parseInt(currentFormConfig.minRequiredCount || 0, 10);
+    if (minReqCount > 0 && checkedBoxes.length < minReqCount) {
+      return alert(`⚠️ 本表單設定最少需勾選 ${minReqCount} 項！（您目前已勾選 ${checkedBoxes.length} 項）`);
+    }
+
+    // 讀取 年級、班級與座號
+    const grade = document.getElementById('userGrade').value;
+    const userClass = document.getElementById('userClass').value;
+    const seat = document.getElementById('userSeat').value.trim();
+
+    if (!grade || !userClass || !seat) {
+      return alert("請完整選擇並填寫【年級、班級與座號】！");
+    }
+
+    if (!hasSigned) return alert("請完成手寫親筆簽名！");
 
     const submitBtn = document.getElementById('submitBtn');
     const loadingOverlay = document.getElementById('loadingOverlay');
-    
     submitBtn.disabled = true;
     loadingOverlay.style.display = 'block';
 
-    let checkedItemsList = [];
-    checkboxes.forEach((box, index) => {
-      const parentLabel = box.closest('label');
-      const text = parentLabel ? parentLabel.innerText.trim() : `第 ${index + 1} 項`;
-      checkedItemsList.push(text);
+    let checkedItemsDetail = [];
+    checkboxes.forEach((box) => {
+      if (box.checked) {
+        const idx = box.getAttribute('data-index');
+        const itemObj = currentFormConfig.items[idx];
+        checkedItemsDetail.push({
+          title: itemObj.title,
+          desc: itemObj.desc || "",
+          refUrl: itemObj.refUrl || "",
+          imgBase64: itemObj.imgBase64 || ""
+        });
+      }
     });
 
+    const classGroupStr = `${grade}${userClass}`;
+    const seatNoStr = seat;
+
+    // 組合個人資料摘要作為主要識別姓名
+    const summaryUserName = primaryUserName || userFieldsDetail.map(f => f.value).filter(Boolean).join(' / ');
+
     const payload = {
-      action: 'submit',
-      userName: document.getElementById('userName').value.trim(),
-      schoolUnit: document.getElementById('schoolUnit').value.trim(),
-      checkedCount: checkedCount,
-      totalCount: totalCount,
-      checkedItems: checkedItemsList,
+      action: 'submitForm',
+      formId: currentFormId,
+      formTitle: currentFormConfig.formTitle,
+      formDesc: currentFormConfig.formDesc,
+      formRefUrl: currentFormConfig.formRefUrl || "",
+      formImgBase64: currentFormConfig.formImgBase64 || "",
+      userName: summaryUserName,
+      userFieldsDetail: userFieldsDetail, // 完整個人資料欄位傳給後端
+      signatureLabel: currentFormConfig.signatureLabel || "親筆簽名確認",
+      classGroup: classGroupStr,
+      seatNo: seatNoStr,
+      checkedCount: checkedBoxes.length,
+      totalCount: checkboxes.length,
+      checkedItemsDetail: checkedItemsDetail,
       signatureBase64: canvas.toDataURL('image/png')
     };
 
@@ -768,8 +857,6 @@
       if (data.result === 'success') {
         document.getElementById('mainForm').style.display = 'none';
         document.getElementById('successBox').style.display = 'block';
-
-        // 顯示易記的 6 位數字 ID
         document.getElementById('resFileId').innerText = data.fileId;
         document.getElementById('resDownloadBtn').href = data.downloadUrl;
       } else {
@@ -777,15 +864,303 @@
         submitBtn.disabled = false;
         loadingOverlay.style.display = 'none';
       }
-    })
-    .catch(err => {
-      alert("系統發生錯誤，請稍後再試！");
-      submitBtn.disabled = false;
-      loadingOverlay.style.display = 'none';
     });
   });
 
-  updateCount();
+  // 管理者後台功能
+  function openAdminLogin() { document.getElementById('loginModal').style.display = 'flex'; }
+  function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+  function submitAdminLogin() {
+    const pwd = document.getElementById('adminPasswordInput').value;
+    fetch(GAS_WEB_APP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'adminLogin', password: pwd })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.result === 'success') {
+        adminPasswordToken = pwd;
+        closeModal('loginModal');
+        document.getElementById('adminModal').style.display = 'flex';
+      } else {
+        alert(data.message);
+      }
+    });
+  }
+
+  // [修改處 10] 動態新增後台個人資料欄位編輯列
+  function addAdminUserFieldRow(label = "", required = true) {
+    const container = document.getElementById('adminUserFieldsContainer');
+    const rowId = "uf_row_" + Date.now() + "_" + Math.floor(Math.random()*1000);
+    const div = document.createElement('div');
+    div.className = "admin-uf-row";
+    div.id = rowId;
+    div.style.cssText = "display:flex; align-items:center; gap:10px; margin-bottom:8px;";
+    div.innerHTML = `
+      <label style="font-weight:bold; white-space:nowrap;">欄位名稱：</label>
+      <input type="text" class="admin-uf-label" value="${label}" placeholder="例如：學生姓名、家長姓名" style="flex:1; padding:6px; border:1px solid #ccc; border-radius:4px;">
+      <label style="color:#d93025; font-weight:bold; cursor:pointer; white-space:nowrap;">
+        <input type="checkbox" class="admin-uf-required" ${required ? 'checked' : ''}> 必填
+      </label>
+      <button type="button" onclick="this.parentElement.remove()" style="background:#d93025; color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;">🗑️ 刪除</button>
+    `;
+    container.appendChild(div);
+  }
+
+  // [修改處 11] 載入表單資料至後台編輯器
+  function loadFormToAdmin() {
+    const formId = document.getElementById('adminFormSelect').value;
+    if (!formId) return;
+
+    fetch(GAS_WEB_APP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'getFormConfig', formId: formId })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.result === 'success') {
+        document.getElementById('adminFormId').value = data.formId;
+        document.getElementById('adminFormTitle').value = data.formTitle;
+        document.getElementById('adminFormDesc').value = data.formDesc || "";
+        document.getElementById('adminGradeOptions').value = data.gradeOptions || "一年,二年,三年,四年,五年,六年";
+        document.getElementById('adminMinRequiredCount').value = data.minRequiredCount || 0;
+        document.getElementById('adminFormRefUrl').value = data.formRefUrl || "";
+        document.getElementById('adminFormImgBase64').value = data.formImgBase64 || "";
+
+        // 載入個人資料欄位
+        const ufContainer = document.getElementById('adminUserFieldsContainer');
+        ufContainer.innerHTML = "";
+        if (data.userFields && data.userFields.length > 0) {
+          data.userFields.forEach(uf => addAdminUserFieldRow(uf.label, uf.required));
+        } else {
+          addAdminUserFieldRow("學生姓名", true);
+        }
+
+        // 載入簽名標題
+        document.getElementById('adminSignatureLabel').value = data.signatureLabel || "親筆簽名確認";
+
+        const headerPreview = document.getElementById('adminFormImgPreview');
+        if (data.formImgBase64) {
+          headerPreview.src = data.formImgBase64;
+          headerPreview.style.display = 'block';
+          document.getElementById('clearHeaderImgBtn').style.display = 'inline-block';
+        } else {
+          headerPreview.style.display = 'none';
+          document.getElementById('clearHeaderImgBtn').style.display = 'none';
+        }
+
+        const container = document.getElementById('adminItemsContainer');
+        container.innerHTML = "";
+        if (data.items) {
+          data.items.forEach(item => addAdminItemRow(item.title, item.desc, item.refUrl, item.imgBase64, item.required));
+        }
+
+        const formUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?formId=' + data.formId;
+        const urlBox = document.getElementById('adminFormUrlBox');
+        urlBox.style.display = 'block';
+        urlBox.innerHTML = `🔗 <b>此表單專屬網址：</b><br><a href="${formUrl}" target="_blank">${formUrl}</a>`;
+      }
+    });
+  }
+
+  // [修改處 12] 新增全新表單預設設定
+  function createNewFormInAdmin() {
+    document.getElementById('adminFormSelect').value = "";
+    document.getElementById('adminFormId').value = "";
+    document.getElementById('adminFormTitle').value = "";
+    document.getElementById('adminFormDesc').value = "";
+    document.getElementById('adminGradeOptions').value = "一年,二年,三年,四年,五年,六年";
+    document.getElementById('adminMinRequiredCount').value = "0";
+    document.getElementById('adminFormRefUrl').value = "";
+    clearImageUpload('adminFormImgFile', 'adminFormImgPreview', 'adminFormImgBase64');
+    
+    // 清空並帶入預設個人欄位
+    const ufContainer = document.getElementById('adminUserFieldsContainer');
+    ufContainer.innerHTML = "";
+    addAdminUserFieldRow("學生姓名", true);
+    document.getElementById('adminSignatureLabel').value = "親筆簽名確認";
+
+    document.getElementById('adminItemsContainer').innerHTML = "";
+    document.getElementById('adminFormUrlBox').style.display = 'none';
+    addAdminItemRow("", "", "", "", false);
+  }
+
+  function addAdminItemRow(title = "", desc = "", refUrl = "", imgBase64 = "", required = false) {
+    const container = document.getElementById('adminItemsContainer');
+    const rowId = "item_row_" + Date.now() + "_" + Math.floor(Math.random()*1000);
+
+    const div = document.createElement('div');
+    div.className = "admin-item-row";
+    div.id = rowId;
+    div.innerHTML = `
+      <button type="button" class="del-item-btn" onclick="this.parentElement.remove()">🗑️ 刪除本題</button>
+      <div style="margin-bottom:6px; display:flex; align-items:center; gap:10px;">
+        <label><b>檢核題目：</b></label>
+        <input type="text" class="admin-item-title" value="${title}" placeholder="請輸入檢核題目" style="flex:1; padding:4px;">
+        <label style="color:#d93025; font-weight:bold; cursor:pointer;">
+          <input type="checkbox" class="admin-item-required" ${required ? 'checked' : ''}> 設為必選項
+        </label>
+      </div>
+      <div style="margin-bottom:6px;">
+        <label><b>題目詳細說明：</b></label>
+        <textarea class="admin-item-desc" style="width:100%; height:50px; padding:4px;" placeholder="請輸入本題說明/實例內容...">${desc}</textarea>
+      </div>
+      <div style="margin-bottom:6px;">
+        <label><b>題目參考網址：</b></label>
+        <input type="url" class="admin-item-refurl" value="${refUrl}" placeholder="例如：https://..." style="width:100%; padding:4px;">
+      </div>
+      <div>
+        <label><b>題目照片附件 (限制 1MB 以內)：</b></label>
+        <input type="file" accept="image/*" class="admin-item-img-file" onchange="handleItemImageUpload(this, '${rowId}')">
+        <input type="hidden" class="admin-item-img-base64" value="${imgBase64}">
+        <img class="img-preview admin-item-img-preview" src="${imgBase64}" style="${imgBase64 ? 'display:block;' : 'display:none;'}">
+        <button type="button" class="clear-item-img-btn" onclick="clearItemImage('${rowId}')" style="${imgBase64 ? 'display:inline-block;' : 'display:none;'}">刪除照片</button>
+      </div>
+    `;
+    container.appendChild(div);
+  }
+
+  function handleItemImageUpload(fileInput, rowId) {
+    const row = document.getElementById(rowId);
+    const preview = row.querySelector('.admin-item-img-preview');
+    const hidden = row.querySelector('.admin-item-img-base64');
+    const clearBtn = row.querySelector('.clear-item-img-btn');
+
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    if (file.size > 1048576) {
+      alert("⚠️ 照片附件檔案大小不能超過 1MB！請選擇較小的圖片。");
+      fileInput.value = "";
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = new Image();
+      img.onload = function() {
+        const canvas = document.createElement('canvas');
+        const maxWidth = 500;
+        let width = img.width, height = img.height;
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+        canvas.width = width; canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.6);
+
+        hidden.value = compressedBase64;
+        preview.src = compressedBase64;
+        preview.style.display = 'block';
+        clearBtn.style.display = 'inline-block';
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function clearItemImage(rowId) {
+    const row = document.getElementById(rowId);
+    row.querySelector('.admin-item-img-file').value = "";
+    row.querySelector('.admin-item-img-base64').value = "";
+    const preview = row.querySelector('.admin-item-img-preview');
+    preview.src = "";
+    preview.style.display = 'none';
+    row.querySelector('.clear-item-img-btn').style.display = 'none';
+  }
+
+  // [修改處 13] 儲存後台表單設定（含自訂個人欄位與簽名標題）
+  function saveAdminFormConfig() {
+    const saveBtn = document.getElementById('saveAdminFormBtn');
+    const formId = document.getElementById('adminFormId').value;
+    const formTitle = document.getElementById('adminFormTitle').value.trim();
+    const formDesc = document.getElementById('adminFormDesc').value.trim();
+    const formRefUrl = document.getElementById('adminFormRefUrl').value.trim();
+    const formImgBase64 = document.getElementById('adminFormImgBase64').value;
+    const minRequiredCount = document.getElementById('adminMinRequiredCount').value || 0;
+    const gradeOptions = document.getElementById('adminGradeOptions').value.trim() || "一年,二年,三年,四年,五年,六年";
+
+    if (!formTitle) return alert("請填寫表單主題！");
+
+    // 收集個人資料欄位設定
+    const ufRows = document.querySelectorAll('.admin-uf-row');
+    let userFields = [];
+    ufRows.forEach(row => {
+      const lbl = row.querySelector('.admin-uf-label').value.trim();
+      const req = row.querySelector('.admin-uf-required').checked;
+      if (lbl) {
+        userFields.push({ label: lbl, required: req });
+      }
+    });
+
+    if (userFields.length === 0) {
+      return alert("請至少設定一個「填表人個人資料欄位」！");
+    }
+
+    const signatureLabel = document.getElementById('adminSignatureLabel').value.trim() || "親筆簽名確認";
+
+    const itemRows = document.querySelectorAll('.admin-item-row');
+    let items = [];
+    itemRows.forEach(row => {
+      const t = row.querySelector('.admin-item-title').value.trim();
+      const d = row.querySelector('.admin-item-desc').value.trim();
+      const u = row.querySelector('.admin-item-refurl').value.trim();
+      const img = row.querySelector('.admin-item-img-base64').value;
+      const isReq = row.querySelector('.admin-item-required').checked;
+
+      if (t) {
+        items.push({ title: t, desc: d, refUrl: u, imgBase64: img, required: isReq });
+      }
+    });
+
+    saveBtn.innerText = "執行中...";
+    saveBtn.disabled = true;
+
+    const payload = {
+      action: 'saveFormConfig',
+      password: adminPasswordToken,
+      formId: formId,
+      formTitle: formTitle,
+      formDesc: formDesc,
+      formRefUrl: formRefUrl,
+      formImgBase64: formImgBase64,
+      minRequiredCount: minRequiredCount,
+      gradeOptions: gradeOptions,
+      userFields: userFields,           // 傳送個人資料欄位陣列
+      signatureLabel: signatureLabel,   // 傳送自訂簽名標題
+      items: items
+    };
+
+    fetch(GAS_WEB_APP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+      saveBtn.innerText = "💾 儲存表單並自動建立試算表工作表";
+      saveBtn.disabled = false;
+
+      if (data.result === 'success') {
+        alert(data.message);
+        document.getElementById('adminFormId').value = data.formId;
+        fetchFormList(data.formId);
+        closeModal('adminModal');
+      } else {
+        alert("儲存失敗：" + data.message);
+      }
+    })
+    .catch(err => {
+      saveBtn.innerText = "💾 儲存表單並自動建立試算表工作表";
+      saveBtn.disabled = false;
+      alert("儲存失敗：請求過程發生錯誤或回應異常，請重試。(" + err.toString() + ")");
+    });
+  }
 </script>
 
 </body>
