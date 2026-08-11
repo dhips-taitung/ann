@@ -185,7 +185,7 @@
       background-color: #ffffff;
       margin-top: 8px;
     }
-    /* [修改處 1] 簽名框高度增加 20%：180px -> 216px */
+    /* 簽名框高度加高 20% (180px -> 216px) */
     canvas#signatureCanvas {
       width: 100%;
       height: 216px;
@@ -326,9 +326,8 @@
     <div id="displayRefUrl" class="ref-link-box" style="display:none;"></div>
     <img id="displayImg" class="header-img-display" style="display:none;">
 
-    <!-- 個人基本資料 (動態標題) -->
+    <!-- 個人基本資料 -->
     <div class="input-group">
-      <!-- [修改處 2] 填寫人標籤改為可設定，如：學生姓名 -->
       <label><span id="displayUserNameLabel">填寫人姓名</span> <span style="color:red">*</span></label>
       <input type="text" id="userName" placeholder="請輸入姓名" required>
     </div>
@@ -359,18 +358,16 @@
       </div>
     </div>
 
-    <!-- [修改處 3] 動態渲染自訂延伸基本資料欄位（如：家長電話） -->
+    <!-- 動態渲染自訂延伸基本資料欄位 -->
     <div id="extraFieldsContainer"></div>
 
     <!-- 動態檢核題目渲染區 -->
     <div id="checklistContainer"></div>
 
-    <!-- 手寫簽名 (動態標題與 216px 高度) -->
+    <!-- 手寫簽名 (高度 216px) -->
     <div class="input-group">
-      <!-- [修改處 4] 簽名標籤改為可設定，如：家長簽名 -->
       <label><span id="displaySignatureLabel">親筆簽名確認</span> <span style="color:red">*</span></label>
       <div class="signature-container">
-        <!-- 高度設為 216 (增高 20%) -->
         <canvas id="signatureCanvas" width="700" height="216"></canvas>
       </div>
       <button type="button" class="clear-btn" onclick="clearSignature()">清除重簽</button>
@@ -432,7 +429,7 @@
       <textarea id="adminFormDesc" style="width:100%; height:80px; border-radius:6px; padding:8px;" placeholder="請輸入說明條文內容..."></textarea>
     </div>
 
-    <!-- [修改處 5] 後台設定：填寫人欄位名稱與簽名欄位名稱 -->
+    <!-- 設定：填寫人欄位名稱與簽名欄位名稱 -->
     <div style="display:flex; gap:10px;">
       <div class="input-group" style="flex:1;">
         <label>「填寫人姓名」欄位名稱：</label>
@@ -444,7 +441,7 @@
       </div>
     </div>
 
-    <!-- [修改處 6] 後台設定：自訂延伸基本資料欄位（可動態增刪，寫入 I 欄以後） -->
+    <!-- 設定：自訂延伸基本資料欄位 -->
     <div style="background:#f1f5f9; padding:12px; border-radius:6px; border:1px solid #cbd5e1; margin-bottom:15px;">
       <h5 style="margin:0 0 8px 0; color:#1e293b;">自訂延伸基本資料欄位 (如：家長電話、聯絡地址等)</h5>
       <div id="adminExtraFieldsContainer"></div>
@@ -614,15 +611,24 @@
         document.getElementById('displayTitle').innerText = data.formTitle;
         document.getElementById('displayDesc').innerText = data.formDesc || "";
 
-        // 套用自訂填寫人與簽名標籤名稱
-        document.getElementById('displayUserNameLabel').innerText = data.userNameLabel || "填寫人姓名";
-        document.getElementById('displaySignatureLabel').innerText = data.signatureLabel || "親筆簽名確認";
+        // 套用自訂填寫人與簽名標籤名稱 (增加防錯處理，避免顯示 JSON 字串)
+        let userNameLbl = data.userNameLabel || "填寫人姓名";
+        if (userNameLbl.startsWith("[") || userNameLbl.startsWith("{")) {
+          userNameLbl = "填寫人姓名";
+        }
+        document.getElementById('displayUserNameLabel').innerText = userNameLbl;
+
+        let signatureLbl = data.signatureLabel || "親筆簽名確認";
+        if (signatureLbl.startsWith("[") || signatureLbl.startsWith("{")) {
+          signatureLbl = "親筆簽名確認";
+        }
+        document.getElementById('displaySignatureLabel').innerText = signatureLbl;
 
         // 動態渲染自訂延伸基本資料欄位
         const extraContainer = document.getElementById('extraFieldsContainer');
         extraContainer.innerHTML = "";
         if (data.extraFields && data.extraFields.length > 0) {
-          data.extraFields.forEach((field, idx) => {
+          data.extraFields.forEach((field) => {
             const reqStar = field.required ? '<span style="color:red">*</span>' : '';
             const reqAttr = field.required ? 'required' : '';
             extraContainer.innerHTML += `
@@ -813,7 +819,8 @@
     }
 
     if (!hasSigned) {
-      const sigLbl = currentFormConfig.signatureLabel || "親筆簽名確認";
+      let sigLbl = currentFormConfig.signatureLabel || "親筆簽名確認";
+      if (sigLbl.startsWith("[") || sigLbl.startsWith("{")) sigLbl = "親筆簽名確認";
       return alert(`請完成【${sigLbl}】！`);
     }
 
@@ -839,6 +846,12 @@
     const classGroupStr = `${grade}${userClass}`;
     const seatNoStr = seat;
 
+    let userNameLbl = currentFormConfig.userNameLabel || "填寫人姓名";
+    if (userNameLbl.startsWith("[") || userNameLbl.startsWith("{")) userNameLbl = "填寫人姓名";
+
+    let signatureLbl = currentFormConfig.signatureLabel || "親筆簽名確認";
+    if (signatureLbl.startsWith("[") || signatureLbl.startsWith("{")) signatureLbl = "親筆簽名確認";
+
     const payload = {
       action: 'submitForm',
       formId: currentFormId,
@@ -846,12 +859,12 @@
       formDesc: currentFormConfig.formDesc,
       formRefUrl: currentFormConfig.formRefUrl || "",
       formImgBase64: currentFormConfig.formImgBase64 || "",
-      userNameLabel: currentFormConfig.userNameLabel || "填寫人姓名",
-      signatureLabel: currentFormConfig.signatureLabel || "親筆簽名確認",
+      userNameLabel: userNameLbl,
+      signatureLabel: signatureLbl,
       userName: document.getElementById('userName').value.trim(),
       classGroup: classGroupStr,
       seatNo: seatNoStr,
-      extraFieldData: extraFieldData, // 自訂欄位數值 (寫入 I 欄起)
+      extraFieldData: extraFieldData,
       checkedCount: checkedBoxes.length,
       totalCount: checkboxes.length,
       checkedItemsDetail: checkedItemsDetail,
@@ -917,14 +930,20 @@
         document.getElementById('adminFormId').value = data.formId;
         document.getElementById('adminFormTitle').value = data.formTitle;
         document.getElementById('adminFormDesc').value = data.formDesc || "";
-        document.getElementById('adminUserNameLabel').value = data.userNameLabel || "填寫人姓名";
-        document.getElementById('adminSignatureLabel').value = data.signatureLabel || "親筆簽名確認";
+
+        let uLbl = data.userNameLabel || "填寫人姓名";
+        if (uLbl.startsWith("[") || uLbl.startsWith("{")) uLbl = "填寫人姓名";
+        document.getElementById('adminUserNameLabel').value = uLbl;
+
+        let sLbl = data.signatureLabel || "親筆簽名確認";
+        if (sLbl.startsWith("[") || sLbl.startsWith("{")) sLbl = "親筆簽名確認";
+        document.getElementById('adminSignatureLabel').value = sLbl;
+
         document.getElementById('adminGradeOptions').value = data.gradeOptions || "一年,二年,三年,四年,五年,六年";
         document.getElementById('adminMinRequiredCount').value = data.minRequiredCount || 0;
         document.getElementById('adminFormRefUrl').value = data.formRefUrl || "";
         document.getElementById('adminFormImgBase64').value = data.formImgBase64 || "";
 
-        // 載入自訂延伸基本資料欄位
         const extraContainer = document.getElementById('adminExtraFieldsContainer');
         extraContainer.innerHTML = "";
         if (data.extraFields) {
@@ -972,7 +991,6 @@
     addAdminItemRow("", "", "", "", false);
   }
 
-  // 後台新增自訂基本資料欄位（如：家長電話）
   function addAdminExtraFieldRow(label = "", required = false) {
     const container = document.getElementById('adminExtraFieldsContainer');
     const rowId = "extra_row_" + Date.now() + "_" + Math.floor(Math.random()*1000);
@@ -1078,7 +1096,6 @@
     row.querySelector('.clear-item-img-btn').style.display = 'none';
   }
 
-  // 儲存後台表單設定
   function saveAdminFormConfig() {
     const saveBtn = document.getElementById('saveAdminFormBtn');
     const formId = document.getElementById('adminFormId').value;
@@ -1086,14 +1103,18 @@
     const formDesc = document.getElementById('adminFormDesc').value.trim();
     const formRefUrl = document.getElementById('adminFormRefUrl').value.trim();
     const formImgBase64 = document.getElementById('adminFormImgBase64').value;
-    const userNameLabel = document.getElementById('adminUserNameLabel').value.trim() || "填寫人姓名";
-    const signatureLabel = document.getElementById('adminSignatureLabel').value.trim() || "親筆簽名確認";
+    
+    let userNameLabel = document.getElementById('adminUserNameLabel').value.trim() || "填寫人姓名";
+    if (userNameLabel.startsWith("[") || userNameLabel.startsWith("{")) userNameLabel = "填寫人姓名";
+
+    let signatureLabel = document.getElementById('adminSignatureLabel').value.trim() || "親筆簽名確認";
+    if (signatureLabel.startsWith("[") || signatureLabel.startsWith("{")) signatureLabel = "親筆簽名確認";
+
     const minRequiredCount = document.getElementById('adminMinRequiredCount').value || 0;
     const gradeOptions = document.getElementById('adminGradeOptions').value.trim() || "一年,二年,三年,四年,五年,六年";
 
     if (!formTitle) return alert("請填寫表單主題！");
 
-    // 收集自訂延伸基本資料欄位
     const extraRows = document.querySelectorAll('.admin-extra-field-row');
     let extraFields = [];
     extraRows.forEach(row => {
@@ -1131,7 +1152,7 @@
       formImgBase64: formImgBase64,
       userNameLabel: userNameLabel,
       signatureLabel: signatureLabel,
-      extraFields: extraFields, // 自訂欄位結構
+      extraFields: extraFields,
       minRequiredCount: minRequiredCount,
       gradeOptions: gradeOptions,
       items: items
