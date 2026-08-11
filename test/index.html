@@ -185,7 +185,7 @@
       background-color: #ffffff;
       margin-top: 8px;
     }
-    /* [修改處 1] 簽名框高度增加 10% (由 180px 增至 198px) */
+    /* [修改處 1] 簽名框高度增加 10% (由 180px 提升至 198px) */
     canvas#signatureCanvas {
       width: 100%;
       height: 198px;
@@ -326,10 +326,14 @@
     <div id="displayRefUrl" class="ref-link-box" style="display:none;"></div>
     <img id="displayImg" class="header-img-display" style="display:none;">
 
-    <!-- [修改處 2] 個人基本資料渲染區（改為可後台自訂欄位與名稱） -->
-    <div id="userFieldsContainer"></div>
+    <!-- 個人基本資料 -->
+    <!-- [修改處 2] 動態標籤展示：可於後台自訂 (例如：學生姓名) -->
+    <div class="input-group">
+      <label id="userNameLabelDisplay">填寫人姓名 <span style="color:red">*</span></label>
+      <input type="text" id="userName" placeholder="請輸入姓名" required>
+    </div>
 
-    <!-- 班級使用版：年級（動態生成選項）、班級、座號欄位 -->
+    <!-- 年級、班級、座號欄位 -->
     <div class="class-info-group">
       <div class="class-info-item">
         <label>年級 <span style="color:red">*</span></label>
@@ -355,15 +359,18 @@
       </div>
     </div>
 
+    <!-- [修改處 3] 動態個人資料欄位渲染容器 (可增刪) -->
+    <div id="extraUserFieldsContainer"></div>
+
     <!-- 動態檢核題目渲染區 -->
     <div id="checklistContainer"></div>
 
-    <!-- 手寫簽名（簽名標題由後台自訂，簽名框高度增加 10%） -->
+    <!-- 手寫簽名 -->
     <div class="input-group">
-      <!-- [修改處 3] 動態簽名標題 -->
-      <label id="displaySignatureLabel">親筆簽名確認 <span style="color:red">*</span></label>
+      <!-- [修改處 4] 簽名標籤連動後台設定 (如：家長簽名) -->
+      <label id="signatureLabelDisplay">親筆簽名確認 <span style="color:red">*</span></label>
       <div class="signature-container">
-        <!-- [修改處 4] 畫布高度從 180 提高為 198 (增加10%) -->
+        <!-- 畫布高度增至 198px -->
         <canvas id="signatureCanvas" width="700" height="198"></canvas>
       </div>
       <button type="button" class="clear-btn" onclick="clearSignature()">清除重簽</button>
@@ -425,18 +432,25 @@
       <textarea id="adminFormDesc" style="width:100%; height:80px; border-radius:6px; padding:8px;" placeholder="請輸入說明條文內容..."></textarea>
     </div>
 
-    <!-- [修改處 5] 後台新增「填表人個人資料欄位設定」專區（可自由增刪與修改標題） -->
-    <div style="background:#f8f9fa; padding:12px; border-radius:6px; border:1px solid #ddd; margin-bottom:15px;">
-      <h4 style="margin-top:0; color:#1a73e8;">👤 填表人個人資料欄位設定 (可增刪欄位與自訂標題)</h4>
-      <div id="adminUserFieldsContainer"></div>
-      <button type="button" onclick="addAdminUserFieldRow()" style="padding:6px 12px; background:#1a73e8; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold; margin-top:5px;">➕ 新增個人資料欄位</button>
-    </div>
+    <!-- [修改處 5] 後台個人資料欄位與簽名標籤設定區 -->
+    <div style="background:#f0f4f9; padding:12px; border-radius:6px; border:1px solid #d0d7de; margin-bottom:15px;">
+      <h4 style="margin-top:0; color:#1a73e8;">👤 填表人個人資料與簽名欄位設定</h4>
 
-    <!-- [修改處 6] 後台新增「親筆簽名欄位標題」自訂設定 -->
-    <div style="background:#f8f9fa; padding:12px; border-radius:6px; border:1px solid #ddd; margin-bottom:15px;">
-      <h4 style="margin-top:0; color:#1a73e8;">✍️ 親筆簽名欄位標題設定</h4>
-      <label>簽名欄位提示文字 (例如：家長簽名、本人親筆簽名)：</label>
-      <input type="text" id="adminSignatureLabel" placeholder="預設：親筆簽名確認" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px; margin-top:4px;">
+      <div class="input-group">
+        <label>主要填寫人欄位標籤 (預設：填寫人姓名，可改為如：學生姓名)：</label>
+        <input type="text" id="adminUserNameLabel" placeholder="填寫人姓名">
+      </div>
+
+      <div class="input-group">
+        <label>簽名欄位標籤 (預設：親筆簽名確認，可改為如：家長簽名)：</label>
+        <input type="text" id="adminSignatureLabel" placeholder="親筆簽名確認">
+      </div>
+
+      <hr style="margin:10px 0; border:0; border-top:1px dashed #ccc;">
+
+      <label><b>動態新增個人資料欄位 (例：家長姓名、聯絡電話，可自由增刪)：</b></label>
+      <div id="adminExtraUserFieldsContainer" style="margin-top:8px;"></div>
+      <button type="button" onclick="addAdminExtraUserFieldRow()" style="padding:6px 12px; background:#1a73e8; color:white; border:none; border-radius:4px; cursor:pointer; font-size:13px; margin-top:5px;">➕ 新增個人資料欄位</button>
     </div>
 
     <div class="input-group" style="background:#f8f9fa; padding:10px; border-radius:6px; border:1px solid #ddd;">
@@ -493,7 +507,7 @@
     fetchFormList(formIdFromUrl);
   });
 
-  // 圖片上傳壓縮與處理引擎 (限制 1MB 以內，並自動縮放瘦身)
+  // 圖片上傳壓縮處理
   function handleImageUpload(fileInput, previewImgId, base64HiddenId) {
     const file = fileInput.files[0];
     if (!file) return;
@@ -602,26 +616,15 @@
         document.getElementById('displayTitle').innerText = data.formTitle;
         document.getElementById('displayDesc').innerText = data.formDesc || "";
 
-        // [修改處 7] 動態渲染填表人個人資料欄位
-        const ufContainer = document.getElementById('userFieldsContainer');
-        ufContainer.innerHTML = "";
-        const uFields = data.userFields || [{ label: "學生姓名", required: true }];
-        uFields.forEach(uf => {
-          const reqStar = uf.required ? '<span style="color:red">*</span>' : '';
-          const reqAttr = uf.required ? 'required' : '';
-          ufContainer.innerHTML += `
-            <div class="input-group">
-              <label>${uf.label} ${reqStar}</label>
-              <input type="text" class="user-field-input" data-label="${uf.label}" data-required="${uf.required}" placeholder="請輸入${uf.label}" ${reqAttr}>
-            </div>
-          `;
-        });
+        // [修改處 6] 動態替換「姓名標籤」與「簽名標籤」
+        const uLabel = (data.userInfoConfig && data.userInfoConfig.userNameLabel) ? data.userInfoConfig.userNameLabel : "填寫人姓名";
+        const sLabel = (data.userInfoConfig && data.userInfoConfig.signatureLabel) ? data.userInfoConfig.signatureLabel : "親筆簽名確認";
 
-        // [修改處 8] 動態渲染簽名欄位標題
-        const sigLabel = data.signatureLabel || "親筆簽名確認";
-        document.getElementById('displaySignatureLabel').innerHTML = `${sigLabel} <span style="color:red">*</span>`;
+        document.getElementById('userNameLabelDisplay').innerHTML = `${uLabel} <span style="color:red">*</span>`;
+        document.getElementById('userName').placeholder = `請輸入${uLabel}`;
+        document.getElementById('signatureLabelDisplay').innerHTML = `${sLabel} <span style="color:red">*</span>`;
 
-        // 動態生成年級下拉選單選項
+        // 年級下拉選單
         const gradeSelect = document.getElementById('userGrade');
         gradeSelect.innerHTML = '<option value="">請選擇年級</option>';
         const rawGradeStr = data.gradeOptions || "一年,二年,三年,四年,五年,六年";
@@ -629,6 +632,22 @@
         gradeList.forEach(g => {
           gradeSelect.innerHTML += `<option value="${g}">${g}</option>`;
         });
+
+        // [修改處 7] 動態渲染管理者新增的「個人資料自訂欄位」
+        const extraContainer = document.getElementById('extraUserFieldsContainer');
+        extraContainer.innerHTML = "";
+        if (data.userInfoConfig && data.userInfoConfig.extraUserFields && data.userInfoConfig.extraUserFields.length > 0) {
+          data.userInfoConfig.extraUserFields.forEach((uf) => {
+            const reqMark = uf.required ? '<span style="color:red">*</span>' : '';
+            const div = document.createElement('div');
+            div.className = "input-group";
+            div.innerHTML = `
+              <label>${uf.label} ${reqMark}</label>
+              <input type="text" class="extra-user-field" data-label="${uf.label}" data-required="${uf.required}" placeholder="${uf.placeholder || ('請輸入' + uf.label)}">
+            `;
+            extraContainer.appendChild(div);
+          });
+        }
 
         const refUrlBox = document.getElementById('displayRefUrl');
         if (data.formRefUrl) {
@@ -678,7 +697,7 @@
     });
   }
 
-  // 手寫簽名引擎
+  // 手寫簽名引擎 (高度 198px)
   const canvas = document.getElementById('signatureCanvas');
   const ctx = canvas.getContext('2d');
   let isDrawing = false, hasSigned = false, lastX = 0, lastY = 0;
@@ -747,33 +766,10 @@
   // 送出填寫表單
   document.getElementById('mainForm').addEventListener('submit', function(e) {
     e.preventDefault();
-
-    // [修改處 9] 收集並驗證填表人個人資料欄位
-    let userFieldsDetail = [];
-    let primaryUserName = "";
-    let missingUserFields = [];
-
-    const userInputs = document.querySelectorAll('.user-field-input');
-    userInputs.forEach((input, idx) => {
-      const lbl = input.getAttribute('data-label');
-      const req = input.getAttribute('data-required') === 'true';
-      const val = input.value.trim();
-
-      if (req && !val) {
-        missingUserFields.push(lbl);
-      }
-      if (idx === 0) primaryUserName = val;
-      userFieldsDetail.push({ label: lbl, value: val });
-    });
-
-    if (missingUserFields.length > 0) {
-      return alert("⚠️ 請填寫以下必填欄位：\n\n• " + missingUserFields.join("\n• "));
-    }
-
     const checkboxes = document.querySelectorAll('.rule-check');
     const checkedBoxes = document.querySelectorAll('.rule-check:checked');
 
-    // 檢查「必選」項目
+    // 1. 檢查「必選」項目
     let missingRequiredList = [];
     checkboxes.forEach((box) => {
       const idx = box.getAttribute('data-index');
@@ -787,22 +783,43 @@
       return alert("⚠️ 以下為「必選項」，請確認勾選：\n\n• " + missingRequiredList.join("\n• "));
     }
 
-    // 檢查「最少需勾選數量」
+    // 2. 檢查「最少需勾選數量」
     const minReqCount = parseInt(currentFormConfig.minRequiredCount || 0, 10);
     if (minReqCount > 0 && checkedBoxes.length < minReqCount) {
       return alert(`⚠️ 本表單設定最少需勾選 ${minReqCount} 項！（您目前已勾選 ${checkedBoxes.length} 項）`);
     }
 
-    // 讀取 年級、班級與座號
+    // 3. 驗證年級、班級、座號與主要姓名
     const grade = document.getElementById('userGrade').value;
     const userClass = document.getElementById('userClass').value;
     const seat = document.getElementById('userSeat').value.trim();
+    const userNameVal = document.getElementById('userName').value.trim();
 
-    if (!grade || !userClass || !seat) {
-      return alert("請完整選擇並填寫【年級、班級與座號】！");
+    if (!grade || !userClass || !seat || !userNameVal) {
+      return alert("請完整填寫基本資料（姓名、年級、班級、座號）！");
     }
 
-    if (!hasSigned) return alert("請完成手寫親筆簽名！");
+    // [修改處 8] 讀取並驗證自訂個人資料欄位
+    const extraInputs = document.querySelectorAll('.extra-user-field');
+    let extraUserValues = [];
+    let missingExtra = [];
+
+    extraInputs.forEach(input => {
+      const label = input.getAttribute('data-label');
+      const isReq = input.getAttribute('data-required') === 'true';
+      const val = input.value.trim();
+
+      if (isReq && !val) {
+        missingExtra.push(label);
+      }
+      extraUserValues.push({ label: label, value: val });
+    });
+
+    if (missingExtra.length > 0) {
+      return alert("⚠️ 請完整填寫以下個人資料欄位：\n\n• " + missingExtra.join("\n• "));
+    }
+
+    if (!hasSigned) return alert("請完成親筆簽名！");
 
     const submitBtn = document.getElementById('submitBtn');
     const loadingOverlay = document.getElementById('loadingOverlay');
@@ -824,10 +841,8 @@
     });
 
     const classGroupStr = `${grade}${userClass}`;
-    const seatNoStr = seat;
-
-    // 組合個人資料摘要作為主要識別姓名
-    const summaryUserName = primaryUserName || userFieldsDetail.map(f => f.value).filter(Boolean).join(' / ');
+    const uLabel = (currentFormConfig.userInfoConfig && currentFormConfig.userInfoConfig.userNameLabel) || "填寫人姓名";
+    const sLabel = (currentFormConfig.userInfoConfig && currentFormConfig.userInfoConfig.signatureLabel) || "親筆簽名確認";
 
     const payload = {
       action: 'submitForm',
@@ -836,11 +851,12 @@
       formDesc: currentFormConfig.formDesc,
       formRefUrl: currentFormConfig.formRefUrl || "",
       formImgBase64: currentFormConfig.formImgBase64 || "",
-      userName: summaryUserName,
-      userFieldsDetail: userFieldsDetail, // 完整個人資料欄位傳給後端
-      signatureLabel: currentFormConfig.signatureLabel || "親筆簽名確認",
+      userName: userNameVal,
+      userNameLabel: uLabel,
+      signatureLabel: sLabel,
       classGroup: classGroupStr,
-      seatNo: seatNoStr,
+      seatNo: seat,
+      extraUserValues: extraUserValues, // 送出自訂動態欄位的值
       checkedCount: checkedBoxes.length,
       totalCount: checkboxes.length,
       checkedItemsDetail: checkedItemsDetail,
@@ -890,26 +906,7 @@
     });
   }
 
-  // [修改處 10] 動態新增後台個人資料欄位編輯列
-  function addAdminUserFieldRow(label = "", required = true) {
-    const container = document.getElementById('adminUserFieldsContainer');
-    const rowId = "uf_row_" + Date.now() + "_" + Math.floor(Math.random()*1000);
-    const div = document.createElement('div');
-    div.className = "admin-uf-row";
-    div.id = rowId;
-    div.style.cssText = "display:flex; align-items:center; gap:10px; margin-bottom:8px;";
-    div.innerHTML = `
-      <label style="font-weight:bold; white-space:nowrap;">欄位名稱：</label>
-      <input type="text" class="admin-uf-label" value="${label}" placeholder="例如：學生姓名、家長姓名" style="flex:1; padding:6px; border:1px solid #ccc; border-radius:4px;">
-      <label style="color:#d93025; font-weight:bold; cursor:pointer; white-space:nowrap;">
-        <input type="checkbox" class="admin-uf-required" ${required ? 'checked' : ''}> 必填
-      </label>
-      <button type="button" onclick="this.parentElement.remove()" style="background:#d93025; color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;">🗑️ 刪除</button>
-    `;
-    container.appendChild(div);
-  }
-
-  // [修改處 11] 載入表單資料至後台編輯器
+  // [修改處 9] 載入後台個人資料與簽名欄位設定
   function loadFormToAdmin() {
     const formId = document.getElementById('adminFormSelect').value;
     if (!formId) return;
@@ -925,22 +922,23 @@
         document.getElementById('adminFormId').value = data.formId;
         document.getElementById('adminFormTitle').value = data.formTitle;
         document.getElementById('adminFormDesc').value = data.formDesc || "";
+
+        // 載入自訂標籤設定
+        const uic = data.userInfoConfig || {};
+        document.getElementById('adminUserNameLabel').value = uic.userNameLabel || "填寫人姓名";
+        document.getElementById('adminSignatureLabel').value = uic.signatureLabel || "親筆簽名確認";
+
+        // 載入自訂個人資料欄位
+        const ufContainer = document.getElementById('adminExtraUserFieldsContainer');
+        ufContainer.innerHTML = "";
+        if (uic.extraUserFields && uic.extraUserFields.length > 0) {
+          uic.extraUserFields.forEach(uf => addAdminExtraUserFieldRow(uf.label, uf.placeholder, uf.required));
+        }
+
         document.getElementById('adminGradeOptions').value = data.gradeOptions || "一年,二年,三年,四年,五年,六年";
         document.getElementById('adminMinRequiredCount').value = data.minRequiredCount || 0;
         document.getElementById('adminFormRefUrl').value = data.formRefUrl || "";
         document.getElementById('adminFormImgBase64').value = data.formImgBase64 || "";
-
-        // 載入個人資料欄位
-        const ufContainer = document.getElementById('adminUserFieldsContainer');
-        ufContainer.innerHTML = "";
-        if (data.userFields && data.userFields.length > 0) {
-          data.userFields.forEach(uf => addAdminUserFieldRow(uf.label, uf.required));
-        } else {
-          addAdminUserFieldRow("學生姓名", true);
-        }
-
-        // 載入簽名標題
-        document.getElementById('adminSignatureLabel').value = data.signatureLabel || "親筆簽名確認";
 
         const headerPreview = document.getElementById('adminFormImgPreview');
         if (data.formImgBase64) {
@@ -966,26 +964,53 @@
     });
   }
 
-  // [修改處 12] 新增全新表單預設設定
+  // 新增全新表單時的預設值
   function createNewFormInAdmin() {
     document.getElementById('adminFormSelect').value = "";
     document.getElementById('adminFormId').value = "";
     document.getElementById('adminFormTitle').value = "";
     document.getElementById('adminFormDesc').value = "";
+    document.getElementById('adminUserNameLabel').value = "填寫人姓名";
+    document.getElementById('adminSignatureLabel').value = "親筆簽名確認";
+    document.getElementById('adminExtraUserFieldsContainer').innerHTML = "";
     document.getElementById('adminGradeOptions').value = "一年,二年,三年,四年,五年,六年";
     document.getElementById('adminMinRequiredCount').value = "0";
     document.getElementById('adminFormRefUrl').value = "";
     clearImageUpload('adminFormImgFile', 'adminFormImgPreview', 'adminFormImgBase64');
-    
-    // 清空並帶入預設個人欄位
-    const ufContainer = document.getElementById('adminUserFieldsContainer');
-    ufContainer.innerHTML = "";
-    addAdminUserFieldRow("學生姓名", true);
-    document.getElementById('adminSignatureLabel').value = "親筆簽名確認";
-
     document.getElementById('adminItemsContainer').innerHTML = "";
     document.getElementById('adminFormUrlBox').style.display = 'none';
     addAdminItemRow("", "", "", "", false);
+  }
+
+  // [修改處 10] 動態新增/刪除個人資料欄位列
+  function addAdminExtraUserFieldRow(label = "", placeholder = "", required = false) {
+    const container = document.getElementById('adminExtraUserFieldsContainer');
+    const rowId = "uf_row_" + Date.now() + "_" + Math.floor(Math.random()*1000);
+
+    const div = document.createElement('div');
+    div.className = "admin-item-row";
+    div.id = rowId;
+    div.style.padding = "8px 12px";
+    div.style.marginBottom = "8px";
+    div.innerHTML = `
+      <button type="button" class="del-item-btn" onclick="this.parentElement.remove()">🗑️ 刪除欄位</button>
+      <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+        <div style="flex:2; min-width:130px;">
+          <label style="font-size:12px;"><b>欄位名稱：</b></label>
+          <input type="text" class="admin-uf-label" value="${label}" placeholder="例如：家長姓名" style="width:100%; padding:4px;">
+        </div>
+        <div style="flex:2; min-width:130px;">
+          <label style="font-size:12px;"><b>提示文字 (Placeholder)：</b></label>
+          <input type="text" class="admin-uf-placeholder" value="${placeholder}" placeholder="例如：請輸入家長姓名" style="width:100%; padding:4px;">
+        </div>
+        <div style="flex:1; min-width:80px; padding-top:14px;">
+          <label style="color:#d93025; font-size:13px; font-weight:bold; cursor:pointer;">
+            <input type="checkbox" class="admin-uf-required" ${required ? 'checked' : ''}> 必填
+          </label>
+        </div>
+      </div>
+    `;
+    container.appendChild(div);
   }
 
   function addAdminItemRow(title = "", desc = "", refUrl = "", imgBase64 = "", required = false) {
@@ -1074,7 +1099,7 @@
     row.querySelector('.clear-item-img-btn').style.display = 'none';
   }
 
-  // [修改處 13] 儲存後台表單設定（含自訂個人欄位與簽名標題）
+  // [修改處 11] 儲存後台表單設定（包含自訂個人資料欄位）
   function saveAdminFormConfig() {
     const saveBtn = document.getElementById('saveAdminFormBtn');
     const formId = document.getElementById('adminFormId').value;
@@ -1085,26 +1110,30 @@
     const minRequiredCount = document.getElementById('adminMinRequiredCount').value || 0;
     const gradeOptions = document.getElementById('adminGradeOptions').value.trim() || "一年,二年,三年,四年,五年,六年";
 
-    if (!formTitle) return alert("請填寫表單主題！");
+    // 收集個人資料欄位與簽名設定
+    const userNameLabel = document.getElementById('adminUserNameLabel').value.trim() || "填寫人姓名";
+    const signatureLabel = document.getElementById('adminSignatureLabel').value.trim() || "親筆簽名確認";
 
-    // 收集個人資料欄位設定
-    const ufRows = document.querySelectorAll('.admin-uf-row');
-    let userFields = [];
+    const ufRows = document.querySelectorAll('#adminExtraUserFieldsContainer .admin-item-row');
+    let extraUserFields = [];
     ufRows.forEach(row => {
       const lbl = row.querySelector('.admin-uf-label').value.trim();
+      const ph = row.querySelector('.admin-uf-placeholder').value.trim();
       const req = row.querySelector('.admin-uf-required').checked;
       if (lbl) {
-        userFields.push({ label: lbl, required: req });
+        extraUserFields.push({ label: lbl, placeholder: ph, required: req });
       }
     });
 
-    if (userFields.length === 0) {
-      return alert("請至少設定一個「填表人個人資料欄位」！");
-    }
+    const userInfoConfig = {
+      userNameLabel: userNameLabel,
+      signatureLabel: signatureLabel,
+      extraUserFields: extraUserFields
+    };
 
-    const signatureLabel = document.getElementById('adminSignatureLabel').value.trim() || "親筆簽名確認";
+    if (!formTitle) return alert("請填寫表單主題！");
 
-    const itemRows = document.querySelectorAll('.admin-item-row');
+    const itemRows = document.querySelectorAll('#adminItemsContainer .admin-item-row');
     let items = [];
     itemRows.forEach(row => {
       const t = row.querySelector('.admin-item-title').value.trim();
@@ -1131,8 +1160,7 @@
       formImgBase64: formImgBase64,
       minRequiredCount: minRequiredCount,
       gradeOptions: gradeOptions,
-      userFields: userFields,           // 傳送個人資料欄位陣列
-      signatureLabel: signatureLabel,   // 傳送自訂簽名標題
+      userInfoConfig: userInfoConfig, // 送出個人資料與簽名欄位設定
       items: items
     };
 
