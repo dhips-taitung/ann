@@ -21,8 +21,10 @@
       border-radius: 12px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.08);
     }
+    
+    /* 預設隱藏頂部藍色控制列，僅管理者登入/後台連結可開啟 */
     .top-bar {
-      display: flex;
+      display: none; 
       justify-content: space-between;
       align-items: center;
       background: #1a73e8;
@@ -236,7 +238,6 @@
       overflow-y: auto;
     }
     
-    /* 頁籤控制 Navigation Tabs */
     .nav-tabs {
       display: flex;
       border-bottom: 2px solid #e2e8f0;
@@ -308,7 +309,6 @@
       font-weight: bold;
     }
 
-    /* 管理表格與網格 CSS */
     .admin-table {
       width: 100%;
       border-collapse: collapse;
@@ -375,13 +375,27 @@
       border-radius: 6px;
       font-weight: bold;
     }
+
+    .footer-admin-link {
+      text-align: center;
+      margin-top: 25px;
+      font-size: 12px;
+      color: #94a3b8;
+    }
+    .footer-admin-link a {
+      color: #94a3b8;
+      text-decoration: none;
+    }
+    .footer-admin-link a:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <!-- 頂部功能列 -->
-  <div class="top-bar">
+  <!-- 頂部功能列：學生填表頁面預設隱藏，管理者帶有 admin=true 參數或登入後展開 -->
+  <div class="top-bar" id="topBar">
     <div>
       <span>📋 切換表單：</span>
       <select id="formSelect" onchange="switchForm()"></select>
@@ -401,8 +415,8 @@
 
   <!-- 前台填表畫面 -->
   <form id="mainForm">
-    <h2 id="displayTitle">載入中...</h2>
-    <div class="header-desc" id="displayDesc">正在讀取表單設定內容...</div>
+    <h2 id="displayTitle">⚡ 正在快速載入表單...</h2>
+    <div class="header-desc" id="displayDesc">正在讀取表單內容，請稍候...</div>
     
     <div id="displayRefUrl" class="ref-link-box" style="display:none;"></div>
     <img id="displayImg" class="header-img-display" style="display:none;">
@@ -461,6 +475,11 @@
     <a href="#" target="_blank" class="download-btn" id="resDownloadBtn">📄 立即下載 PDF 檔</a>
     <br><br>
     <button type="button" onclick="location.reload()" style="padding:8px 16px; cursor:pointer;">填寫新表單</button>
+  </div>
+
+  <!-- 隱密頁尾登入連結 (給管理者無頂列時備用) -->
+  <div class="footer-admin-link">
+    <a href="javascript:void(0)" onclick="openAdminLogin()">🔐 管理者登入專區</a>
   </div>
 </div>
 
@@ -602,18 +621,31 @@
   let currentFormConfig = null;
   let adminPasswordToken = "";
 
-  // [前端極速快取快照]
   const pdfDataCache = {};
   let imageDataCache = null;
 
+  // 網頁載入初始化 (優化：直加載表單設定，省略不必要的選單請求)
   window.addEventListener('load', () => {
     initCanvas();
     const urlParams = new URLSearchParams(window.location.search);
     const formIdFromUrl = urlParams.get('formId');
-    fetchFormList(formIdFromUrl);
+    const isAdmin = urlParams.get('admin') === 'true' || urlParams.get('admin') === '1';
+
+    // 若為管理者進入模式，顯示頂部控制列
+    if (isAdmin) {
+      document.getElementById('topBar').style.display = 'flex';
+      fetchFormList(formIdFromUrl);
+    } else if (formIdFromUrl) {
+      // 學生/家長填表模式：直接加載該表單，速度提升一倍！
+      currentFormId = formIdFromUrl;
+      loadFormConfig(currentFormId);
+    } else {
+      // 無 URL 參數時預設抓取第一份表單
+      fetchFormList(null);
+    }
   });
 
-  // 圖片上傳壓縮與處理引擎 (限制 1MB 以內)
+  // 圖片上傳壓縮 (限制 1MB 以內)
   function handleImageUpload(fileInput, previewImgId, base64HiddenId) {
     const file = fileInput.files[0];
     if (!file) return;
@@ -667,6 +699,7 @@
     }
   }
 
+  // 抓取所有表單選單
   function fetchFormList(targetFormId) {
     fetch(GAS_WEB_APP_URL, {
       method: 'POST',
@@ -695,7 +728,7 @@
         loadFormConfig(currentFormId);
       } else {
         document.getElementById('displayTitle').innerText = "尚未建立任何表單";
-        document.getElementById('displayDesc').innerText = "請點選右上角「管理者後台設定」建立第一份表單。";
+        document.getElementById('displayDesc').innerText = "請點選頁尾「管理者登入專區」建立第一份表單。";
       }
     });
   }
@@ -707,6 +740,7 @@
     loadFormConfig(currentFormId);
   }
 
+  // 載入特定表單內容並渲染畫面
   function loadFormConfig(formId) {
     fetch(GAS_WEB_APP_URL, {
       method: 'POST',
@@ -993,6 +1027,11 @@
       if (data.result === 'success') {
         adminPasswordToken = pwd;
         closeModal('loginModal');
+        
+        // 登入成功後展開頂部列並加載表單選單
+        document.getElementById('topBar').style.display = 'flex';
+        fetchFormList(currentFormId);
+        
         document.getElementById('adminModal').style.display = 'flex';
         switchAdminTab('config');
       } else {
@@ -1075,10 +1114,20 @@
           data.items.forEach(item => addAdminItemRow(item.title, item.desc, item.refUrl, item.imgBase64, item.required));
         }
 
-        const formUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?formId=' + data.formId;
+        // 後台顯示之分享網址 (一般填表者網址) 與 (管理者連結)
+        const baseUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+        const formUrl = baseUrl + '?formId=' + data.formId;
+        const adminFormUrl = baseUrl + '?formId=' + data.formId + '&admin=true';
+
         const urlBox = document.getElementById('adminFormUrlBox');
         urlBox.style.display = 'block';
-        urlBox.innerHTML = `🔗 <b>此表單專屬網址：</b><br><a href="${formUrl}" target="_blank">${formUrl}</a>`;
+        urlBox.innerHTML = `
+          📄 <b>給學生/家長填寫的專屬網址 (無後台控制列)：</b><br>
+          <a href="${formUrl}" target="_blank">${formUrl}</a>
+          <br><br>
+          🔐 <b>管理者專用網址 (含後台控制列)：</b><br>
+          <a href="${adminFormUrl}" target="_blank">${adminFormUrl}</a>
+        `;
       }
     });
   }
@@ -1276,9 +1325,7 @@
     });
   }
 
-  // -------------------------------------------------------------------------
-  // [極速效能優化] PDF 檔案管理邏輯 (含快取極速展現)
-  // -------------------------------------------------------------------------
+  // 後台 PDF 檔案管理
   function renderPdfTable(list) {
     const container = document.getElementById('pdfListContainer');
     if (!list || list.length === 0) {
@@ -1323,13 +1370,12 @@
       return;
     }
 
-    // 優先讀取前端快取實作秒開
     if (!forceRefresh && pdfDataCache[formId]) {
       renderPdfTable(pdfDataCache[formId]);
       return;
     }
 
-    container.innerHTML = "⚡ 正在載入 PDF 檔案紀錄 (極速優化模式)...";
+    container.innerHTML = "⚡ 正在載入 PDF 檔案紀錄...";
 
     fetch(GAS_WEB_APP_URL, {
       method: 'POST',
@@ -1344,9 +1390,6 @@
       } else {
         container.innerHTML = "讀取失敗：" + data.message;
       }
-    })
-    .catch(err => {
-      container.innerHTML = "載入出錯，請再試一次。";
     });
   }
 
@@ -1386,14 +1429,12 @@
     .then(res => res.json())
     .then(data => {
       alert(data.message);
-      delete pdfDataCache[formId]; // 刪除後更新快取
+      delete pdfDataCache[formId];
       loadAdminPdfList(true);
     });
   }
 
-  // -------------------------------------------------------------------------
-  // [極速效能優化] 附件照片管理邏輯 (含快取展現)
-  // -------------------------------------------------------------------------
+  // 後台附件照片管理
   function renderImageGrid(list) {
     const container = document.getElementById('imageListContainer');
     if (!list || list.length === 0) {
