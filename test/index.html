@@ -21,9 +21,10 @@
       border-radius: 12px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.08);
     }
-    /* 頂部藍色工具列 */
+    
+    /* 頂部管理列 (預設隱藏，僅在管理者進入無 formId 網址時顯示) */
     .top-bar {
-      display: flex;
+      display: none;
       justify-content: space-between;
       align-items: center;
       background: #1a73e8;
@@ -379,8 +380,8 @@
 <body>
 
 <div class="container">
-  <!-- 頂部功能列 (僅在無 ?formId= 參數時顯示給管理者) -->
-  <div class="top-bar" id="topBarElement" style="display:none;">
+  <!-- 頂部功能列 (僅管理者入口網址無 formId 時才會顯示) -->
+  <div class="top-bar" id="topBar">
     <div>
       <span>📋 切換表單：</span>
       <select id="formSelect" onchange="switchForm()"></select>
@@ -604,25 +605,22 @@
   const pdfDataCache = {};
   let imageDataCache = null;
 
-  // [關鍵邏輯] 頁面初始化：區分「填寫者專用網址」與「管理者原始網址」
   window.addEventListener('load', () => {
     initCanvas();
     const urlParams = new URLSearchParams(window.location.search);
     const formIdFromUrl = urlParams.get('formId');
-    const topBar = document.getElementById('topBarElement');
+    const topBar = document.getElementById('topBar');
 
-    if (formIdFromUrl && formIdFromUrl.trim() !== "") {
-      // 1. 學生/家長填表專用模式：隱藏頂部工具列
+    // [核心邏輯 1 & 2] 根據網址有無 ?formId 控制紅框藍色管理列的顯示/隱藏
+    if (formIdFromUrl && formIdFromUrl.trim() !== '') {
+      // 學生/填寫人專用網址：隱藏切換選單與管理者登入按鈕
       topBar.style.display = 'none';
-      currentFormId = formIdFromUrl.trim();
-      
-      // 2. 直連極速載入：跳過全表單選單查詢，直接請求單一表單內容 (速度提升 50%)
-      loadFormConfig(currentFormId);
     } else {
-      // 3. 管理者檢視/原始網址模式：顯示頂部工具列
+      // 管理者入口原網址：顯示完整的切換選單與管理者登入按鈕
       topBar.style.display = 'flex';
-      fetchFormList(null);
     }
+
+    fetchFormList(formIdFromUrl);
   });
 
   // 圖片上傳壓縮與處理引擎 (限制 1MB 以內)
@@ -702,30 +700,24 @@
           adminPdfSelect.innerHTML += `<option value="${item.formId}">${item.formTitle}</option>`;
         });
 
-        if (!currentFormId) {
-          currentFormId = targetFormId || data.list[0].formId;
-          select.value = currentFormId;
-          loadFormConfig(currentFormId);
-        } else {
-          select.value = currentFormId;
-        }
+        currentFormId = targetFormId || data.list[0].formId;
+        select.value = currentFormId;
+        loadFormConfig(currentFormId);
       } else {
         document.getElementById('displayTitle').innerText = "尚未建立任何表單";
-        document.getElementById('displayDesc').innerText = "請由原始網址進入並點選右上角「管理者後台設定」建立第一份表單。";
+        document.getElementById('displayDesc').innerText = "請由管理者進入建立第一份表單。";
       }
     });
   }
 
   function switchForm() {
     currentFormId = document.getElementById('formSelect').value;
+    const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?formId=' + currentFormId;
+    window.history.pushState({path:newUrl}, '', newUrl);
     loadFormConfig(currentFormId);
   }
 
-  // 載入特定表單設定並渲染前台畫面 (極速渲染版)
   function loadFormConfig(formId) {
-    document.getElementById('displayTitle').innerText = "⚡ 表單載入中...";
-    document.getElementById('displayDesc').innerText = "正在為您準備檢核項目與簽名畫布...";
-
     fetch(GAS_WEB_APP_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -746,26 +738,29 @@
         if (signatureLbl.startsWith("[") || signatureLbl.startsWith("{")) signatureLbl = "親筆簽名確認";
         document.getElementById('displaySignatureLabel').innerText = signatureLbl;
 
-        // 延伸欄位繪製
         const extraContainer = document.getElementById('extraFieldsContainer');
+        extraContainer.innerHTML = "";
         if (data.extraFields && data.extraFields.length > 0) {
-          extraContainer.innerHTML = data.extraFields.map(field => `
-            <div class="input-group">
-              <label>${field.label} ${field.required ? '<span style="color:red">*</span>' : ''}</label>
-              <input type="text" class="user-extra-input" data-label="${field.label}" data-required="${field.required ? 'true' : 'false'}" placeholder="請輸入${field.label}" ${field.required ? 'required' : ''}>
-            </div>
-          `).join('');
-        } else {
-          extraContainer.innerHTML = "";
+          data.extraFields.forEach((field) => {
+            const reqStar = field.required ? '<span style="color:red">*</span>' : '';
+            const reqAttr = field.required ? 'required' : '';
+            extraContainer.innerHTML += `
+              <div class="input-group">
+                <label>${field.label} ${reqStar}</label>
+                <input type="text" class="user-extra-input" data-label="${field.label}" data-required="${field.required ? 'true' : 'false'}" placeholder="請輸入${field.label}" ${reqAttr}>
+              </div>
+            `;
+          });
         }
 
-        // 年級下拉選單繪製
         const gradeSelect = document.getElementById('userGrade');
+        gradeSelect.innerHTML = '<option value="">請選擇年級</option>';
         const rawGradeStr = data.gradeOptions || "一年,二年,三年,四年,五年,六年";
         const gradeList = rawGradeStr.split(/[,，]/).map(s => s.trim()).filter(Boolean);
-        gradeSelect.innerHTML = '<option value="">請選擇年級</option>' + gradeList.map(g => `<option value="${g}">${g}</option>`).join('');
+        gradeList.forEach(g => {
+          gradeSelect.innerHTML += `<option value="${g}">${g}</option>`;
+        });
 
-        // 參考網址與主題照片
         const refUrlBox = document.getElementById('displayRefUrl');
         if (data.formRefUrl) {
           refUrlBox.style.display = 'block';
@@ -782,30 +777,34 @@
           headerImg.style.display = 'none';
         }
 
-        // 題目清單極速繪製
         const container = document.getElementById('checklistContainer');
         container.innerHTML = "";
 
         if (data.items && data.items.length > 0) {
-          const itemsHtml = data.items.map((item, index) => {
-            const reqBadge = item.required ? `<span class="required-badge">必選</span>` : "";
+          const card = document.createElement('div');
+          card.className = "section-card";
+
+          data.items.forEach((item, index) => {
+            const requiredHtml = item.required ? `<span class="required-badge">必選</span>` : "";
             let html = `
               <label class="checkbox-item">
                 <input type="checkbox" class="rule-check" data-index="${index}">
-                <span><b>${index + 1}. ${item.title}</b> ${reqBadge}</span>
+                <span><b>${index + 1}. ${item.title}</b> ${requiredHtml}</span>
               </label>
             `;
-            if (item.desc) html += `<div class="item-desc-box">${item.desc}</div>`;
-            if (item.refUrl) html += `<div class="item-desc-box" style="background:#eef3fc;">🔗 <b>參考網址：</b><a href="${item.refUrl}" target="_blank" style="color:#1a73e8; font-weight:bold;">${item.refUrl}</a></div>`;
-            if (item.imgBase64) html += `<img src="${item.imgBase64}" class="item-img-display" loading="lazy">`;
-            return html;
-          }).join('');
-
-          container.innerHTML = `<div class="section-card">${itemsHtml}</div>`;
+            if (item.desc) {
+              html += `<div class="item-desc-box">${item.desc}</div>`;
+            }
+            if (item.refUrl) {
+              html += `<div class="item-desc-box" style="background:#eef3fc;">🔗 <b>參考網址：</b><a href="${item.refUrl}" target="_blank" style="color:#1a73e8; font-weight:bold;">${item.refUrl}</a></div>`;
+            }
+            if (item.imgBase64) {
+              html += `<img src="${item.imgBase64}" class="item-img-display">`;
+            }
+            card.innerHTML += html;
+          });
+          container.appendChild(card);
         }
-      } else {
-        document.getElementById('displayTitle').innerText = "查無此表單";
-        document.getElementById('displayDesc').innerText = data.message || "表單代碼不正確。";
       }
     });
   }
@@ -915,7 +914,9 @@
       const isReq = input.getAttribute('data-required') === 'true';
       const val = input.value.trim();
 
-      if (isReq && !val) missingExtraLabels.push(lbl);
+      if (isReq && !val) {
+        missingExtraLabels.push(lbl);
+      }
       extraFieldData.push({ label: lbl, value: val });
     });
 
@@ -1003,9 +1004,6 @@
         adminPasswordToken = pwd;
         closeModal('loginModal');
         document.getElementById('adminModal').style.display = 'flex';
-        
-        // 若尚未抓取選單，登入後自動抓取
-        fetchFormList(currentFormId);
         switchAdminTab('config');
       } else {
         alert(data.message);
@@ -1087,10 +1085,11 @@
           data.items.forEach(item => addAdminItemRow(item.title, item.desc, item.refUrl, item.imgBase64, item.required));
         }
 
+        // [核心邏輯 2] 後台產出的學生專用連結自動包含 ?formId= 參數
         const formUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?formId=' + data.formId;
         const urlBox = document.getElementById('adminFormUrlBox');
         urlBox.style.display = 'block';
-        urlBox.innerHTML = `🔗 <b>此表單專屬填寫網址 (自動隱藏選單與後台鈕)：</b><br><a href="${formUrl}" target="_blank">${formUrl}</a>`;
+        urlBox.innerHTML = `🔗 <b>給學生/填寫人的專屬網址 (自動隱藏管理列)：</b><br><a href="${formUrl}" target="_blank">${formUrl}</a>`;
       }
     });
   }
@@ -1288,7 +1287,6 @@
     });
   }
 
-  // PDF 管理渲染
   function renderPdfTable(list) {
     const container = document.getElementById('pdfListContainer');
     if (!list || list.length === 0) {
@@ -1338,7 +1336,7 @@
       return;
     }
 
-    container.innerHTML = "⚡ 正在載入 PDF 檔案紀錄...";
+    container.innerHTML = "⚡ 正在載入 PDF 檔案紀錄 (極速模式)...";
 
     fetch(GAS_WEB_APP_URL, {
       method: 'POST',
@@ -1353,6 +1351,9 @@
       } else {
         container.innerHTML = "讀取失敗：" + data.message;
       }
+    })
+    .catch(err => {
+      container.innerHTML = "載入出錯，請再試一次。";
     });
   }
 
@@ -1360,8 +1361,13 @@
     const formId = document.getElementById('adminPdfFormSelect').value;
     const checkedBoxes = document.querySelectorAll('.pdf-check:checked');
 
-    if (checkedBoxes.length === 0) return alert("請先勾選要刪除的 PDF 檔案紀錄！");
-    if (!confirm(`⚠️ 確定要刪除選取的 ${checkedBoxes.length} 個 PDF 檔案及其試算表紀錄嗎？`)) return;
+    if (checkedBoxes.length === 0) {
+      return alert("請先勾選要刪除的 PDF 檔案紀錄！");
+    }
+
+    if (!confirm(`⚠️ 確定要刪除選取的 ${checkedBoxes.length} 個 PDF 檔案及其試算表紀錄嗎？\n此動作將同步移至雲端垃圾桶！`)) {
+      return;
+    }
 
     let itemsToDelete = [];
     checkedBoxes.forEach(box => {
@@ -1392,7 +1398,6 @@
     });
   }
 
-  // 附件照片管理渲染
   function renderImageGrid(list) {
     const container = document.getElementById('imageListContainer');
     if (!list || list.length === 0) {
@@ -1450,11 +1455,18 @@
   function deleteSelectedImages() {
     const checkedBoxes = document.querySelectorAll('.img-check:checked');
 
-    if (checkedBoxes.length === 0) return alert("請先勾選要刪除的照片檔案！");
-    if (!confirm(`⚠️ 確定要刪除選取的 ${checkedBoxes.length} 張照片嗎？`)) return;
+    if (checkedBoxes.length === 0) {
+      return alert("請先勾選要刪除的照片檔案！");
+    }
+
+    if (!confirm(`⚠️ 確定要刪除選取的 ${checkedBoxes.length} 張照片嗎？\n檔案將移至 Google Drive 垃圾桶！`)) {
+      return;
+    }
 
     let fileIds = [];
-    checkedBoxes.forEach(box => fileIds.push(box.getAttribute('data-fileid')));
+    checkedBoxes.forEach(box => {
+      fileIds.push(box.getAttribute('data-fileid'));
+    });
 
     const container = document.getElementById('imageListContainer');
     container.innerHTML = "⏳ 正在刪除照片檔案中...";
