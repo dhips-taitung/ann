@@ -286,7 +286,6 @@
       border-radius: 4px;
       cursor: pointer;
       font-weight: bold;
-      margin-bottom: 10px;
     }
     .batch-del-btn:hover { background: #b3261e; }
 
@@ -309,7 +308,7 @@
       font-weight: bold;
     }
 
-    /* 管理表格與網格專用 CSS */
+    /* 管理表格與網格 CSS */
     .admin-table {
       width: 100%;
       border-collapse: collapse;
@@ -405,17 +404,14 @@
     <h2 id="displayTitle">載入中...</h2>
     <div class="header-desc" id="displayDesc">正在讀取表單設定內容...</div>
     
-    <!-- 標題參考網址與照片展示區 -->
     <div id="displayRefUrl" class="ref-link-box" style="display:none;"></div>
     <img id="displayImg" class="header-img-display" style="display:none;">
 
-    <!-- 個人基本資料 -->
     <div class="input-group">
       <label><span id="displayUserNameLabel">填寫人姓名</span> <span style="color:red">*</span></label>
       <input type="text" id="userName" placeholder="請輸入姓名" required>
     </div>
 
-    <!-- 班級使用版：年級、班級、座號欄位 -->
     <div class="class-info-group">
       <div class="class-info-item">
         <label>年級 <span style="color:red">*</span></label>
@@ -441,13 +437,9 @@
       </div>
     </div>
 
-    <!-- 動態渲染自訂延伸基本資料欄位 -->
     <div id="extraFieldsContainer"></div>
-
-    <!-- 動態檢核題目渲染區 -->
     <div id="checklistContainer"></div>
 
-    <!-- 手寫簽名 -->
     <div class="input-group">
       <label><span id="displaySignatureLabel">親筆簽名確認</span> <span style="color:red">*</span></label>
       <div class="signature-container">
@@ -485,12 +477,11 @@
   </div>
 </div>
 
-<!-- 管理者後台設定 Modal (支援頁籤切換) -->
+<!-- 管理者後台設定 Modal -->
 <div class="modal-overlay" id="adminModal">
   <div class="modal-card">
     <h3>⚙️ 管理者後台中心</h3>
     
-    <!-- 後台三分頁按鈕 -->
     <div class="nav-tabs">
       <div class="nav-tab active" id="tabBtnConfig" onclick="switchAdminTab('config')">⚙️ 表單內容設定</div>
       <div class="nav-tab" id="tabBtnPdf" onclick="switchAdminTab('pdf')">📄 PDF 檔案管理</div>
@@ -576,12 +567,12 @@
     <div class="tab-content" id="tabContentPdf">
       <div class="input-group">
         <label>選擇檢視 PDF 檔之表單：</label>
-        <select id="adminPdfFormSelect" onchange="loadAdminPdfList()"></select>
+        <select id="adminPdfFormSelect" onchange="loadAdminPdfList(true)"></select>
       </div>
       
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
         <button type="button" class="batch-del-btn" onclick="deleteSelectedPdfs()">🗑️ 刪除勾選之 PDF 檔紀錄</button>
-        <button type="button" onclick="loadAdminPdfList()" style="padding:6px 12px; cursor:pointer;">🔄 重新整理</button>
+        <button type="button" onclick="loadAdminPdfList(true)" style="padding:6px 12px; cursor:pointer; border-radius:4px; border:1px solid #ccc; background:#fff;">🔄 強制重新整理</button>
       </div>
 
       <div id="pdfListContainer">載入中...</div>
@@ -589,11 +580,11 @@
 
     <!-- 頁籤三：附件照片管理 -->
     <div class="tab-content" id="tabContentImages">
-      <p style="font-size:13px; color:#64748b; margin-top:0;">此處為雲端照片附件資料夾中保存的所有圖片檔，包含標頭照片與題目附件圖檔。</p>
+      <p style="font-size:13px; color:#64748b; margin-top:0;">此處為雲端照片附件資料夾中保存的所有圖片檔。</p>
       
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
         <button type="button" class="batch-del-btn" onclick="deleteSelectedImages()">🗑️ 刪除勾選之照片檔</button>
-        <button type="button" onclick="loadAdminImageList()" style="padding:6px 12px; cursor:pointer;">🔄 重新整理照片庫</button>
+        <button type="button" onclick="loadAdminImageList(true)" style="padding:6px 12px; cursor:pointer; border-radius:4px; border:1px solid #ccc; background:#fff;">🔄 強制重新整理照片庫</button>
       </div>
 
       <div id="imageListContainer">載入中...</div>
@@ -611,7 +602,10 @@
   let currentFormConfig = null;
   let adminPasswordToken = "";
 
-  // 網頁載入初始化
+  // [前端極速快取快照]
+  const pdfDataCache = {};
+  let imageDataCache = null;
+
   window.addEventListener('load', () => {
     initCanvas();
     const urlParams = new URLSearchParams(window.location.search);
@@ -673,7 +667,6 @@
     }
   }
 
-  // 抓取所有表單選單
   function fetchFormList(targetFormId) {
     fetch(GAS_WEB_APP_URL, {
       method: 'POST',
@@ -707,7 +700,6 @@
     });
   }
 
-  // 切換選單表單
   function switchForm() {
     currentFormId = document.getElementById('formSelect').value;
     const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?formId=' + currentFormId;
@@ -715,7 +707,6 @@
     loadFormConfig(currentFormId);
   }
 
-  // 載入特定表單設定並渲染前台畫面
   function loadFormConfig(formId) {
     fetch(GAS_WEB_APP_URL, {
       method: 'POST',
@@ -852,7 +843,6 @@
     ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height); hasSigned = false;
   }
 
-  // 查詢 PDF 檔
   function queryPDF() {
     const queryId = document.getElementById('queryFileId').value.trim();
     const resultDiv = document.getElementById('queryResult');
@@ -874,7 +864,6 @@
     });
   }
 
-  // 送出填寫表單
   document.getElementById('mainForm').addEventListener('submit', function(e) {
     e.preventDefault();
     const checkboxes = document.querySelectorAll('.rule-check');
@@ -989,7 +978,6 @@
     });
   });
 
-  // 管理者後台與頁籤切換邏輯
   function openAdminLogin() { document.getElementById('loginModal').style.display = 'flex'; }
   function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
@@ -1013,7 +1001,6 @@
     });
   }
 
-  // 切換後台三分頁
   function switchAdminTab(tabName) {
     document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -1029,15 +1016,14 @@
       if (currentFormId && adminPdfSelect) {
         adminPdfSelect.value = currentFormId;
       }
-      loadAdminPdfList();
+      loadAdminPdfList(false);
     } else if (tabName === 'images') {
       document.getElementById('tabBtnImages').classList.add('active');
       document.getElementById('tabContentImages').classList.add('active');
-      loadAdminImageList();
+      loadAdminImageList(false);
     }
   }
 
-  // 載入表單內容至設定頁籤
   function loadFormToAdmin() {
     const formId = document.getElementById('adminFormSelect').value;
     if (!formId) return;
@@ -1291,9 +1277,44 @@
   }
 
   // -------------------------------------------------------------------------
-  // [新增功能] PDF 檔案管理頁籤邏輯
+  // [極速效能優化] PDF 檔案管理邏輯 (含快取極速展現)
   // -------------------------------------------------------------------------
-  function loadAdminPdfList() {
+  function renderPdfTable(list) {
+    const container = document.getElementById('pdfListContainer');
+    if (!list || list.length === 0) {
+      container.innerHTML = "<p style='color:#64748b;'>目前尚無任何提交之 PDF 檔案。</p>";
+      return;
+    }
+
+    const rowsHtml = list.map(item => `
+      <tr>
+        <td style="text-align:center;">
+          <input type="checkbox" class="pdf-check" data-pdfid="${item.pdfId}" data-easyid="${item.easyId}">
+        </td>
+        <td>${item.time}</td>
+        <td><b>${item.userName}</b><br><small style="color:#64748b;">${item.classGroup} ${item.seatNo ? item.seatNo + '號' : ''}</small></td>
+        <td><span style="background:#e8f0fe; color:#1a73e8; padding:2px 6px; border-radius:4px; font-weight:bold;">${item.easyId}</span></td>
+        <td><a href="${item.downloadUrl}" target="_blank" style="color:#d93025; font-weight:bold;">📄 下載 PDF</a></td>
+      </tr>
+    `).join('');
+
+    container.innerHTML = `
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th style="width:40px; text-align:center;"><input type="checkbox" onchange="toggleSelectAll('pdf-check', this.checked)"></th>
+            <th>填表時間</th>
+            <th>填寫人 / 班級座號</th>
+            <th>查詢ID</th>
+            <th>PDF 下載</th>
+          </tr>
+        </thead>
+        <tbody>${rowsHtml}</tbody>
+      </table>
+    `;
+  }
+
+  function loadAdminPdfList(forceRefresh = false) {
     const formId = document.getElementById('adminPdfFormSelect').value;
     const container = document.getElementById('pdfListContainer');
 
@@ -1302,7 +1323,13 @@
       return;
     }
 
-    container.innerHTML = "⏳ 載入 PDF 檔案紀錄中...";
+    // 優先讀取前端快取實作秒開
+    if (!forceRefresh && pdfDataCache[formId]) {
+      renderPdfTable(pdfDataCache[formId]);
+      return;
+    }
+
+    container.innerHTML = "⚡ 正在載入 PDF 檔案紀錄 (極速優化模式)...";
 
     fetch(GAS_WEB_APP_URL, {
       method: 'POST',
@@ -1312,44 +1339,14 @@
     .then(res => res.json())
     .then(data => {
       if (data.result === 'success') {
-        if (data.list.length === 0) {
-          container.innerHTML = "目前尚無任何提交之 PDF 檔案。";
-          return;
-        }
-
-        let html = `
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th style="width:40px; text-align:center;"><input type="checkbox" onchange="toggleSelectAll('pdf-check', this.checked)"></th>
-                <th>填表時間</th>
-                <th>填寫人 / 班級座號</th>
-                <th>查詢ID</th>
-                <th>PDF 下載</th>
-              </tr>
-            </thead>
-            <tbody>
-        `;
-
-        data.list.forEach(item => {
-          html += `
-            <tr>
-              <td style="text-align:center;">
-                <input type="checkbox" class="pdf-check" data-pdfid="${item.pdfId}" data-easyid="${item.easyId}">
-              </td>
-              <td>${item.time}</td>
-              <td><b>${item.userName}</b><br><small style="color:#64748b;">${item.classGroup} ${item.seatNo ? item.seatNo + '號' : ''}</small></td>
-              <td><span style="background:#e8f0fe; color:#1a73e8; padding:2px 6px; border-radius:4px; font-weight:bold;">${item.easyId}</span></td>
-              <td><a href="${item.downloadUrl}" target="_blank" style="color:#d93025; font-weight:bold;">📄 下載 PDF</a></td>
-            </tr>
-          `;
-        });
-
-        html += `</tbody></table>`;
-        container.innerHTML = html;
+        pdfDataCache[formId] = data.list || [];
+        renderPdfTable(pdfDataCache[formId]);
       } else {
         container.innerHTML = "讀取失敗：" + data.message;
       }
+    })
+    .catch(err => {
+      container.innerHTML = "載入出錯，請再試一次。";
     });
   }
 
@@ -1389,16 +1386,51 @@
     .then(res => res.json())
     .then(data => {
       alert(data.message);
-      loadAdminPdfList();
+      delete pdfDataCache[formId]; // 刪除後更新快取
+      loadAdminPdfList(true);
     });
   }
 
   // -------------------------------------------------------------------------
-  // [新增功能] 附件照片管理頁籤邏輯
+  // [極速效能優化] 附件照片管理邏輯 (含快取展現)
   // -------------------------------------------------------------------------
-  function loadAdminImageList() {
+  function renderImageGrid(list) {
     const container = document.getElementById('imageListContainer');
-    container.innerHTML = "⏳ 載入照片附件庫中...";
+    if (!list || list.length === 0) {
+      container.innerHTML = "<p style='color:#64748b;'>目前照片資料夾中無任何圖片檔案。</p>";
+      return;
+    }
+
+    const cardsHtml = list.map(img => `
+      <div class="image-card">
+        <input type="checkbox" class="img-check" data-fileid="${img.fileId}" style="position:absolute; top:15px; left:15px; width:18px; height:18px;">
+        <a href="${img.fileUrl}" target="_blank">
+          <img src="${img.fileUrl}" alt="${img.fileName}" loading="lazy">
+        </a>
+        <div class="image-card-title" title="${img.fileName}">${img.fileName}</div>
+        <div style="font-size:11px; color:#94a3b8;">${img.dateCreated}</div>
+      </div>
+    `).join('');
+
+    container.innerHTML = `
+      <div style="margin-bottom:10px;">
+        <label style="font-weight:bold; cursor:pointer;">
+          <input type="checkbox" onchange="toggleSelectAll('img-check', this.checked)"> 全選所有照片
+        </label>
+      </div>
+      <div class="image-grid">${cardsHtml}</div>
+    `;
+  }
+
+  function loadAdminImageList(forceRefresh = false) {
+    const container = document.getElementById('imageListContainer');
+
+    if (!forceRefresh && imageDataCache) {
+      renderImageGrid(imageDataCache);
+      return;
+    }
+
+    container.innerHTML = "⚡ 載入照片附件庫中...";
 
     fetch(GAS_WEB_APP_URL, {
       method: 'POST',
@@ -1408,35 +1440,8 @@
     .then(res => res.json())
     .then(data => {
       if (data.result === 'success') {
-        if (data.list.length === 0) {
-          container.innerHTML = "目前照片資料夾中無任何圖片檔案。";
-          return;
-        }
-
-        let html = `
-          <div style="margin-bottom:10px;">
-            <label style="font-weight:bold; cursor:pointer;">
-              <input type="checkbox" onchange="toggleSelectAll('img-check', this.checked)"> 全選所有照片
-            </label>
-          </div>
-          <div class="image-grid">
-        `;
-
-        data.list.forEach(img => {
-          html += `
-            <div class="image-card">
-              <input type="checkbox" class="img-check" data-fileid="${img.fileId}" style="position:absolute; top:15px; left:15px; width:18px; height:18px;">
-              <a href="${img.fileUrl}" target="_blank">
-                <img src="${img.fileUrl}" alt="${img.fileName}" loading="lazy">
-              </a>
-              <div class="image-card-title" title="${img.fileName}">${img.fileName}</div>
-              <div style="font-size:11px; color:#94a3b8;">${img.dateCreated}</div>
-            </div>
-          `;
-        });
-
-        html += `</div>`;
-        container.innerHTML = html;
+        imageDataCache = data.list || [];
+        renderImageGrid(imageDataCache);
       } else {
         container.innerHTML = "讀取失敗：" + data.message;
       }
@@ -1474,11 +1479,11 @@
     .then(res => res.json())
     .then(data => {
       alert(data.message);
-      loadAdminImageList();
+      imageDataCache = null;
+      loadAdminImageList(true);
     });
   }
 
-  // 通用輔助：全選與取消全選
   function toggleSelectAll(className, isChecked) {
     document.querySelectorAll('.' + className).forEach(chk => {
       chk.checked = isChecked;
