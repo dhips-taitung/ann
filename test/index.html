@@ -291,13 +291,13 @@
 <body>
 
 <div class="container">
-  <!-- 頂部標題與後台登入按鈕 (已取消多表單選單) -->
+  <!-- 頂部標題與後台登入按鈕 -->
   <div class="top-bar">
     <h3>📋 班級同意書線上簽署系統</h3>
     <button type="button" class="admin-btn" onclick="openAdminLogin()">🔐 管理者後台設定</button>
   </div>
 
-  <!-- 重複下載查詢區塊 (支援 Enter 鍵查詢) -->
+  <!-- 查詢區塊 (支援 Enter 鍵) -->
   <div class="query-card">
     <div style="font-weight: bold; color: #1a73e8;">🔍 查詢已填寫表單 (下載 PDF)</div>
     <div class="query-input-group">
@@ -310,9 +310,8 @@
   <!-- 前台填表畫面 -->
   <form id="mainForm">
     <h2 id="displayTitle">載入中...</h2>
-    <div class="header-desc" id="displayDesc">正在讀取同意書設定內容...</div>
+    <div class="header-desc" id="displayDesc">正在載入同意書內容...</div>
     
-    <!-- 標題參考網址與照片展示區 -->
     <div id="displayRefUrl" class="ref-link-box" style="display:none;"></div>
     <img id="displayImg" class="header-img-display" style="display:none;">
 
@@ -322,7 +321,7 @@
       <input type="text" id="userName" placeholder="請輸入姓名" required>
     </div>
 
-    <!-- 班級使用版：年級、班級、座號欄位 -->
+    <!-- 年級、班級、座號欄位 -->
     <div class="class-info-group">
       <div class="class-info-item">
         <label>年級 <span style="color:red">*</span></label>
@@ -348,13 +347,13 @@
       </div>
     </div>
 
-    <!-- 動態渲染自訂延伸基本資料欄位 -->
+    <!-- 自訂延伸欄位 -->
     <div id="extraFieldsContainer"></div>
 
-    <!-- 動態檢核題目渲染區 -->
+    <!-- 檢核題目區 -->
     <div id="checklistContainer"></div>
 
-    <!-- 手寫簽名 (高度 216px) -->
+    <!-- 手寫簽名 -->
     <div class="input-group">
       <label><span id="displaySignatureLabel">親筆簽名確認</span> <span style="color:red">*</span></label>
       <div class="signature-container">
@@ -379,7 +378,7 @@
   </div>
 </div>
 
-<!-- 管理者登入 Modal (支援 Enter 鍵登入) -->
+<!-- 管理者登入 Modal (支援 Enter 鍵) -->
 <div class="modal-overlay" id="loginModal">
   <div class="modal-card" style="max-width: 400px;">
     <h3>🔐 管理者登入</h3>
@@ -394,7 +393,7 @@
   </div>
 </div>
 
-<!-- 管理者後台設定 Modal (獨立編輯同意書) -->
+<!-- 管理者後台設定 Modal -->
 <div class="modal-overlay" id="adminModal">
   <div class="modal-card">
     <h3>⚙️ 班級同意書後台設定</h3>
@@ -410,7 +409,6 @@
       <textarea id="adminFormDesc" style="width:100%; height:80px; border-radius:6px; padding:8px;" placeholder="請輸入說明條文內容..."></textarea>
     </div>
 
-    <!-- 設定：填寫人欄位名稱與簽名欄位名稱 -->
     <div style="display:flex; gap:10px;">
       <div class="input-group" style="flex:1;">
         <label>「填寫人姓名」欄位名稱：</label>
@@ -422,7 +420,6 @@
       </div>
     </div>
 
-    <!-- 設定：自訂延伸基本資料欄位 -->
     <div style="background:#f1f5f9; padding:12px; border-radius:6px; border:1px solid #cbd5e1; margin-bottom:15px;">
       <h5 style="margin:0 0 8px 0; color:#1e293b;">自訂延伸基本資料欄位 (如：家長電話、緊急聯絡人等)</h5>
       <div id="adminExtraFieldsContainer"></div>
@@ -460,25 +457,220 @@
 
     <br><br>
 
-    <!-- 儲存後不自動關閉後台，只能透過此手動關閉 -->
+    <!-- 寫入仍使用 GAS Deployed URL -->
     <button type="button" class="submit-btn" id="saveAdminFormBtn" onclick="saveAdminFormConfig()">💾 儲存同意書設定</button>
     <button type="button" style="width:100%; margin-top:8px; padding:12px; background:#6c757d; color:white; border:none; border-radius:6px; font-weight:bold; cursor:pointer;" onclick="closeModal('adminModal')">❌ 關閉後台</button>
   </div>
 </div>
 
 <script>
+  // 1. GAS 寫入與提交 API 網址
   const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxXpi0zSLgzr1ix2UM_wp3kED24uF80E2odz8a2MQepKE0JmUbmUPPwB9jN3aSwemOF/exec";
+  
+  // 2. 試算表 CSV 直連網址 (前台超高速讀取)
+  const SPREADSHEET_ID = "1GT53RxyCBln6uuhUiDitauGfcbSoNQ1Q2ePT_kTsPqw";
+  const CSV_URL = `https://docs.google.com/spreadsheets/d/e/2PACX-1vQWgP_-GLR3ljSXPsMjqYXsEnsa5zRgCAY1BrbtBOI_W1vAqF-d5r32zBv09JfysNhPCUthBTFvOhAJ/pub?gid=941265157&single=true&output=csv`;
 
   let currentFormConfig = null;
   let adminPasswordToken = "";
 
-  // 網頁載入初始化，直接載入獨立同意書設定
+  // 初始化
   window.addEventListener('load', () => {
     initCanvas();
-    loadFormConfig();
+    loadFormConfigFromCSV();
   });
 
-  // 圖片處理引擎
+  // 超高速 CSV 解析引擎 (處理標準 CSV 雙引號與換行符號)
+  function parseCSV(text) {
+    let lines = [];
+    let row = [];
+    let inQuotes = false;
+    let currentStr = '';
+    for (let i = 0; i < text.length; i++) {
+      let c = text[i];
+      let nextC = text[i+1];
+      if (c === '"') {
+        if (inQuotes && nextC === '"') {
+          currentStr += '"';
+          i++;
+        } else {
+          inQuotes = !inQuotes;
+        }
+      } else if (c === ',' && !inQuotes) {
+        row.push(currentStr);
+        currentStr = '';
+      } else if ((c === '\r' || c === '\n') && !inQuotes) {
+        if (c === '\r' && nextC === '\n') { i++; }
+        row.push(currentStr);
+        currentStr = '';
+        if (row.length > 1 || row[0] !== '') {
+          lines.push(row);
+        }
+        row = [];
+      } else {
+        currentStr += c;
+      }
+    }
+    if (currentStr || row.length > 0) {
+      row.push(currentStr);
+      lines.push(row);
+    }
+    return lines;
+  }
+
+  function cleanJsonStr(str) {
+    if (!str) return "[]";
+    str = str.trim();
+    if (str.startsWith("'")) str = str.substring(1);
+    return str;
+  }
+
+  // 1. 前台超高速讀取表單設定 (CSV)
+  function loadFormConfigFromCSV() {
+    fetch(CSV_URL)
+      .then(res => {
+        if (!res.ok) throw new Error("CSV Fetch Failed");
+        return res.text();
+      })
+      .then(csvText => {
+        const rows = parseCSV(csvText);
+        if (rows.length >= 2) {
+          const row = rows[1]; // 第一筆表單資料列 (第0列為 Header)
+
+          let items = [];
+          let extraFields = [];
+          try { items = JSON.parse(cleanJsonStr(row[3])); } catch(e){}
+          try { extraFields = JSON.parse(cleanJsonStr(row[11])); } catch(e){}
+
+          let uLabel = row[9] || "學生姓名";
+          if (uLabel.startsWith("[") || uLabel.startsWith("{")) uLabel = "學生姓名";
+
+          let sLabel = row[10] || "家長簽名確認";
+          if (sLabel.startsWith("[") || sLabel.startsWith("{")) sLabel = "家長簽名確認";
+
+          currentFormConfig = {
+            result: 'success',
+            formId: row[0] || "CLASS_CONSENT_FORM",
+            formTitle: row[1] || "班級同意書",
+            formDesc: row[2] || "",
+            items: items,
+            formImgBase64: row[5] || "",
+            formRefUrl: row[6] || "",
+            minRequiredCount: parseInt(row[7] || "0", 10),
+            gradeOptions: row[8] || "一年,二年,三年,四年,五年,六年",
+            userNameLabel: uLabel,
+            signatureLabel: sLabel,
+            extraFields: extraFields
+          };
+          renderFormUI(currentFormConfig);
+        } else {
+          loadFormConfigFromGAS(); // 若 CSV 為空，改用 GAS 備用讀取
+        }
+      })
+      .catch(err => {
+        console.warn("CSV 讀取失敗，自動改用 GAS 備用路徑讀取：", err);
+        loadFormConfigFromGAS();
+      });
+  }
+
+  // GAS 備用讀取機制
+  function loadFormConfigFromGAS() {
+    fetch(GAS_WEB_APP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'getFormConfig' })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.result === 'success') {
+        currentFormConfig = data;
+        renderFormUI(data);
+      }
+    });
+  }
+
+  // 渲染前台畫面
+  function renderFormUI(data) {
+    document.getElementById('displayTitle').innerText = data.formTitle || "班級同意書";
+    document.getElementById('displayDesc').innerText = data.formDesc || "";
+
+    document.getElementById('displayUserNameLabel').innerText = data.userNameLabel || "學生姓名";
+    document.getElementById('displaySignatureLabel').innerText = data.signatureLabel || "家長簽名確認";
+
+    // 延伸欄位
+    const extraContainer = document.getElementById('extraFieldsContainer');
+    extraContainer.innerHTML = "";
+    if (data.extraFields && data.extraFields.length > 0) {
+      data.extraFields.forEach((field) => {
+        const reqStar = field.required ? '<span style="color:red">*</span>' : '';
+        const reqAttr = field.required ? 'required' : '';
+        extraContainer.innerHTML += `
+          <div class="input-group">
+            <label>${field.label} ${reqStar}</label>
+            <input type="text" class="user-extra-input" data-label="${field.label}" data-required="${field.required ? 'true' : 'false'}" placeholder="請輸入${field.label}" ${reqAttr}>
+          </div>
+        `;
+      });
+    }
+
+    // 年級選項
+    const gradeSelect = document.getElementById('userGrade');
+    gradeSelect.innerHTML = '<option value="">請選擇年級</option>';
+    const rawGradeStr = data.gradeOptions || "一年,二年,三年,四年,五年,六年";
+    const gradeList = rawGradeStr.split(/[,，]/).map(s => s.trim()).filter(Boolean);
+    gradeList.forEach(g => {
+      gradeSelect.innerHTML += `<option value="${g}">${g}</option>`;
+    });
+
+    // 網址與圖片
+    const refUrlBox = document.getElementById('displayRefUrl');
+    if (data.formRefUrl) {
+      refUrlBox.style.display = 'block';
+      refUrlBox.innerHTML = `🔗 <b>參考網址：</b><a href="${data.formRefUrl}" target="_blank">${data.formRefUrl}</a>`;
+    } else {
+      refUrlBox.style.display = 'none';
+    }
+
+    const headerImg = document.getElementById('displayImg');
+    if (data.formImgBase64) {
+      headerImg.src = data.formImgBase64;
+      headerImg.style.display = 'block';
+    } else {
+      headerImg.style.display = 'none';
+    }
+
+    // 條款渲染
+    const container = document.getElementById('checklistContainer');
+    container.innerHTML = "";
+
+    if (data.items && data.items.length > 0) {
+      const card = document.createElement('div');
+      card.className = "section-card";
+
+      data.items.forEach((item, index) => {
+        const requiredHtml = item.required ? `<span class="required-badge">必選</span>` : "";
+        let html = `
+          <label class="checkbox-item">
+            <input type="checkbox" class="rule-check" data-index="${index}">
+            <span><b>${index + 1}. ${item.title}</b> ${requiredHtml}</span>
+          </label>
+        `;
+        if (item.desc) {
+          html += `<div class="item-desc-box">${item.desc}</div>`;
+        }
+        if (item.refUrl) {
+          html += `<div class="item-desc-box" style="background:#eef3fc;">🔗 <b>參考網址：</b><a href="${item.refUrl}" target="_blank" style="color:#1a73e8; font-weight:bold;">${item.refUrl}</a></div>`;
+        }
+        if (item.imgBase64) {
+          html += `<img src="${item.imgBase64}" class="item-img-display">`;
+        }
+        card.innerHTML += html;
+      });
+      container.appendChild(card);
+    }
+  }
+
+  // 圖片處理
   function handleImageUpload(fileInput, previewImgId, base64HiddenId) {
     const file = fileInput.files[0];
     if (!file) return;
@@ -495,16 +687,14 @@
       img.onload = function() {
         const canvas = document.createElement('canvas');
         const maxWidth = 500;
-        let width = img.width;
-        let height = img.height;
+        let width = img.width, height = img.height;
 
         if (width > maxWidth) {
           height = Math.round((height * maxWidth) / width);
           width = maxWidth;
         }
 
-        canvas.width = width;
-        canvas.height = height;
+        canvas.width = width; canvas.height = height;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
 
@@ -535,104 +725,7 @@
     }
   }
 
-  // 載入同意書設定並渲染前台畫面
-  function loadFormConfig() {
-    fetch(GAS_WEB_APP_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'getFormConfig' })
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data.result === 'success') {
-        currentFormConfig = data;
-        document.getElementById('displayTitle').innerText = data.formTitle || "班級同意書";
-        document.getElementById('displayDesc').innerText = data.formDesc || "";
-
-        let userNameLbl = data.userNameLabel || "學生姓名";
-        if (userNameLbl.startsWith("[") || userNameLbl.startsWith("{")) userNameLbl = "學生姓名";
-        document.getElementById('displayUserNameLabel').innerText = userNameLbl;
-
-        let signatureLbl = data.signatureLabel || "家長簽名確認";
-        if (signatureLbl.startsWith("[") || signatureLbl.startsWith("{")) signatureLbl = "家長簽名確認";
-        document.getElementById('displaySignatureLabel').innerText = signatureLbl;
-
-        // 延伸基本資料欄位
-        const extraContainer = document.getElementById('extraFieldsContainer');
-        extraContainer.innerHTML = "";
-        if (data.extraFields && data.extraFields.length > 0) {
-          data.extraFields.forEach((field) => {
-            const reqStar = field.required ? '<span style="color:red">*</span>' : '';
-            const reqAttr = field.required ? 'required' : '';
-            extraContainer.innerHTML += `
-              <div class="input-group">
-                <label>${field.label} ${reqStar}</label>
-                <input type="text" class="user-extra-input" data-label="${field.label}" data-required="${field.required ? 'true' : 'false'}" placeholder="請輸入${field.label}" ${reqAttr}>
-              </div>
-            `;
-          });
-        }
-
-        // 年級選單
-        const gradeSelect = document.getElementById('userGrade');
-        gradeSelect.innerHTML = '<option value="">請選擇年級</option>';
-        const rawGradeStr = data.gradeOptions || "一年,二年,三年,四年,五年,六年";
-        const gradeList = rawGradeStr.split(/[,，]/).map(s => s.trim()).filter(Boolean);
-        gradeList.forEach(g => {
-          gradeSelect.innerHTML += `<option value="${g}">${g}</option>`;
-        });
-
-        // 參考網址與圖片
-        const refUrlBox = document.getElementById('displayRefUrl');
-        if (data.formRefUrl) {
-          refUrlBox.style.display = 'block';
-          refUrlBox.innerHTML = `🔗 <b>參考網址：</b><a href="${data.formRefUrl}" target="_blank">${data.formRefUrl}</a>`;
-        } else {
-          refUrlBox.style.display = 'none';
-        }
-
-        const headerImg = document.getElementById('displayImg');
-        if (data.formImgBase64) {
-          headerImg.src = data.formImgBase64;
-          headerImg.style.display = 'block';
-        } else {
-          headerImg.style.display = 'none';
-        }
-
-        // 勾選題目渲染
-        const container = document.getElementById('checklistContainer');
-        container.innerHTML = "";
-
-        if (data.items && data.items.length > 0) {
-          const card = document.createElement('div');
-          card.className = "section-card";
-
-          data.items.forEach((item, index) => {
-            const requiredHtml = item.required ? `<span class="required-badge">必選</span>` : "";
-            let html = `
-              <label class="checkbox-item">
-                <input type="checkbox" class="rule-check" data-index="${index}">
-                <span><b>${index + 1}. ${item.title}</b> ${requiredHtml}</span>
-              </label>
-            `;
-            if (item.desc) {
-              html += `<div class="item-desc-box">${item.desc}</div>`;
-            }
-            if (item.refUrl) {
-              html += `<div class="item-desc-box" style="background:#eef3fc;">🔗 <b>參考網址：</b><a href="${item.refUrl}" target="_blank" style="color:#1a73e8; font-weight:bold;">${item.refUrl}</a></div>`;
-            }
-            if (item.imgBase64) {
-              html += `<img src="${item.imgBase64}" class="item-img-display">`;
-            }
-            card.innerHTML += html;
-          });
-          container.appendChild(card);
-        }
-      }
-    });
-  }
-
-  // 畫布簽名功能
+  // 簽名板
   const canvas = document.getElementById('signatureCanvas');
   const ctx = canvas.getContext('2d');
   let isDrawing = false, hasSigned = false, lastX = 0, lastY = 0;
@@ -676,7 +769,7 @@
     ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height); hasSigned = false;
   }
 
-  // 查詢 PDF 檔
+  // 查詢 PDF 檔 (使用 GAS URL)
   function queryPDF() {
     const queryId = document.getElementById('queryFileId').value.trim();
     const resultDiv = document.getElementById('queryResult');
@@ -698,7 +791,7 @@
     });
   }
 
-  // 提交同意書
+  // 提交同意書 (使用 GAS URL)
   document.getElementById('mainForm').addEventListener('submit', function(e) {
     e.preventDefault();
     const checkboxes = document.querySelectorAll('.rule-check');
@@ -751,7 +844,6 @@
 
     if (!hasSigned) {
       let sigLbl = currentFormConfig.signatureLabel || "親筆簽名確認";
-      if (sigLbl.startsWith("[") || sigLbl.startsWith("{")) sigLbl = "親筆簽名確認";
       return alert(`請完成【${sigLbl}】！`);
     }
 
@@ -774,20 +866,16 @@
       }
     });
 
-    const classGroupStr = `${grade}${userClass}`;
-    let userNameLbl = currentFormConfig.userNameLabel || "學生姓名";
-    let signatureLbl = currentFormConfig.signatureLabel || "家長簽名確認";
-
     const payload = {
       action: 'submitForm',
       formTitle: currentFormConfig.formTitle,
       formDesc: currentFormConfig.formDesc,
       formRefUrl: currentFormConfig.formRefUrl || "",
       formImgBase64: currentFormConfig.formImgBase64 || "",
-      userNameLabel: userNameLbl,
-      signatureLabel: signatureLbl,
+      userNameLabel: currentFormConfig.userNameLabel || "學生姓名",
+      signatureLabel: currentFormConfig.signatureLabel || "家長簽名確認",
       userName: document.getElementById('userName').value.trim(),
-      classGroup: classGroupStr,
+      classGroup: `${grade}${userClass}`,
       seatNo: seat,
       extraFieldData: extraFieldData,
       checkedCount: checkedBoxes.length,
@@ -816,7 +904,7 @@
     });
   });
 
-  // 管理者登入 (優化登入與載入速度)
+  // 管理者登入 (使用 GAS URL，瞬間登入帶入資料)
   function openAdminLogin() { 
     document.getElementById('adminPasswordInput').value = "";
     document.getElementById('loginModal').style.display = 'flex'; 
@@ -845,7 +933,8 @@
       if (data.result === 'success') {
         adminPasswordToken = pwd;
         closeModal('loginModal');
-        loadFormToAdmin(); // 快速帶入後台資料
+        // 直接使用前台已快取之設定，無需二次請求，瞬間打開後台！
+        if (currentFormConfig) populateAdminFields(currentFormConfig);
         document.getElementById('adminModal').style.display = 'flex';
       } else {
         alert(data.message);
@@ -855,26 +944,6 @@
       loginBtn.innerText = "登入後台";
       loginBtn.disabled = false;
       alert("網路連線錯誤，請重試");
-    });
-  }
-
-  // 載入當前同意書設定至後台
-  function loadFormToAdmin() {
-    if (currentFormConfig) {
-      populateAdminFields(currentFormConfig);
-    }
-    // 同步重新向後端拉取最新設定
-    fetch(GAS_WEB_APP_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'getFormConfig' })
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data.result === 'success') {
-        currentFormConfig = data;
-        populateAdminFields(data);
-      }
     });
   }
 
@@ -1022,7 +1091,7 @@
     row.querySelector('.clear-item-img-btn').style.display = 'none';
   }
 
-  // 儲存表單設定 (不會自動關閉後台視窗)
+  // 儲存表單設定 (使用 GAS URL 寫入，成功後不關閉後台)
   function saveAdminFormConfig() {
     const saveBtn = document.getElementById('saveAdminFormBtn');
     const formTitle = document.getElementById('adminFormTitle').value.trim();
@@ -1088,7 +1157,8 @@
 
       if (data.result === 'success') {
         alert("✅ " + data.message);
-        loadFormConfig(); // 即時更新前台背景顯示，但不關閉管理者 Modal
+        // 重新從 CSV 讀取刷新前台，但保持後台開啟
+        setTimeout(() => { loadFormConfigFromCSV(); }, 800);
       } else {
         alert("儲存失敗：" + data.message);
       }
