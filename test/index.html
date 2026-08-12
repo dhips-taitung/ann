@@ -225,10 +225,79 @@
       border-radius: 10px;
       padding: 25px;
       width: 100%;
-      max-width: 750px;
+      max-width: 820px;
       max-height: 90vh;
       overflow-y: auto;
     }
+
+    /* 後台頁籤 (Tabs) 樣式 */
+    .admin-tab-nav {
+      display: flex;
+      gap: 6px;
+      border-bottom: 2px solid #e2e8f0;
+      margin-bottom: 18px;
+    }
+    .admin-tab-btn {
+      padding: 10px 16px;
+      background: #f1f5f9;
+      border: none;
+      border-radius: 6px 6px 0 0;
+      font-weight: bold;
+      font-size: 14px;
+      cursor: pointer;
+      color: #64748b;
+      transition: all 0.2s;
+    }
+    .admin-tab-btn:hover { background: #e2e8f0; color: #334155; }
+    .admin-tab-btn.active {
+      background: #1a73e8;
+      color: white;
+    }
+    .admin-tab-content { display: none; }
+    .admin-tab-content.active { display: block; }
+
+    /* 後台列表表格與網格樣式 */
+    .admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 13.5px;
+    }
+    .admin-table th, .admin-table td {
+      border: 1px solid #e2e8f0;
+      padding: 8px 10px;
+      text-align: left;
+    }
+    .admin-table th { background: #f8fafc; color: #475569; }
+
+    .photo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 15px;
+      margin-top: 12px;
+    }
+    .photo-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 10px;
+      background: #fafafa;
+      text-align: center;
+    }
+    .photo-card img {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 4px;
+      margin-bottom: 8px;
+      border: 1px solid #ddd;
+    }
+    .photo-card .info {
+      font-size: 12px;
+      color: #64748b;
+      margin-bottom: 8px;
+      word-break: break-all;
+    }
+
     .admin-item-row, .admin-extra-field-row {
       background: #f8f9fa;
       border: 1px solid #ddd;
@@ -378,7 +447,7 @@
   </div>
 </div>
 
-<!-- 管理者登入 Modal (支援 Enter 鍵) -->
+<!-- 管理者登入 Modal -->
 <div class="modal-overlay" id="loginModal">
   <div class="modal-card" style="max-width: 400px;">
     <h3>🔐 管理者登入</h3>
@@ -393,79 +462,121 @@
   </div>
 </div>
 
-<!-- 管理者後台設定 Modal -->
+<!-- 管理者後台 Modal (包含三個頁籤) -->
 <div class="modal-overlay" id="adminModal">
   <div class="modal-card">
-    <h3>⚙️ 班級同意書後台設定</h3>
-    <hr>
+    <h3 style="margin-bottom:12px;">⚙️ 班級同意書管理者後台</h3>
     
-    <div class="input-group">
-      <label>同意書主題 (標題)：</label>
-      <input type="text" id="adminFormTitle" placeholder="例如：113學年度家長同意書">
+    <!-- 後台頁籤選單 -->
+    <div class="admin-tab-nav">
+      <button type="button" class="admin-tab-btn active" onclick="switchAdminTab('config')">⚙️ 表單設置</button>
+      <button type="button" class="admin-tab-btn" onclick="switchAdminTab('pdf')">📄 PDF 同意書管理</button>
+      <button type="button" class="admin-tab-btn" onclick="switchAdminTab('photo')">🖼️ 照片附件管理</button>
     </div>
 
-    <div class="input-group">
-      <label>標題說明欄位 (同意書內容條文)：</label>
-      <textarea id="adminFormDesc" style="width:100%; height:80px; border-radius:6px; padding:8px;" placeholder="請輸入說明條文內容..."></textarea>
-    </div>
-
-    <div style="display:flex; gap:10px;">
-      <div class="input-group" style="flex:1;">
-        <label>「填寫人姓名」欄位名稱：</label>
-        <input type="text" id="adminUserNameLabel" placeholder="預設：學生姓名">
+    <!-- 頁籤 1：表單設置 -->
+    <div class="admin-tab-content active" id="tab-config">
+      <div class="input-group">
+        <label>同意書主題 (標題)：</label>
+        <input type="text" id="adminFormTitle" placeholder="例如：113學年度家長同意書">
       </div>
-      <div class="input-group" style="flex:1;">
-        <label>「親筆簽名」欄位名稱：</label>
-        <input type="text" id="adminSignatureLabel" placeholder="預設：家長簽名確認">
+
+      <div class="input-group">
+        <label>標題說明欄位 (同意書內容條文)：</label>
+        <textarea id="adminFormDesc" style="width:100%; height:80px; border-radius:6px; padding:8px;" placeholder="請輸入說明條文內容..."></textarea>
+      </div>
+
+      <div style="display:flex; gap:10px;">
+        <div class="input-group" style="flex:1;">
+          <label>「填寫人姓名」欄位名稱：</label>
+          <input type="text" id="adminUserNameLabel" placeholder="預設：學生姓名">
+        </div>
+        <div class="input-group" style="flex:1;">
+          <label>「親筆簽名」欄位名稱：</label>
+          <input type="text" id="adminSignatureLabel" placeholder="預設：家長簽名確認">
+        </div>
+      </div>
+
+      <div style="background:#f1f5f9; padding:12px; border-radius:6px; border:1px solid #cbd5e1; margin-bottom:15px;">
+        <h5 style="margin:0 0 8px 0; color:#1e293b;">自訂延伸基本資料欄位 (如：家長電話、緊急聯絡人等)</h5>
+        <div id="adminExtraFieldsContainer"></div>
+        <button type="button" onclick="addAdminExtraFieldRow()" style="padding:5px 10px; background:#475569; color:white; border:none; border-radius:4px; cursor:pointer;">➕ 新增基本資料欄位</button>
+      </div>
+
+      <div class="input-group" style="background:#f8f9fa; padding:10px; border-radius:6px; border:1px solid #ddd;">
+        <label style="color:#1a73e8;">自訂年級下拉選單 (以逗號分隔)：</label>
+        <input type="text" id="adminGradeOptions" placeholder="例如：一年,二年,三年 或 幼兒園,一年">
+      </div>
+
+      <div class="input-group" style="background:#eef3fc; padding:10px; border-radius:6px; border:1px solid #c2d7fa;">
+        <label style="color:#1a73e8;">全表單最少需勾選數量 (0 表不限制數量)：</label>
+        <input type="number" id="adminMinRequiredCount" min="0" value="0" placeholder="0">
+      </div>
+
+      <div class="input-group">
+        <label>參考網址 (選擇性)：</label>
+        <input type="url" id="adminFormRefUrl" placeholder="例如：https://school.edu.tw/...">
+      </div>
+
+      <div class="input-group">
+        <label>主題照片附件 (限制 1MB 以內，選擇性)：</label>
+        <input type="file" id="adminFormImgFile" accept="image/*" onchange="handleImageUpload(this, 'adminFormImgPreview', 'adminFormImgBase64')">
+        <input type="hidden" id="adminFormImgBase64">
+        <img id="adminFormImgPreview" class="img-preview">
+        <button type="button" onclick="clearImageUpload('adminFormImgFile', 'adminFormImgPreview', 'adminFormImgBase64')" style="display:none;" id="clearHeaderImgBtn">清除照片</button>
+      </div>
+
+      <hr style="margin:20px 0;">
+
+      <h4>同意條款項目設定</h4>
+      <div id="adminItemsContainer"></div>
+      <button type="button" onclick="addAdminItemRow()" style="padding:8px 14px; background:#1a73e8; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">➕ 新增同意條款</button>
+
+      <br><br>
+      <button type="button" class="submit-btn" id="saveAdminFormBtn" onclick="saveAdminFormConfig()">💾 儲存同意書設定</button>
+    </div>
+
+    <!-- 頁籤 2：PDF 同意書管理 -->
+    <div class="admin-tab-content" id="tab-pdf">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-weight:bold; color:#1a73e8;">📄 已生成的 PDF 同意書列表</span>
+        <button type="button" onclick="fetchAdminFileList()" style="padding:6px 12px; background:#f1f5f9; border:1px solid #ccc; border-radius:4px; cursor:pointer;">🔄 重新整理</button>
+      </div>
+      <div id="pdfLoadingText" style="margin-top:15px; color:#666;">資料載入中...</div>
+      <div style="overflow-x:auto;">
+        <table class="admin-table" id="pdfTable" style="display:none;">
+          <thead>
+            <tr>
+              <th>檔案名稱</th>
+              <th>建立時間</th>
+              <th>大小</th>
+              <th>檢視/下載</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="pdfTableBody"></tbody>
+        </table>
       </div>
     </div>
 
-    <div style="background:#f1f5f9; padding:12px; border-radius:6px; border:1px solid #cbd5e1; margin-bottom:15px;">
-      <h5 style="margin:0 0 8px 0; color:#1e293b;">自訂延伸基本資料欄位 (如：家長電話、緊急聯絡人等)</h5>
-      <div id="adminExtraFieldsContainer"></div>
-      <button type="button" onclick="addAdminExtraFieldRow()" style="padding:5px 10px; background:#475569; color:white; border:none; border-radius:4px; cursor:pointer;">➕ 新增基本資料欄位</button>
+    <!-- 頁籤 3：照片附件管理 -->
+    <div class="admin-tab-content" id="tab-photo">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-weight:bold; color:#1a73e8;">🖼️ 照片附件圖庫</span>
+        <button type="button" onclick="fetchAdminFileList()" style="padding:6px 12px; background:#f1f5f9; border:1px solid #ccc; border-radius:4px; cursor:pointer;">🔄 重新整理</button>
+      </div>
+      <div id="photoLoadingText" style="margin-top:15px; color:#666;">資料載入中...</div>
+      <div class="photo-grid" id="photoGrid"></div>
     </div>
 
-    <div class="input-group" style="background:#f8f9fa; padding:10px; border-radius:6px; border:1px solid #ddd;">
-      <label style="color:#1a73e8;">自訂年級下拉選單 (以逗號分隔)：</label>
-      <input type="text" id="adminGradeOptions" placeholder="例如：一年,二年,三年 或 幼兒園,一年">
-    </div>
-
-    <div class="input-group" style="background:#eef3fc; padding:10px; border-radius:6px; border:1px solid #c2d7fa;">
-      <label style="color:#1a73e8;">全表單最少需勾選數量 (0 表不限制數量)：</label>
-      <input type="number" id="adminMinRequiredCount" min="0" value="0" placeholder="0">
-    </div>
-
-    <div class="input-group">
-      <label>參考網址 (選擇性)：</label>
-      <input type="url" id="adminFormRefUrl" placeholder="例如：https://school.edu.tw/...">
-    </div>
-
-    <div class="input-group">
-      <label>主題照片附件 (限制 1MB 以內，選擇性)：</label>
-      <input type="file" id="adminFormImgFile" accept="image/*" onchange="handleImageUpload(this, 'adminFormImgPreview', 'adminFormImgBase64')">
-      <input type="hidden" id="adminFormImgBase64">
-      <img id="adminFormImgPreview" class="img-preview">
-      <button type="button" onclick="clearImageUpload('adminFormImgFile', 'adminFormImgPreview', 'adminFormImgBase64')" style="display:none;" id="clearHeaderImgBtn">清除照片</button>
-    </div>
-
-    <hr style="margin:20px 0;">
-
-    <h4>同意條款項目設定</h4>
-    <div id="adminItemsContainer"></div>
-    <button type="button" onclick="addAdminItemRow()" style="padding:8px 14px; background:#1a73e8; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">➕ 新增同意條款</button>
-
-    <br><br>
-
-    <!-- 寫入仍使用 GAS Deployed URL -->
-    <button type="button" class="submit-btn" id="saveAdminFormBtn" onclick="saveAdminFormConfig()">💾 儲存同意書設定</button>
-    <button type="button" style="width:100%; margin-top:8px; padding:12px; background:#6c757d; color:white; border:none; border-radius:6px; font-weight:bold; cursor:pointer;" onclick="closeModal('adminModal')">❌ 關閉後台</button>
+    <br>
+    <button type="button" style="width:100%; padding:12px; background:#6c757d; color:white; border:none; border-radius:6px; font-weight:bold; cursor:pointer;" onclick="closeModal('adminModal')">❌ 關閉後台</button>
   </div>
 </div>
 
 <script>
   // 1. GAS 寫入與提交 API 網址
-  const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwh16Lj317SKPuqMtmGnUH0h5HU2qWF-6bW3Ntcto_kEYgzmAHmao_IQm74Nb9nxbeG/exec";
+  const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwN3SJodr8qf3ZFyIWRXeyK6l5magmiZuTdrnw4QQ8FhJ3nQjLzFG4XRUXuIZ87d5Ty/exec";
   
   // 2. 試算表 CSV 直連網址 (前台超高速讀取)
   const SPREADSHEET_ID = "1GT53RxyCBln6uuhUiDitauGfcbSoNQ1Q2ePT_kTsPqw";
@@ -473,6 +584,8 @@
 
   let currentFormConfig = null;
   let adminPasswordToken = "";
+  let adminPdfFiles = [];
+  let adminImageFiles = [];
 
   // 初始化
   window.addEventListener('load', () => {
@@ -480,7 +593,7 @@
     loadFormConfigFromCSV();
   });
 
-  // 超高速 CSV 解析引擎 (處理標準 CSV 雙引號與換行符號)
+  // CSV 解析
   function parseCSV(text) {
     let lines = [];
     let row = [];
@@ -525,7 +638,6 @@
     return str;
   }
 
-  // 1. 前台超高速讀取表單設定 (CSV)
   function loadFormConfigFromCSV() {
     fetch(CSV_URL)
       .then(res => {
@@ -535,7 +647,7 @@
       .then(csvText => {
         const rows = parseCSV(csvText);
         if (rows.length >= 2) {
-          const row = rows[1]; // 第一筆表單資料列 (第0列為 Header)
+          const row = rows[1];
 
           let items = [];
           let extraFields = [];
@@ -564,7 +676,7 @@
           };
           renderFormUI(currentFormConfig);
         } else {
-          loadFormConfigFromGAS(); // 若 CSV 為空，改用 GAS 備用讀取
+          loadFormConfigFromGAS();
         }
       })
       .catch(err => {
@@ -573,7 +685,6 @@
       });
   }
 
-  // GAS 備用讀取機制
   function loadFormConfigFromGAS() {
     fetch(GAS_WEB_APP_URL, {
       method: 'POST',
@@ -589,7 +700,6 @@
     });
   }
 
-  // 渲染前台畫面
   function renderFormUI(data) {
     document.getElementById('displayTitle').innerText = data.formTitle || "班級同意書";
     document.getElementById('displayDesc').innerText = data.formDesc || "";
@@ -597,7 +707,6 @@
     document.getElementById('displayUserNameLabel').innerText = data.userNameLabel || "學生姓名";
     document.getElementById('displaySignatureLabel').innerText = data.signatureLabel || "家長簽名確認";
 
-    // 延伸欄位
     const extraContainer = document.getElementById('extraFieldsContainer');
     extraContainer.innerHTML = "";
     if (data.extraFields && data.extraFields.length > 0) {
@@ -613,7 +722,6 @@
       });
     }
 
-    // 年級選項
     const gradeSelect = document.getElementById('userGrade');
     gradeSelect.innerHTML = '<option value="">請選擇年級</option>';
     const rawGradeStr = data.gradeOptions || "一年,二年,三年,四年,五年,六年";
@@ -622,7 +730,6 @@
       gradeSelect.innerHTML += `<option value="${g}">${g}</option>`;
     });
 
-    // 網址與圖片
     const refUrlBox = document.getElementById('displayRefUrl');
     if (data.formRefUrl) {
       refUrlBox.style.display = 'block';
@@ -639,7 +746,6 @@
       headerImg.style.display = 'none';
     }
 
-    // 條款渲染
     const container = document.getElementById('checklistContainer');
     container.innerHTML = "";
 
@@ -670,7 +776,6 @@
     }
   }
 
-  // 圖片處理
   function handleImageUpload(fileInput, previewImgId, base64HiddenId) {
     const file = fileInput.files[0];
     if (!file) return;
@@ -769,7 +874,7 @@
     ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height); hasSigned = false;
   }
 
-  // 查詢 PDF 檔 (使用 GAS URL)
+  // 查詢 PDF 檔
   function queryPDF() {
     const queryId = document.getElementById('queryFileId').value.trim();
     const resultDiv = document.getElementById('queryResult');
@@ -791,7 +896,7 @@
     });
   }
 
-  // 提交同意書 (使用 GAS URL)
+  // 提交同意書
   document.getElementById('mainForm').addEventListener('submit', function(e) {
     e.preventDefault();
     const checkboxes = document.querySelectorAll('.rule-check');
@@ -904,7 +1009,7 @@
     });
   });
 
-  // 管理者登入 (使用 GAS URL，瞬間登入帶入資料)
+  // 管理者登入
   function openAdminLogin() { 
     document.getElementById('adminPasswordInput').value = "";
     document.getElementById('loginModal').style.display = 'flex'; 
@@ -933,8 +1038,8 @@
       if (data.result === 'success') {
         adminPasswordToken = pwd;
         closeModal('loginModal');
-        // 直接使用前台已快取之設定，無需二次請求，瞬間打開後台！
         if (currentFormConfig) populateAdminFields(currentFormConfig);
+        switchAdminTab('config'); // 預設打開第一個頁籤
         document.getElementById('adminModal').style.display = 'flex';
       } else {
         alert(data.message);
@@ -944,6 +1049,149 @@
       loginBtn.innerText = "登入後台";
       loginBtn.disabled = false;
       alert("網路連線錯誤，請重試");
+    });
+  }
+
+  // -------------------------------------------------------------------------
+  // 新增：後台頁籤切換與檔案管理邏輯
+  // -------------------------------------------------------------------------
+
+  function switchAdminTab(tabName) {
+    const tabs = ['config', 'pdf', 'photo'];
+    tabs.forEach(t => {
+      const btn = document.querySelector(`.admin-tab-btn[onclick="switchAdminTab('${t}')"]`);
+      const content = document.getElementById(`tab-${t}`);
+      if (t === tabName) {
+        if(btn) btn.classList.add('active');
+        if(content) content.classList.add('active');
+      } else {
+        if(btn) btn.classList.remove('active');
+        if(content) content.classList.remove('active');
+      }
+    });
+
+    if (tabName === 'pdf' || tabName === 'photo') {
+      fetchAdminFileList();
+    }
+  }
+
+  // 向 GAS 請求讀取 PDF 與 照片 列表
+  function fetchAdminFileList() {
+    const pdfLoadingText = document.getElementById('pdfLoadingText');
+    const photoLoadingText = document.getElementById('photoLoadingText');
+    if(pdfLoadingText) pdfLoadingText.innerText = "資料載入中...";
+    if(photoLoadingText) photoLoadingText.innerText = "資料載入中...";
+
+    fetch(GAS_WEB_APP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'getAdminFiles', password: adminPasswordToken })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.result === 'success') {
+        adminPdfFiles = data.pdfFiles || [];
+        adminImageFiles = data.imageFiles || [];
+        renderAdminPdfList();
+        renderAdminPhotoList();
+      } else {
+        if(pdfLoadingText) pdfLoadingText.innerText = "載入失敗：" + data.message;
+        if(photoLoadingText) photoLoadingText.innerText = "載入失敗：" + data.message;
+      }
+    })
+    .catch(err => {
+      if(pdfLoadingText) pdfLoadingText.innerText = "載入錯誤，請重試";
+      if(photoLoadingText) photoLoadingText.innerText = "載入錯誤，請重試";
+    });
+  }
+
+  // 渲染 PDF 列表表格
+  function renderAdminPdfList() {
+    const pdfLoadingText = document.getElementById('pdfLoadingText');
+    const pdfTable = document.getElementById('pdfTable');
+    const tbody = document.getElementById('pdfTableBody');
+
+    pdfLoadingText.style.display = 'none';
+    pdfTable.style.display = 'table';
+    tbody.innerHTML = "";
+
+    if (adminPdfFiles.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#888;">尚無任何已產出的 PDF 檔案</td></tr>`;
+      return;
+    }
+
+    adminPdfFiles.forEach(file => {
+      tbody.innerHTML += `
+        <tr>
+          <td><b>${file.name}</b></td>
+          <td>${file.date}</td>
+          <td>${file.size}</td>
+          <td><a href="${file.downloadUrl}" target="_blank" style="color:#1a73e8; font-weight:bold;">📄 查看/下載</a></td>
+          <td>
+            <button type="button" class="del-item-btn" style="float:none;" onclick="deleteAdminFile('${file.id}', 'pdf', '${file.name}')">🗑️ 刪除</button>
+          </td>
+        </tr>
+      `;
+    });
+  }
+
+  // 渲染 照片 圖庫
+  function renderAdminPhotoList() {
+    const photoLoadingText = document.getElementById('photoLoadingText');
+    const photoGrid = document.getElementById('photoGrid');
+
+    photoLoadingText.style.display = 'none';
+    photoGrid.innerHTML = "";
+
+    if (adminImageFiles.length === 0) {
+      photoGrid.innerHTML = `<div style="grid-column:1/-1; text-align:center; color:#888;">尚無任何照片附件</div>`;
+      return;
+    }
+
+    adminImageFiles.forEach(file => {
+      photoGrid.innerHTML += `
+        <div class="photo-card">
+          <a href="${file.url}" target="_blank">
+            <img src="${file.url}" alt="${file.name}" onerror="this.src='https://via.placeholder.com/150?text=Image+Error'">
+          </a>
+          <div class="info">
+            <b>${file.name}</b><br>
+            <span style="font-size:11px;">${file.date} (${file.size})</span>
+          </div>
+          <button type="button" class="del-item-btn" style="float:none; width:100%;" onclick="deleteAdminFile('${file.id}', 'photo', '${file.name}')">🗑️ 刪除照片</button>
+        </div>
+      `;
+    });
+  }
+
+  // 刪除檔案事件
+  function deleteAdminFile(fileId, fileType, fileName) {
+    const typeText = fileType === 'pdf' ? 'PDF 同意書' : '照片附件';
+    if (!confirm(`⚠️ 確定要刪除該${typeText}「${fileName}」嗎？\n\n注意：檔案將移至垃圾桶（若為 PDF，試算表回應紀錄亦會同步清理）。`)) {
+      return;
+    }
+
+    fetch(GAS_WEB_APP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({
+        action: 'deleteAdminFile',
+        password: adminPasswordToken,
+        fileId: fileId,
+        fileType: fileType
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.result === 'success') {
+        alert("✅ " + data.message);
+        fetchAdminFileList(); // 重新整理列表
+      } else {
+        alert("刪除失敗：" + data.message);
+      }
+    })
+    .catch(err => {
+      alert("刪除失敗，網路發生錯誤");
     });
   }
 
@@ -1091,7 +1339,6 @@
     row.querySelector('.clear-item-img-btn').style.display = 'none';
   }
 
-  // 儲存表單設定 (使用 GAS URL 寫入，成功後不關閉後台)
   function saveAdminFormConfig() {
     const saveBtn = document.getElementById('saveAdminFormBtn');
     const formTitle = document.getElementById('adminFormTitle').value.trim();
@@ -1157,7 +1404,6 @@
 
       if (data.result === 'success') {
         alert("✅ " + data.message);
-        // 重新從 CSV 讀取刷新前台，但保持後台開啟
         setTimeout(() => { loadFormConfigFromCSV(); }, 800);
       } else {
         alert("儲存失敗：" + data.message);
