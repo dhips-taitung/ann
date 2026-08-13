@@ -27,9 +27,11 @@
       align-items: center;
       background: #1a73e8;
       color: white;
-      padding: 10px 15px;
+      padding: 10px 18px;
       border-radius: 8px;
       margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 10px;
     }
     .top-bar-title {
       font-size: 16px;
@@ -39,7 +41,7 @@
       background: #fbbc04;
       color: #202124;
       border: none;
-      padding: 6px 14px;
+      padding: 8px 16px;
       border-radius: 4px;
       cursor: pointer;
       font-weight: bold;
@@ -227,10 +229,48 @@
       border-radius: 10px;
       padding: 25px;
       width: 100%;
-      max-width: 800px;
+      max-width: 820px;
       max-height: 90vh;
       overflow-y: auto;
     }
+
+    /* 後台頁籤 Tab 樣式 */
+    .tab-bar {
+      display: flex;
+      gap: 5px;
+      border-bottom: 2px solid #1a73e8;
+      margin-bottom: 15px;
+    }
+    .tab-btn {
+      padding: 10px 16px;
+      border: none;
+      background: #eef3fc;
+      color: #1a73e8;
+      font-weight: bold;
+      border-radius: 6px 6px 0 0;
+      cursor: pointer;
+    }
+    .tab-btn.active {
+      background: #1a73e8;
+      color: white;
+    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* 後台列表表格樣式 */
+    .admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    .admin-table th, .admin-table td {
+      border: 1px solid #ddd;
+      padding: 8px 10px;
+      text-align: left;
+    }
+    .admin-table th { background: #f1f5f9; }
+
     .admin-item-row, .admin-extra-field-row {
       background: #f8f9fa;
       border: 1px solid #ddd;
@@ -288,52 +328,14 @@
       border-radius: 6px;
       font-weight: bold;
     }
-
-    /* 後台頁籤樣式 */
-    .admin-tabs {
-      display: flex;
-      gap: 10px;
-      border-bottom: 2px solid #ddd;
-      margin-bottom: 15px;
-    }
-    .admin-tab-btn {
-      padding: 10px 16px;
-      border: none;
-      background: #f1f5f9;
-      color: #475569;
-      font-weight: bold;
-      cursor: pointer;
-      border-top-left-radius: 6px;
-      border-top-right-radius: 6px;
-    }
-    .admin-tab-btn.active {
-      background: #1a73e8;
-      color: white;
-    }
-
-    /* 提交紀錄表格樣式 */
-    .sub-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-      font-size: 13.5px;
-    }
-    .sub-table th, .sub-table td {
-      border: 1px solid #cbd5e1;
-      padding: 8px 10px;
-      text-align: left;
-    }
-    .sub-table th {
-      background: #f1f5f9;
-    }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <!-- 頂部功能列 (前台已移除表單切換功能) -->
+  <!-- 頂部功能列 (前台已移除選單，僅保留檢核系統標題與後台登入) -->
   <div class="top-bar">
-    <div class="top-bar-title">📋 線上檢核表單系統</div>
+    <div class="top-bar-title">📋 班級表單填寫與檢核系統</div>
     <button class="admin-btn" onclick="openAdminLogin()">🔐 管理者後台設定</button>
   </div>
 
@@ -350,7 +352,7 @@
   <!-- 前台填表畫面 -->
   <form id="mainForm">
     <h2 id="displayTitle">載入中...</h2>
-    <div class="header-desc" id="displayDesc">正在快速讀取表單內容...</div>
+    <div class="header-desc" id="displayDesc">正在讀取表單內容...</div>
     
     <!-- 標題參考網址與照片展示區 -->
     <div id="displayRefUrl" class="ref-link-box" style="display:none;"></div>
@@ -425,7 +427,8 @@
     <h3>🔐 管理者登入</h3>
     <div class="input-group">
       <label>請輸入管理者密碼：</label>
-      <input type="password" id="adminPasswordInput" placeholder="請輸入密碼">
+      <!-- [修改] 支援 Enter 鍵按鍵登入 -->
+      <input type="password" id="adminPasswordInput" placeholder="請輸入密碼" onkeyup="if(event.key==='Enter') submitAdminLogin()">
     </div>
     <button class="query-btn" style="width:100%;" onclick="submitAdminLogin()">登入後台</button>
     <button style="width:100%; margin-top:8px;" onclick="closeModal('loginModal')">取消</button>
@@ -435,16 +438,17 @@
 <!-- 管理者後台設定 Modal -->
 <div class="modal-overlay" id="adminModal">
   <div class="modal-card">
-    <h3>⚙️ 管理者表單設置後台</h3>
+    <h3>⚙️ 管理者後台管理系統</h3>
     
-    <!-- 後台頁籤選單 -->
-    <div class="admin-tabs">
-      <button type="button" class="admin-tab-btn active" id="tabBtn1" onclick="switchAdminTab('editTab')">📝 表單題目與設定</button>
-      <button type="button" class="admin-tab-btn" id="tabBtn2" onclick="switchAdminTab('filesTab')">📁 PDF & 提交紀錄管理</button>
+    <!-- 後台分頁 Tab -->
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchAdminTab('tabFormConfig')">⚙️ 表單設定與編輯</button>
+      <button class="tab-btn" onclick="switchAdminTab('tabPdfFiles'); loadAdminPdfList();">📄 PDF 檔管理</button>
+      <button class="tab-btn" onclick="switchAdminTab('tabImageFiles'); loadAdminImageList();">🖼️ 附件照片管理</button>
     </div>
 
-    <!-- 頁籤 1: 表單編輯器 -->
-    <div id="adminTabEdit">
+    <!-- 頁籤 1: 表單設定與編輯 -->
+    <div id="tabFormConfig" class="tab-content active">
       <div class="input-group">
         <label>選擇要編輯的表單：</label>
         <select id="adminFormSelect" onchange="loadFormToAdmin()"></select>
@@ -484,13 +488,13 @@
       </div>
 
       <div class="input-group" style="background:#f8f9fa; padding:10px; border-radius:6px; border:1px solid #ddd;">
-        <label style="color:#1a73e8;">自訂年級下拉選單 (逗號隔開)：</label>
-        <input type="text" id="adminGradeOptions" placeholder="例如：一年,二年,三年,四年,五年,六年">
+        <label style="color:#1a73e8;">自訂年級下拉選單 (以逗號分隔)：</label>
+        <input type="text" id="adminGradeOptions" placeholder="一年,二年,三年,四年,五年,六年">
       </div>
 
       <div class="input-group" style="background:#eef3fc; padding:10px; border-radius:6px; border:1px solid #c2d7fa;">
-        <label style="color:#1a73e8;">全表單最少需勾選數量 (0 表不限制)：</label>
-        <input type="number" id="adminMinRequiredCount" min="0" value="0">
+        <label style="color:#1a73e8;">全表單最少需勾選數量：</label>
+        <input type="number" id="adminMinRequiredCount" min="0" value="0" placeholder="0">
       </div>
 
       <div class="input-group">
@@ -516,170 +520,151 @@
       <div id="adminFormUrlBox" style="background:#e8f0fe; padding:10px; border-radius:6px; font-size:13px; display:none; word-break:break-all;"></div>
       <br>
 
+      <div id="adminSaveStatus" style="font-weight:bold; color:green; margin-bottom:8px; display:none;"></div>
       <button type="button" class="submit-btn" id="saveAdminFormBtn" onclick="saveAdminFormConfig()">💾 儲存表單設定</button>
     </div>
 
-    <!-- 頁籤 2: 提交紀錄與 PDF 檔案檢視刪除 -->
-    <div id="adminTabFiles" style="display:none;">
-      <div class="input-group">
-        <label>選擇查看紀錄的表單：</label>
-        <select id="adminFileFormSelect" onchange="loadSubmissionsList()"></select>
+    <!-- 頁籤 2: PDF 檔案檢視與刪除 -->
+    <div id="tabPdfFiles" class="tab-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <h4 style="margin:0;">📁 雲端硬碟 PDF 檔案列表</h4>
+        <button type="button" onclick="loadAdminPdfList()" style="padding:4px 10px;">🔄 重整清單</button>
       </div>
-
-      <div id="submissionsContainer">
-        <p style="color:#666;">請選擇表單以讀取提交紀錄...</p>
-      </div>
+      <div id="pdfListContainer">資料讀取中...</div>
     </div>
 
-    <button type="button" style="width:100%; margin-top:15px; padding:10px; background:#e0e0e0; border:none; border-radius:6px; cursor:pointer; font-weight:bold;" onclick="closeModal('adminModal')">關閉後台</button>
+    <!-- 頁籤 3: 附件照片檔檢視與刪除 -->
+    <div id="tabImageFiles" class="tab-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <h4 style="margin:0;">🖼️ 雲端硬碟照片附件列表</h4>
+        <button type="button" onclick="loadAdminImageList()" style="padding:4px 10px;">🔄 重整清單</button>
+      </div>
+      <div id="imageListContainer">資料讀取中...</div>
+    </div>
+
+    <br>
+    <button type="button" style="width:100%; margin-top:8px; padding:10px; font-weight:bold;" onclick="closeModal('adminModal')">關閉後台</button>
   </div>
 </div>
 
 <script>
   // 發佈之 CSV 網址 (用於極速讀取前台內容)
-  const CSV_PUBLISHED_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSLhyKrfe933mNx7pMrgfoucQqQrL5B6NuGQ1CBke7xQhvoGQz0vnT3-ZeL57JsKgTPiYjFQUXfXERF/pub?gid=1778083626&single=true&output=csv";
-
-  // Google Apps Script 部署 URL (用於寫入、刪除與檔案產出)
+  const CONFIG_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSLhyKrfe933mNx7pMrgfoucQqQrL5B6NuGQ1CBke7xQhvoGQz0vnT3-ZeL57JsKgTPiYjFQUXfXERF/pub?gid=1778083626&single=true&output=csv";
+  
+  // Apps Script Web App URL (用於後台儲存、提交表單、刪除檔案)
   const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycby7Y7VEUZIYyAV74AAClExnkRtRuxBOkuc2vu4blsQcO-pT1ArZFHTnEg8UzFEfBwSvkw/exec";
 
   let currentFormId = "";
   let currentFormConfig = null;
   let adminPasswordToken = "";
-  let globalFormList = [];
+  let allParsedForms = [];
 
-  // 初始化
-  window.addEventListener('load', () => {
-    initCanvas();
-    const urlParams = new URLSearchParams(window.location.search);
-    const targetFormId = urlParams.get('formId');
-    loadFormConfigFromCSV(targetFormId);
-  });
-
-  // RFC4180 CSV 解析函式
+  // CSV 高效解析器 (處理包含 JSON 與雙引號的情況)
   function parseCSV(text) {
     const result = [];
     let row = [];
-    let col = '';
+    let cell = '';
     let inQuotes = false;
     for (let i = 0; i < text.length; i++) {
       const c = text[i];
       const nextC = text[i + 1];
-      if (c === '"' && inQuotes && nextC === '"') {
-        col += '"'; i++;
-      } else if (c === '"') {
-        inQuotes = !inQuotes;
-      } else if (c === ',' && !inQuotes) {
-        row.push(col); col = '';
-      } else if ((c === '\r' || c === '\n') && !inQuotes) {
-        if (c === '\r' && nextC === '\n') i++;
-        row.push(col);
-        if (row.length > 1 || row[0] !== '') result.push(row);
-        row = []; col = '';
+      if (inQuotes) {
+        if (c === '"') {
+          if (nextC === '"') { cell += '"'; i++; } 
+          else { inQuotes = false; }
+        } else { cell += c; }
       } else {
-        col += c;
+        if (c === '"') { inQuotes = true; } 
+        else if (c === ',') { row.push(cell); cell = ''; } 
+        else if (c === '\r' && nextC === '\n') { row.push(cell); result.push(row); row = []; cell = ''; i++; } 
+        else if (c === '\n' || c === '\r') { row.push(cell); result.push(row); row = []; cell = ''; } 
+        else { cell += c; }
       }
     }
-    if (col !== '' || row.length > 0) { row.push(col); result.push(row); }
+    if (cell || row.length > 0) { row.push(cell); result.push(row); }
     return result;
   }
 
-  function cleanJsonStr(str) {
-    if (!str) return "[]";
-    str = str.trim();
-    if (str.startsWith("'")) str = str.substring(1);
-    return str;
-  }
+  // 網頁載入初始化 (改為從發佈之 CSV 直接讀取，達成秒開 speedup)
+  window.addEventListener('load', () => {
+    initCanvas();
+    const urlParams = new URLSearchParams(window.location.search);
+    const formIdFromUrl = urlParams.get('formId');
+    loadFormFromCSV(formIdFromUrl);
+  });
 
-  // 使用工作表發佈之 CSV 高速讀取表單設定內容
-  function loadFormConfigFromCSV(targetFormId) {
-    fetch(CSV_PUBLISHED_URL)
+  // 從 CSV 極速讀取表單資料
+  function loadFormFromCSV(targetFormId) {
+    fetch(CONFIG_CSV_URL + "&t=" + new Date().getTime())
       .then(res => res.text())
       .then(csvText => {
         const rows = parseCSV(csvText);
-        if (rows.length <= 1) {
-          document.getElementById('displayTitle').innerText = "尚未建立任何表單";
-          document.getElementById('displayDesc').innerText = "請點選右上角「管理者後台設定」建立表單。";
-          return;
-        }
-
-        globalFormList = [];
-        let matchedRow = null;
-
+        allParsedForms = [];
+        
         for (let i = 1; i < rows.length; i++) {
           const row = rows[i];
-          if (!row[0]) continue;
+          if (row && row[0]) {
+            let cleanItemsStr = (row[3] || "[]").trim();
+            if (cleanItemsStr.startsWith("'")) cleanItemsStr = cleanItemsStr.substring(1);
+            let cleanExtraStr = (row[11] || "[]").trim();
+            if (cleanExtraStr.startsWith("'")) cleanExtraStr = cleanExtraStr.substring(1);
 
-          const formObj = {
-            formId: row[0],
-            formTitle: row[1],
-            formDesc: row[2],
-            itemsJson: cleanJsonStr(row[3]),
-            createdAt: row[4],
-            formImgBase64: row[5] || "",
-            formRefUrl: row[6] || "",
-            minRequiredCount: parseInt(row[7] || "0", 10),
-            gradeOptions: row[8] || "一年,二年,三年,四年,五年,六年",
-            userNameLabel: row[9] || "填寫人姓名",
-            signatureLabel: row[10] || "親筆簽名確認",
-            extraFieldsJson: cleanJsonStr(row[11])
-          };
+            let items = [], extraFields = [];
+            try { items = JSON.parse(cleanItemsStr); } catch(e){}
+            try { extraFields = JSON.parse(cleanExtraStr); } catch(e){}
 
-          globalFormList.push(formObj);
-
-          if (targetFormId && formObj.formId === targetFormId) {
-            matchedRow = formObj;
+            allParsedForms.push({
+              formId: row[0].trim(),
+              formTitle: row[1] || "",
+              formDesc: row[2] || "",
+              items: items,
+              createdAt: row[4] || "",
+              formImgBase64: row[5] || "",
+              formRefUrl: row[6] || "",
+              minRequiredCount: parseInt(row[7] || "0", 10),
+              gradeOptions: row[8] || "一年,二年,三年,四年,五年,六年",
+              userNameLabel: row[9] || "填寫人姓名",
+              signatureLabel: row[10] || "親筆簽名確認",
+              extraFields: extraFields
+            });
           }
         }
 
-        if (!matchedRow && globalFormList.length > 0) {
-          matchedRow = globalFormList[0];
-        }
-
-        if (matchedRow) {
-          renderFrontendForm(matchedRow);
+        if (allParsedForms.length > 0) {
+          let selected = allParsedForms.find(f => f.formId === targetFormId);
+          if (!selected) selected = allParsedForms[0];
+          
+          currentFormId = selected.formId;
+          renderFrontendForm(selected);
+        } else {
+          document.getElementById('displayTitle').innerText = "尚未建立任何表單";
+          document.getElementById('displayDesc').innerText = "請點選右上角「管理者後台設定」建立第一份表單。";
         }
       })
       .catch(err => {
-        console.error("CSV 讀取失敗:", err);
+        console.error("CSV 載入失敗，備用方案", err);
       });
   }
 
-  // 渲染前台畫面
-  function renderFrontendForm(formData) {
-    currentFormId = formData.formId;
-    let items = [], extraFields = [];
-    try { items = JSON.parse(formData.itemsJson); } catch(e){}
-    try { extraFields = JSON.parse(formData.extraFieldsJson); } catch(e){}
+  // 渲染前台表單
+  function renderFrontendForm(data) {
+    currentFormConfig = data;
+    document.getElementById('displayTitle').innerText = data.formTitle;
+    document.getElementById('displayDesc').innerText = data.formDesc || "";
 
-    currentFormConfig = {
-      formId: formData.formId,
-      formTitle: formData.formTitle,
-      formDesc: formData.formDesc,
-      items: items,
-      formImgBase64: formData.formImgBase64,
-      formRefUrl: formData.formRefUrl,
-      minRequiredCount: formData.minRequiredCount,
-      gradeOptions: formData.gradeOptions,
-      userNameLabel: formData.userNameLabel,
-      signatureLabel: formData.signatureLabel,
-      extraFields: extraFields
-    };
-
-    document.getElementById('displayTitle').innerText = formData.formTitle;
-    document.getElementById('displayDesc').innerText = formData.formDesc || "";
-
-    let userNameLbl = formData.userNameLabel || "填寫人姓名";
+    let userNameLbl = data.userNameLabel || "填寫人姓名";
     if (userNameLbl.startsWith("[") || userNameLbl.startsWith("{")) userNameLbl = "填寫人姓名";
     document.getElementById('displayUserNameLabel').innerText = userNameLbl;
 
-    let signatureLbl = formData.signatureLabel || "親筆簽名確認";
+    let signatureLbl = data.signatureLabel || "親筆簽名確認";
     if (signatureLbl.startsWith("[") || signatureLbl.startsWith("{")) signatureLbl = "親筆簽名確認";
     document.getElementById('displaySignatureLabel').innerText = signatureLbl;
 
+    // 自訂延伸欄位
     const extraContainer = document.getElementById('extraFieldsContainer');
     extraContainer.innerHTML = "";
-    if (extraFields.length > 0) {
-      extraFields.forEach((field) => {
+    if (data.extraFields && data.extraFields.length > 0) {
+      data.extraFields.forEach((field) => {
         const reqStar = field.required ? '<span style="color:red">*</span>' : '';
         const reqAttr = field.required ? 'required' : '';
         extraContainer.innerHTML += `
@@ -691,25 +676,26 @@
       });
     }
 
+    // 年級下拉選單
     const gradeSelect = document.getElementById('userGrade');
     gradeSelect.innerHTML = '<option value="">請選擇年級</option>';
-    const rawGradeStr = formData.gradeOptions || "一年,二年,三年,四年,五年,六年";
+    const rawGradeStr = data.gradeOptions || "一年,二年,三年,四年,五年,六年";
     const gradeList = rawGradeStr.split(/[,，]/).map(s => s.trim()).filter(Boolean);
     gradeList.forEach(g => {
       gradeSelect.innerHTML += `<option value="${g}">${g}</option>`;
     });
 
     const refUrlBox = document.getElementById('displayRefUrl');
-    if (formData.formRefUrl) {
+    if (data.formRefUrl) {
       refUrlBox.style.display = 'block';
-      refUrlBox.innerHTML = `🔗 <b>參考網址：</b><a href="${formData.formRefUrl}" target="_blank">${formData.formRefUrl}</a>`;
+      refUrlBox.innerHTML = `🔗 <b>參考網址：</b><a href="${data.formRefUrl}" target="_blank">${data.formRefUrl}</a>`;
     } else {
       refUrlBox.style.display = 'none';
     }
 
     const headerImg = document.getElementById('displayImg');
-    if (formData.formImgBase64) {
-      headerImg.src = formData.formImgBase64;
+    if (data.formImgBase64) {
+      headerImg.src = data.formImgBase64;
       headerImg.style.display = 'block';
     } else {
       headerImg.style.display = 'none';
@@ -718,11 +704,11 @@
     const container = document.getElementById('checklistContainer');
     container.innerHTML = "";
 
-    if (items.length > 0) {
+    if (data.items && data.items.length > 0) {
       const card = document.createElement('div');
       card.className = "section-card";
 
-      items.forEach((item, index) => {
+      data.items.forEach((item, index) => {
         const requiredHtml = item.required ? `<span class="required-badge">必選</span>` : "";
         let html = `
           <label class="checkbox-item">
@@ -739,7 +725,7 @@
     }
   }
 
-  // 圖片上傳壓縮處理
+  // 照片上傳壓縮引擎
   function handleImageUpload(fileInput, previewImgId, base64HiddenId) {
     const file = fileInput.files[0];
     if (!file) return;
@@ -768,6 +754,7 @@
         ctx.drawImage(img, 0, 0, width, height);
 
         const compressedBase64 = canvas.toDataURL('image/jpeg', 0.6);
+
         document.getElementById(base64HiddenId).value = compressedBase64;
         const preview = document.getElementById(previewImgId);
         preview.src = compressedBase64;
@@ -785,7 +772,8 @@
     document.getElementById(fileInputId).value = "";
     document.getElementById(base64HiddenId).value = "";
     const preview = document.getElementById(previewImgId);
-    preview.src = ""; preview.style.display = 'none';
+    preview.src = "";
+    preview.style.display = 'none';
 
     if (fileInputId === 'adminFormImgFile') {
       document.getElementById('clearHeaderImgBtn').style.display = 'none';
@@ -836,7 +824,7 @@
     ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height); hasSigned = false;
   }
 
-  // 查詢已提交 PDF 檔
+  // 查詢 PDF 檔
   function queryPDF() {
     const queryId = document.getElementById('queryFileId').value.trim();
     const resultDiv = document.getElementById('queryResult');
@@ -858,7 +846,7 @@
     });
   }
 
-  // 表單送出
+  // 前台送出填寫表單
   document.getElementById('mainForm').addEventListener('submit', function(e) {
     e.preventDefault();
     const checkboxes = document.querySelectorAll('.rule-check');
@@ -879,7 +867,7 @@
 
     const minReqCount = parseInt(currentFormConfig.minRequiredCount || 0, 10);
     if (minReqCount > 0 && checkedBoxes.length < minReqCount) {
-      return alert(`⚠️ 本表單最少需勾選 ${minReqCount} 項！（您目前已勾選 ${checkedBoxes.length} 項）`);
+      return alert(`⚠️ 本表單設定最少需勾選 ${minReqCount} 項！（您目前已勾選 ${checkedBoxes.length} 項）`);
     }
 
     const grade = document.getElementById('userGrade').value;
@@ -898,12 +886,13 @@
       const lbl = input.getAttribute('data-label');
       const isReq = input.getAttribute('data-required') === 'true';
       const val = input.value.trim();
+
       if (isReq && !val) missingExtraLabels.push(lbl);
       extraFieldData.push({ label: lbl, value: val });
     });
 
     if (missingExtraLabels.length > 0) {
-      return alert("⚠️ 請填寫必填欄位：\n\n• " + missingExtraLabels.join("\n• "));
+      return alert("⚠️ 請填寫以下必填欄位：\n\n• " + missingExtraLabels.join("\n• "));
     }
 
     if (!hasSigned) {
@@ -970,28 +959,27 @@
     });
   });
 
-  // 後台功能與 Modal 控制
-  function openAdminLogin() { document.getElementById('loginModal').style.display = 'flex'; }
+  // 管理者後台功能
+  function openAdminLogin() { 
+    document.getElementById('adminPasswordInput').value = "";
+    document.getElementById('loginModal').style.display = 'flex'; 
+    document.getElementById('adminPasswordInput').focus();
+  }
   function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
-  function switchAdminTab(tabName) {
-    document.getElementById('tabBtn1').classList.remove('active');
-    document.getElementById('tabBtn2').classList.remove('active');
-    document.getElementById('adminTabEdit').style.display = 'none';
-    document.getElementById('adminTabFiles').style.display = 'none';
-
-    if (tabName === 'editTab') {
-      document.getElementById('tabBtn1').classList.add('active');
-      document.getElementById('adminTabEdit').style.display = 'block';
-    } else {
-      document.getElementById('tabBtn2').classList.add('active');
-      document.getElementById('adminTabFiles').style.display = 'block';
-      loadSubmissionsList();
-    }
+  // 後台頁籤切換
+  function switchAdminTab(tabId) {
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+    
+    event.target.classList.add('active');
+    document.getElementById(tabId).classList.add('active');
   }
 
   function submitAdminLogin() {
     const pwd = document.getElementById('adminPasswordInput').value;
+    if (!pwd) return alert("請輸入密碼！");
+
     fetch(GAS_WEB_APP_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -1003,28 +991,22 @@
         adminPasswordToken = pwd;
         closeModal('loginModal');
         document.getElementById('adminModal').style.display = 'flex';
-        populateAdminFormSelects();
+        populateAdminFormSelect();
       } else {
         alert(data.message);
       }
     });
   }
 
-  // 填充後台下拉選單
-  function populateAdminFormSelects() {
+  // 填入後台選單
+  function populateAdminFormSelect() {
     const adminSelect = document.getElementById('adminFormSelect');
-    const fileSelect = document.getElementById('adminFileFormSelect');
     adminSelect.innerHTML = "<option value=''>-- 選擇表單進行編輯 --</option>";
-    fileSelect.innerHTML = "<option value=''>-- 選擇表單查看紀錄 --</option>";
-
-    globalFormList.forEach(item => {
+    allParsedForms.forEach(item => {
       adminSelect.innerHTML += `<option value="${item.formId}">${item.formTitle}</option>`;
-      fileSelect.innerHTML += `<option value="${item.formId}">${item.formTitle}</option>`;
     });
-
     if (currentFormId) {
       adminSelect.value = currentFormId;
-      fileSelect.value = currentFormId;
       loadFormToAdmin();
     }
   }
@@ -1034,52 +1016,52 @@
     const formId = document.getElementById('adminFormSelect').value;
     if (!formId) return;
 
-    fetch(GAS_WEB_APP_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'getFormConfig', formId: formId })
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data.result === 'success') {
-        document.getElementById('adminFormId').value = data.formId;
-        document.getElementById('adminFormTitle').value = data.formTitle;
-        document.getElementById('adminFormDesc').value = data.formDesc || "";
-        document.getElementById('adminUserNameLabel').value = data.userNameLabel || "填寫人姓名";
-        document.getElementById('adminSignatureLabel').value = data.signatureLabel || "親筆簽名確認";
-        document.getElementById('adminGradeOptions').value = data.gradeOptions || "一年,二年,三年,四年,五年,六年";
-        document.getElementById('adminMinRequiredCount').value = data.minRequiredCount || 0;
-        document.getElementById('adminFormRefUrl').value = data.formRefUrl || "";
-        document.getElementById('adminFormImgBase64').value = data.formImgBase64 || "";
+    const data = allParsedForms.find(f => f.formId === formId);
+    if (!data) return;
 
-        const extraContainer = document.getElementById('adminExtraFieldsContainer');
-        extraContainer.innerHTML = "";
-        if (data.extraFields) {
-          data.extraFields.forEach(f => addAdminExtraFieldRow(f.label, f.required));
-        }
+    document.getElementById('adminFormId').value = data.formId;
+    document.getElementById('adminFormTitle').value = data.formTitle;
+    document.getElementById('adminFormDesc').value = data.formDesc || "";
 
-        const headerPreview = document.getElementById('adminFormImgPreview');
-        if (data.formImgBase64) {
-          headerPreview.src = data.formImgBase64;
-          headerPreview.style.display = 'block';
-          document.getElementById('clearHeaderImgBtn').style.display = 'inline-block';
-        } else {
-          headerPreview.style.display = 'none';
-          document.getElementById('clearHeaderImgBtn').style.display = 'none';
-        }
+    let uLbl = data.userNameLabel || "填寫人姓名";
+    if (uLbl.startsWith("[") || uLbl.startsWith("{")) uLbl = "填寫人姓名";
+    document.getElementById('adminUserNameLabel').value = uLbl;
 
-        const container = document.getElementById('adminItemsContainer');
-        container.innerHTML = "";
-        if (data.items) {
-          data.items.forEach(item => addAdminItemRow(item.title, item.desc, item.refUrl, item.imgBase64, item.required));
-        }
+    let sLbl = data.signatureLabel || "親筆簽名確認";
+    if (sLbl.startsWith("[") || sLbl.startsWith("{")) sLbl = "親筆簽名確認";
+    document.getElementById('adminSignatureLabel').value = sLbl;
 
-        const formUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?formId=' + data.formId;
-        const urlBox = document.getElementById('adminFormUrlBox');
-        urlBox.style.display = 'block';
-        urlBox.innerHTML = `🔗 <b>此表單專屬網址：</b><br><a href="${formUrl}" target="_blank">${formUrl}</a>`;
-      }
-    });
+    document.getElementById('adminGradeOptions').value = data.gradeOptions || "一年,二年,三年,四年,五年,六年";
+    document.getElementById('adminMinRequiredCount').value = data.minRequiredCount || 0;
+    document.getElementById('adminFormRefUrl').value = data.formRefUrl || "";
+    document.getElementById('adminFormImgBase64').value = data.formImgBase64 || "";
+
+    const extraContainer = document.getElementById('adminExtraFieldsContainer');
+    extraContainer.innerHTML = "";
+    if (data.extraFields) {
+      data.extraFields.forEach(f => addAdminExtraFieldRow(f.label, f.required));
+    }
+
+    const headerPreview = document.getElementById('adminFormImgPreview');
+    if (data.formImgBase64) {
+      headerPreview.src = data.formImgBase64;
+      headerPreview.style.display = 'block';
+      document.getElementById('clearHeaderImgBtn').style.display = 'inline-block';
+    } else {
+      headerPreview.style.display = 'none';
+      document.getElementById('clearHeaderImgBtn').style.display = 'none';
+    }
+
+    const container = document.getElementById('adminItemsContainer');
+    container.innerHTML = "";
+    if (data.items) {
+      data.items.forEach(item => addAdminItemRow(item.title, item.desc, item.refUrl, item.imgBase64, item.required));
+    }
+
+    const formUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?formId=' + data.formId;
+    const urlBox = document.getElementById('adminFormUrlBox');
+    urlBox.style.display = 'block';
+    urlBox.innerHTML = `🔗 <b>此表單專屬網址：</b><br><a href="${formUrl}" target="_blank">${formUrl}</a>`;
   }
 
   function createNewFormInAdmin() {
@@ -1133,7 +1115,7 @@
       </div>
       <div style="margin-bottom:6px;">
         <label><b>題目詳細說明：</b></label>
-        <textarea class="admin-item-desc" style="width:100%; height:50px; padding:4px;" placeholder="請輸入說明...">${desc}</textarea>
+        <textarea class="admin-item-desc" style="width:100%; height:50px; padding:4px;" placeholder="請輸入本題說明...">${desc}</textarea>
       </div>
       <div style="margin-bottom:6px;">
         <label><b>題目參考網址：</b></label>
@@ -1201,9 +1183,10 @@
     row.querySelector('.clear-item-img-btn').style.display = 'none';
   }
 
-  // 儲存表單設定 (不自動關閉後台視窗)
+  // 儲存表單設定 (不關閉視窗)
   function saveAdminFormConfig() {
     const saveBtn = document.getElementById('saveAdminFormBtn');
+    const saveStatus = document.getElementById('adminSaveStatus');
     const formId = document.getElementById('adminFormId').value;
     const formTitle = document.getElementById('adminFormTitle').value.trim();
     const formDesc = document.getElementById('adminFormDesc').value.trim();
@@ -1212,6 +1195,7 @@
     
     let userNameLabel = document.getElementById('adminUserNameLabel').value.trim() || "填寫人姓名";
     let signatureLabel = document.getElementById('adminSignatureLabel').value.trim() || "親筆簽名確認";
+
     const minRequiredCount = document.getElementById('adminMinRequiredCount').value || 0;
     const gradeOptions = document.getElementById('adminGradeOptions').value.trim() || "一年,二年,三年,四年,五年,六年";
 
@@ -1233,10 +1217,11 @@
       const u = row.querySelector('.admin-item-refurl').value.trim();
       const img = row.querySelector('.admin-item-img-base64').value;
       const isReq = row.querySelector('.admin-item-required').checked;
+
       if (t) items.push({ title: t, desc: d, refUrl: u, imgBase64: img, required: isReq });
     });
 
-    saveBtn.innerText = "儲存中...";
+    saveBtn.innerText = "⏳ 儲存中...";
     saveBtn.disabled = true;
 
     const payload = {
@@ -1266,10 +1251,15 @@
       saveBtn.disabled = false;
 
       if (data.result === 'success') {
-        alert(data.message);
+        saveStatus.style.display = 'block';
+        saveStatus.innerText = data.message;
+        setTimeout(() => { saveStatus.style.display = 'none'; }, 4000);
+
         document.getElementById('adminFormId').value = data.formId;
-        // 重新讀取 CSV 更新前台與選單 (但不自動關閉後台 modal)
-        loadFormConfigFromCSV(data.formId);
+        
+        // 重新重新載入資料 (不安裝/不關閉 Modal)
+        loadFormFromCSV(data.formId);
+        alert(data.message);
       } else {
         alert("儲存失敗：" + data.message);
       }
@@ -1281,90 +1271,137 @@
     });
   }
 
-  // 載入提交紀錄清單與 PDF 管理
-  function loadSubmissionsList() {
-    const formId = document.getElementById('adminFileFormSelect').value;
-    const container = document.getElementById('submissionsContainer');
-    if (!formId) {
-      container.innerHTML = "<p style='color:#666;'>請選擇表單以讀取提交紀錄...</p>";
-      return;
-    }
-
-    container.innerHTML = "<p style='color:#1a73e8; font-weight:bold;'>讀取紀錄中，請稍候...</p>";
+  // [新增] 載入 PDF 檔案列表
+  function loadAdminPdfList() {
+    const container = document.getElementById('pdfListContainer');
+    container.innerHTML = "資料載入中...";
 
     fetch(GAS_WEB_APP_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'getSubmissions', password: adminPasswordToken, formId: formId })
+      body: JSON.stringify({ action: 'getPdfList', password: adminPasswordToken })
     })
     .then(res => res.json())
     .then(data => {
       if (data.result === 'success') {
         if (data.list.length === 0) {
-          container.innerHTML = "<p style='color:#666;'>目前尚無任何提交紀錄。</p>";
+          container.innerHTML = "<p>目前尚無任何 PDF 檔案紀錄。</p>";
           return;
         }
 
-        let tableHtml = `
-          <table class="sub-table">
+        let html = `
+          <table class="admin-table">
             <thead>
               <tr>
-                <th>時間</th>
-                <th>ID</th>
-                <th>姓名</th>
-                <th>班級/座號</th>
-                <th>PDF 檔</th>
+                <th>檔名</th>
+                <th>大小</th>
+                <th>建立時間</th>
                 <th>操作</th>
               </tr>
             </thead>
             <tbody>
         `;
-
-        data.list.forEach(row => {
-          tableHtml += `
+        data.list.forEach(file => {
+          html += `
             <tr>
-              <td>${row.time}</td>
-              <td><b>${row.fileId}</b></td>
-              <td>${row.userName}</td>
-              <td>${row.classGroup} ${row.seatNo ? row.seatNo + '號' : ''}</td>
-              <td><a href="${row.downloadUrl}" target="_blank" style="color:#1a73e8; font-weight:bold;">📄 開啟 PDF</a></td>
-              <td><button type="button" class="del-item-btn" onclick="deleteSubmissionRecord('${formId}', '${row.fileId}')">🗑️ 刪除紀錄與 PDF</button></td>
+              <td><b>${file.name}</b></td>
+              <td>${file.size}</td>
+              <td>${file.created}</td>
+              <td>
+                <a href="${file.url}" target="_blank" style="color:#1a73e8; font-weight:bold; margin-right:8px;">📄 檢視/下載</a>
+                <button type="button" onclick="deletePdfFile('${file.id}', '${file.name}')" style="background:#d93025; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer;">🗑️ 刪除</button>
+              </td>
             </tr>
           `;
         });
-
-        tableHtml += `</tbody></table>`;
-        container.innerHTML = tableHtml;
+        html += "</tbody></table>";
+        container.innerHTML = html;
       } else {
-        container.innerHTML = `<p style="color:red;">讀取失敗：${data.message}</p>`;
+        container.innerHTML = "<p style='color:red;'>讀取失敗：" + data.message + "</p>";
       }
     });
   }
 
-  // 刪除提交紀錄與對應 PDF 檔案
-  function deleteSubmissionRecord(formId, fileId) {
-    if (!confirm(`⚠️ 確定要刪除查詢 ID [${fileId}] 的紀錄嗎？\n此動作將會將 Drive 中的 PDF 檔案一併移至垃圾桶且無法復原！`)) {
-      return;
-    }
+  function deletePdfFile(fileId, fileName) {
+    if (!confirm(`確定要刪除 PDF 檔案【${fileName}】嗎？刪除後無法復原！`)) return;
 
     fetch(GAS_WEB_APP_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({
-        action: 'deleteSubmission',
-        password: adminPasswordToken,
-        formId: formId,
-        fileId: fileId
-      })
+      body: JSON.stringify({ action: 'deletePdfFile', password: adminPasswordToken, fileId: fileId })
+    })
+    .then(res => res.json())
+    .then(data => {
+      alert(data.message);
+      if (data.result === 'success') loadAdminPdfList();
+    });
+  }
+
+  // [新增] 載入附件照片列表
+  function loadAdminImageList() {
+    const container = document.getElementById('imageListContainer');
+    container.innerHTML = "資料載入中...";
+
+    fetch(GAS_WEB_APP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'getImageList', password: adminPasswordToken })
     })
     .then(res => res.json())
     .then(data => {
       if (data.result === 'success') {
-        alert(data.message);
-        loadSubmissionsList();
+        if (data.list.length === 0) {
+          container.innerHTML = "<p>目前尚無任何照片附件檔案。</p>";
+          return;
+        }
+
+        let html = `
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>預覽圖</th>
+                <th>檔名</th>
+                <th>大小</th>
+                <th>建立時間</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+        data.list.forEach(file => {
+          html += `
+            <tr>
+              <td><img src="${file.url}" style="width:60px; height:60px; object-fit:cover; border-radius:4px; border:1px solid #ccc;"></td>
+              <td><b>${file.name}</b></td>
+              <td>${file.size}</td>
+              <td>${file.created}</td>
+              <td>
+                <a href="${file.url}" target="_blank" style="color:#1a73e8; font-weight:bold; margin-right:8px;">🖼️ 開啟原圖</a>
+                <button type="button" onclick="deleteImageFile('${file.id}', '${file.name}')" style="background:#d93025; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer;">🗑️ 刪除</button>
+              </td>
+            </tr>
+          `;
+        });
+        html += "</tbody></table>";
+        container.innerHTML = html;
       } else {
-        alert("刪除失敗：" + data.message);
+        container.innerHTML = "<p style='color:red;'>讀取失敗：" + data.message + "</p>";
       }
+    });
+  }
+
+  function deleteImageFile(fileId, fileName) {
+    if (!confirm(`確定要刪除照片檔案【${fileName}】嗎？刪除後無法復原！`)) return;
+
+    fetch(GAS_WEB_APP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'deleteImageFile', password: adminPasswordToken, fileId: fileId })
+    })
+    .then(res => res.json())
+    .then(data => {
+      alert(data.message);
+      if (data.result === 'success') loadAdminImageList();
     });
   }
 </script>
