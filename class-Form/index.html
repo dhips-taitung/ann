@@ -27,23 +27,21 @@
       align-items: center;
       background: #1a73e8;
       color: white;
-      padding: 10px 15px;
+      padding: 10px 18px;
       border-radius: 8px;
       margin-bottom: 20px;
       flex-wrap: wrap;
       gap: 10px;
     }
-    .top-bar select {
-      padding: 6px 12px;
-      border-radius: 4px;
-      border: none;
+    .top-bar-title {
+      font-size: 16px;
       font-weight: bold;
     }
     .admin-btn {
       background: #fbbc04;
       color: #202124;
       border: none;
-      padding: 6px 14px;
+      padding: 8px 16px;
       border-radius: 4px;
       cursor: pointer;
       font-weight: bold;
@@ -185,7 +183,6 @@
       background-color: #ffffff;
       margin-top: 8px;
     }
-    /* 簽名框高度加高 20% (180px -> 216px) */
     canvas#signatureCanvas {
       width: 100%;
       height: 216px;
@@ -232,10 +229,48 @@
       border-radius: 10px;
       padding: 25px;
       width: 100%;
-      max-width: 750px;
+      max-width: 820px;
       max-height: 90vh;
       overflow-y: auto;
     }
+
+    /* 後台頁籤 Tab 樣式 */
+    .tab-bar {
+      display: flex;
+      gap: 5px;
+      border-bottom: 2px solid #1a73e8;
+      margin-bottom: 15px;
+    }
+    .tab-btn {
+      padding: 10px 16px;
+      border: none;
+      background: #eef3fc;
+      color: #1a73e8;
+      font-weight: bold;
+      border-radius: 6px 6px 0 0;
+      cursor: pointer;
+    }
+    .tab-btn.active {
+      background: #1a73e8;
+      color: white;
+    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* 後台列表表格樣式 */
+    .admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    .admin-table th, .admin-table td {
+      border: 1px solid #ddd;
+      padding: 8px 10px;
+      text-align: left;
+    }
+    .admin-table th { background: #f1f5f9; }
+
     .admin-item-row, .admin-extra-field-row {
       background: #f8f9fa;
       border: 1px solid #ddd;
@@ -298,12 +333,9 @@
 <body>
 
 <div class="container">
-  <!-- 頂部功能列 -->
+  <!-- 頂部功能列 (前台已移除選單，僅保留檢核系統標題與後台登入) -->
   <div class="top-bar">
-    <div>
-      <span>📋 切換表單：</span>
-      <select id="formSelect" onchange="switchForm()"></select>
-    </div>
+    <div class="top-bar-title">📋 班級表單填寫與檢核系統</div>
     <button class="admin-btn" onclick="openAdminLogin()">🔐 管理者後台設定</button>
   </div>
 
@@ -320,7 +352,7 @@
   <!-- 前台填表畫面 -->
   <form id="mainForm">
     <h2 id="displayTitle">載入中...</h2>
-    <div class="header-desc" id="displayDesc">正在讀取表單設定內容...</div>
+    <div class="header-desc" id="displayDesc">正在讀取表單內容...</div>
     
     <!-- 標題參考網址與照片展示區 -->
     <div id="displayRefUrl" class="ref-link-box" style="display:none;"></div>
@@ -364,7 +396,7 @@
     <!-- 動態檢核題目渲染區 -->
     <div id="checklistContainer"></div>
 
-    <!-- 手寫簽名 (高度 216px) -->
+    <!-- 手寫簽名 -->
     <div class="input-group">
       <label><span id="displaySignatureLabel">親筆簽名確認</span> <span style="color:red">*</span></label>
       <div class="signature-container">
@@ -395,7 +427,8 @@
     <h3>🔐 管理者登入</h3>
     <div class="input-group">
       <label>請輸入管理者密碼：</label>
-      <input type="password" id="adminPasswordInput" placeholder="請輸入密碼">
+      <!-- 支援 Enter 鍵按鍵登入 -->
+      <input type="password" id="adminPasswordInput" placeholder="請輸入密碼" onkeyup="if(event.key==='Enter') submitAdminLogin()">
     </div>
     <button class="query-btn" style="width:100%;" onclick="submitAdminLogin()">登入後台</button>
     <button style="width:100%; margin-top:8px;" onclick="closeModal('loginModal')">取消</button>
@@ -405,110 +438,356 @@
 <!-- 管理者後台設定 Modal -->
 <div class="modal-overlay" id="adminModal">
   <div class="modal-card">
-    <h3>⚙️ 管理者表單設置後台</h3>
-    <hr>
+    <h3>⚙️ 管理者後台管理系統</h3>
     
-    <div class="input-group">
-      <label>選擇要編輯的表單：</label>
-      <select id="adminFormSelect" onchange="loadFormToAdmin()"></select>
-      <button type="button" onclick="createNewFormInAdmin()" style="margin-top:5px;">➕ 新增全新表單</button>
+    <!-- 後台分頁 Tab -->
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchAdminTab('tabFormConfig')">⚙️ 表單設定與編輯</button>
+      <button class="tab-btn" onclick="switchAdminTab('tabPdfFiles'); loadAdminPdfList();">📄 PDF 檔管理</button>
+      <button class="tab-btn" onclick="switchAdminTab('tabImageFiles'); loadAdminImageList();">🖼️ 附件照片管理</button>
     </div>
 
-    <div class="input-group">
-      <label>表單編號 (ID)：</label>
-      <input type="text" id="adminFormId" readonly placeholder="系統自動生成">
-    </div>
-
-    <div class="input-group">
-      <label>檢核主題 (標題)：</label>
-      <input type="text" id="adminFormTitle" placeholder="請輸入表單主題">
-    </div>
-
-    <div class="input-group">
-      <label>標題說明欄位 (表單說明)：</label>
-      <textarea id="adminFormDesc" style="width:100%; height:80px; border-radius:6px; padding:8px;" placeholder="請輸入說明條文內容..."></textarea>
-    </div>
-
-    <!-- 設定：填寫人欄位名稱與簽名欄位名稱 -->
-    <div style="display:flex; gap:10px;">
-      <div class="input-group" style="flex:1;">
-        <label>「填寫人姓名」欄位名稱：</label>
-        <input type="text" id="adminUserNameLabel" placeholder="預設：填寫人姓名（可改如：學生姓名）">
+    <!-- 頁籤 1: 表單設定與編輯 -->
+    <div id="tabFormConfig" class="tab-content active">
+      <div class="input-group">
+        <label>選擇要編輯的表單：</label>
+        <select id="adminFormSelect" onchange="loadFormToAdmin()"></select>
+        <button type="button" onclick="createNewFormInAdmin()" style="margin-top:5px;">➕ 新增全新表單</button>
       </div>
-      <div class="input-group" style="flex:1;">
-        <label>「親筆簽名」欄位名稱：</label>
-        <input type="text" id="adminSignatureLabel" placeholder="預設：親筆簽名確認（可改如：家長簽名）">
+
+      <div class="input-group">
+        <label>表單編號 (ID)：</label>
+        <input type="text" id="adminFormId" readonly placeholder="系統自動生成">
       </div>
+
+      <div class="input-group">
+        <label>檢核主題 (標題)：</label>
+        <input type="text" id="adminFormTitle" placeholder="請輸入表單主題">
+      </div>
+
+      <div class="input-group">
+        <label>標題說明欄位 (表單說明)：</label>
+        <textarea id="adminFormDesc" style="width:100%; height:80px; border-radius:6px; padding:8px;" placeholder="請輸入說明條文內容..."></textarea>
+      </div>
+
+      <div style="display:flex; gap:10px;">
+        <div class="input-group" style="flex:1;">
+          <label>「填寫人姓名」欄位名稱：</label>
+          <input type="text" id="adminUserNameLabel" placeholder="預設：填寫人姓名">
+        </div>
+        <div class="input-group" style="flex:1;">
+          <label>「親筆簽名」欄位名稱：</label>
+          <input type="text" id="adminSignatureLabel" placeholder="預設：親筆簽名確認">
+        </div>
+      </div>
+
+      <div style="background:#f1f5f9; padding:12px; border-radius:6px; border:1px solid #cbd5e1; margin-bottom:15px;">
+        <h5 style="margin:0 0 8px 0; color:#1e293b;">自訂延伸基本資料欄位 (如：家長電話)</h5>
+        <div id="adminExtraFieldsContainer"></div>
+        <button type="button" onclick="addAdminExtraFieldRow()" style="padding:5px 10px; background:#475569; color:white; border:none; border-radius:4px; cursor:pointer;">➕ 新增基本資料欄位</button>
+      </div>
+
+      <div class="input-group" style="background:#f8f9fa; padding:10px; border-radius:6px; border:1px solid #ddd;">
+        <label style="color:#1a73e8;">自訂年級下拉選單 (以逗號分隔)：</label>
+        <input type="text" id="adminGradeOptions" placeholder="一年,二年,三年,四年,五年,六年">
+      </div>
+
+      <div class="input-group" style="background:#eef3fc; padding:10px; border-radius:6px; border:1px solid #c2d7fa;">
+        <label style="color:#1a73e8;">全表單最少需勾選數量：</label>
+        <input type="number" id="adminMinRequiredCount" min="0" value="0" placeholder="0">
+      </div>
+
+      <div class="input-group">
+        <label>檢核主題參考網址 (選擇性)：</label>
+        <input type="url" id="adminFormRefUrl" placeholder="https://...">
+      </div>
+
+      <div class="input-group">
+        <label>檢核主題照片附件 (限制 1MB 以內)：</label>
+        <input type="file" id="adminFormImgFile" accept="image/*" onchange="handleImageUpload(this, 'adminFormImgPreview', 'adminFormImgBase64')">
+        <input type="hidden" id="adminFormImgBase64">
+        <img id="adminFormImgPreview" class="img-preview">
+        <button type="button" onclick="clearImageUpload('adminFormImgFile', 'adminFormImgPreview', 'adminFormImgBase64')" style="display:none;" id="clearHeaderImgBtn">清除照片</button>
+      </div>
+
+      <hr style="margin:20px 0;">
+
+      <h4>檢核項目設定</h4>
+      <div id="adminItemsContainer"></div>
+      <button type="button" onclick="addAdminItemRow()" style="padding:8px 14px; background:#1a73e8; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">➕ 新增檢核項目</button>
+
+      <br><br>
+      <!-- 動態顯示表單專屬網址區域 (含一鍵複製功能) -->
+      <div id="adminFormUrlBox" style="background:#e8f0fe; padding:12px 15px; border-radius:6px; font-size:13.5px; display:none; word-break:break-all; border:1px solid #c2d7fa;"></div>
+      <br>
+
+      <div id="adminSaveStatus" style="font-weight:bold; color:green; margin-bottom:8px; display:none;"></div>
+      <button type="button" class="submit-btn" id="saveAdminFormBtn" onclick="saveAdminFormConfig()">💾 儲存表單設定</button>
     </div>
 
-    <!-- 設定：自訂延伸基本資料欄位 -->
-    <div style="background:#f1f5f9; padding:12px; border-radius:6px; border:1px solid #cbd5e1; margin-bottom:15px;">
-      <h5 style="margin:0 0 8px 0; color:#1e293b;">自訂延伸基本資料欄位 (如：家長電話、聯絡地址等)</h5>
-      <div id="adminExtraFieldsContainer"></div>
-      <button type="button" onclick="addAdminExtraFieldRow()" style="padding:5px 10px; background:#475569; color:white; border:none; border-radius:4px; cursor:pointer;">➕ 新增基本資料欄位</button>
+    <!-- 頁籤 2: PDF 檔案檢視與刪除 -->
+    <div id="tabPdfFiles" class="tab-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <h4 style="margin:0;">📁 雲端硬碟 PDF 檔案列表</h4>
+        <button type="button" onclick="loadAdminPdfList()" style="padding:4px 10px;">🔄 重整清單</button>
+      </div>
+      <div id="pdfListContainer">資料讀取中...</div>
     </div>
 
-    <div class="input-group" style="background:#f8f9fa; padding:10px; border-radius:6px; border:1px solid #ddd;">
-      <label style="color:#1a73e8;">自訂年級下拉選單 (以逗號分隔，如：一年,二年,三年 ； 預設為 一年,二年,三年,四年,五年,六年)：</label>
-      <input type="text" id="adminGradeOptions" placeholder="例如：一年,二年,三年 或 幼兒園,一年">
+    <!-- 頁籤 3: 附件照片檔檢視與刪除 -->
+    <div id="tabImageFiles" class="tab-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <h4 style="margin:0;">🖼️ 雲端硬碟照片附件列表</h4>
+        <button type="button" onclick="loadAdminImageList()" style="padding:4px 10px;">🔄 重整清單</button>
+      </div>
+      <div id="imageListContainer">資料讀取中...</div>
     </div>
 
-    <div class="input-group" style="background:#eef3fc; padding:10px; border-radius:6px; border:1px solid #c2d7fa;">
-      <label style="color:#1a73e8;">全表單最少需勾選數量 (0 表不限制數量；若項目均未設必選，例如同意/不同意二選一可填 1)：</label>
-      <input type="number" id="adminMinRequiredCount" min="0" value="0" placeholder="0">
-    </div>
-
-    <div class="input-group">
-      <label>檢核主題參考網址 (選擇性)：</label>
-      <input type="url" id="adminFormRefUrl" placeholder="例如：https://law.moj.gov.tw/...">
-    </div>
-
-    <div class="input-group">
-      <label>檢核主題照片附件 (限制 1MB 以內，選擇性)：</label>
-      <input type="file" id="adminFormImgFile" accept="image/*" onchange="handleImageUpload(this, 'adminFormImgPreview', 'adminFormImgBase64')">
-      <input type="hidden" id="adminFormImgBase64">
-      <img id="adminFormImgPreview" class="img-preview">
-      <button type="button" onclick="clearImageUpload('adminFormImgFile', 'adminFormImgPreview', 'adminFormImgBase64')" style="display:none;" id="clearHeaderImgBtn">清除照片</button>
-    </div>
-
-    <hr style="margin:20px 0;">
-
-    <h4>檢核項目設定 (可自由增刪)</h4>
-    <div id="adminItemsContainer"></div>
-    <button type="button" onclick="addAdminItemRow()" style="padding:8px 14px; background:#1a73e8; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">➕ 新增檢核項目</button>
-
-    <br><br>
-    <div id="adminFormUrlBox" style="background:#e8f0fe; padding:10px; border-radius:6px; font-size:13px; display:none; word-break:break-all;"></div>
     <br>
-
-    <button type="button" class="submit-btn" id="saveAdminFormBtn" onclick="saveAdminFormConfig()">💾 儲存表單並自動建立試算表工作表</button>
-    <button type="button" style="width:100%; margin-top:8px; padding:10px;" onclick="closeModal('adminModal')">關閉後台</button>
+    <button type="button" style="width:100%; margin-top:8px; padding:10px; font-weight:bold;" onclick="closeModal('adminModal')">關閉後台</button>
   </div>
 </div>
 
 <script>
-  // 保留您的 Apps Script Web App URL
+  // 發佈之 CSV 網址 (用於極速讀取前台內容)
+  const CONFIG_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTSLhpiWJok9MHIOS3NNZtnBTeS22SirbxyLZJVxloDk2CxA7VnSFqWjcJb8DJeKftbXPvenn9b7fJM/pub?gid=1778083626&single=true&output=csv";
+  
+  // Apps Script Web App URL (用於後台儲存、提交表單、刪除檔案)
   const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxfVdlAp3HM31A3fbyw6W_XngDI0VRUoQHD2Z-Xjp6raF2mFKkMGoBUu9kFsvIrR2QNoA/exec";
 
   let currentFormId = "";
   let currentFormConfig = null;
   let adminPasswordToken = "";
+  let allParsedForms = [];
 
-  // 網頁載入初始化
+  // 一鍵複製網址功能
+  function copyFormUrl(url) {
+    navigator.clipboard.writeText(url).then(() => {
+      alert("✅ 專屬網址已成功複製到剪貼簿！\n\n網址：" + url);
+    }).catch(err => {
+      const input = document.createElement('input');
+      input.value = url;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand('copy');
+      document.body.removeChild(input);
+      alert("✅ 專屬網址已成功複製到剪貼簿！");
+    });
+  }
+
+  // 本地端快取更新 (解決 Google CSV 發佈延遲問題)
+  function updateLocalParsedForms(payload, formId) {
+    const existingIndex = allParsedForms.findIndex(f => f.formId === formId);
+    const formData = {
+      formId: formId,
+      formTitle: payload.formTitle,
+      formDesc: payload.formDesc,
+      items: payload.items,
+      formImgBase64: payload.formImgBase64,
+      formRefUrl: payload.formRefUrl,
+      minRequiredCount: payload.minRequiredCount,
+      gradeOptions: payload.gradeOptions,
+      userNameLabel: payload.userNameLabel,
+      signatureLabel: payload.signatureLabel,
+      extraFields: payload.extraFields
+    };
+
+    if (existingIndex >= 0) {
+      allParsedForms[existingIndex] = formData;
+    } else {
+      allParsedForms.push(formData);
+    }
+  }
+
+  // 渲染專屬網址 UI 區塊 (含一鍵複製按鈕)
+  function renderAdminFormUrlBox(formId) {
+    const formUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?formId=' + formId;
+    const urlBox = document.getElementById('adminFormUrlBox');
+    urlBox.style.display = 'block';
+    urlBox.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <div style="word-break:break-all; flex:1;">
+          🔗 <b>此表單專屬網址：</b><br>
+          <a href="${formUrl}" target="_blank" style="color:#1a73e8; font-weight:bold;">${formUrl}</a>
+        </div>
+        <button type="button" onclick="copyFormUrl('${formUrl}')" style="padding:6px 14px; background:#1a73e8; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold; white-space:nowrap;">📋 複製網址</button>
+      </div>
+    `;
+  }
+
+  // CSV 高效解析器 (處理包含 JSON 與雙引號的情況)
+  function parseCSV(text) {
+    const result = [];
+    let row = [];
+    let cell = '';
+    let inQuotes = false;
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      const nextC = text[i + 1];
+      if (inQuotes) {
+        if (c === '"') {
+          if (nextC === '"') { cell += '"'; i++; } 
+          else { inQuotes = false; }
+        } else { cell += c; }
+      } else {
+        if (c === '"') { inQuotes = true; } 
+        else if (c === ',') { row.push(cell); cell = ''; } 
+        else if (c === '\r' && nextC === '\n') { row.push(cell); result.push(row); row = []; cell = ''; i++; } 
+        else if (c === '\n' || c === '\r') { row.push(cell); result.push(row); row = []; cell = ''; } 
+        else { cell += c; }
+      }
+    }
+    if (cell || row.length > 0) { row.push(cell); result.push(row); }
+    return result;
+  }
+
+  // 網頁載入初始化 (改為從發佈之 CSV 直接讀取，達成秒開 speedup)
   window.addEventListener('load', () => {
     initCanvas();
     const urlParams = new URLSearchParams(window.location.search);
     const formIdFromUrl = urlParams.get('formId');
-    fetchFormList(formIdFromUrl);
+    loadFormFromCSV(formIdFromUrl);
   });
 
-  // 圖片上傳壓縮與處理引擎 (限制 1MB 以內，並自動縮放瘦身)
+  // 從 CSV 極速讀取表單資料
+  function loadFormFromCSV(targetFormId) {
+    fetch(CONFIG_CSV_URL + "&t=" + new Date().getTime())
+      .then(res => res.text())
+      .then(csvText => {
+        const rows = parseCSV(csvText);
+        allParsedForms = [];
+        
+        for (let i = 1; i < rows.length; i++) {
+          const row = rows[i];
+          if (row && row[0]) {
+            let cleanItemsStr = (row[3] || "[]").trim();
+            if (cleanItemsStr.startsWith("'")) cleanItemsStr = cleanItemsStr.substring(1);
+            let cleanExtraStr = (row[11] || "[]").trim();
+            if (cleanExtraStr.startsWith("'")) cleanExtraStr = cleanExtraStr.substring(1);
+
+            let items = [], extraFields = [];
+            try { items = JSON.parse(cleanItemsStr); } catch(e){}
+            try { extraFields = JSON.parse(cleanExtraStr); } catch(e){}
+
+            allParsedForms.push({
+              formId: row[0].trim(),
+              formTitle: row[1] || "",
+              formDesc: row[2] || "",
+              items: items,
+              createdAt: row[4] || "",
+              formImgBase64: row[5] || "",
+              formRefUrl: row[6] || "",
+              minRequiredCount: parseInt(row[7] || "0", 10),
+              gradeOptions: row[8] || "一年,二年,三年,四年,五年,六年",
+              userNameLabel: row[9] || "填寫人姓名",
+              signatureLabel: row[10] || "親筆簽名確認",
+              extraFields: extraFields
+            });
+          }
+        }
+
+        if (allParsedForms.length > 0) {
+          let selected = allParsedForms.find(f => f.formId === targetFormId);
+          if (!selected) selected = allParsedForms[0];
+          
+          currentFormId = selected.formId;
+          renderFrontendForm(selected);
+        } else {
+          document.getElementById('displayTitle').innerText = "尚未建立任何表單";
+          document.getElementById('displayDesc').innerText = "請點選右上角「管理者後台設定」建立第一份表單。";
+        }
+      })
+      .catch(err => {
+        console.error("CSV 載入失敗，備用方案", err);
+      });
+  }
+
+  // 渲染前台表單
+  function renderFrontendForm(data) {
+    currentFormConfig = data;
+    document.getElementById('displayTitle').innerText = data.formTitle;
+    document.getElementById('displayDesc').innerText = data.formDesc || "";
+
+    let userNameLbl = data.userNameLabel || "填寫人姓名";
+    if (userNameLbl.startsWith("[") || userNameLbl.startsWith("{")) userNameLbl = "填寫人姓名";
+    document.getElementById('displayUserNameLabel').innerText = userNameLbl;
+
+    let signatureLbl = data.signatureLabel || "親筆簽名確認";
+    if (signatureLbl.startsWith("[") || signatureLbl.startsWith("{")) signatureLbl = "親筆簽名確認";
+    document.getElementById('displaySignatureLabel').innerText = signatureLbl;
+
+    // 自訂延伸欄位
+    const extraContainer = document.getElementById('extraFieldsContainer');
+    extraContainer.innerHTML = "";
+    if (data.extraFields && data.extraFields.length > 0) {
+      data.extraFields.forEach((field) => {
+        const reqStar = field.required ? '<span style="color:red">*</span>' : '';
+        const reqAttr = field.required ? 'required' : '';
+        extraContainer.innerHTML += `
+          <div class="input-group">
+            <label>${field.label} ${reqStar}</label>
+            <input type="text" class="user-extra-input" data-label="${field.label}" data-required="${field.required ? 'true' : 'false'}" placeholder="請輸入${field.label}" ${reqAttr}>
+          </div>
+        `;
+      });
+    }
+
+    // 年級下拉選單
+    const gradeSelect = document.getElementById('userGrade');
+    gradeSelect.innerHTML = '<option value="">請選擇年級</option>';
+    const rawGradeStr = data.gradeOptions || "一年,二年,三年,四年,五年,六年";
+    const gradeList = rawGradeStr.split(/[,，]/).map(s => s.trim()).filter(Boolean);
+    gradeList.forEach(g => {
+      gradeSelect.innerHTML += `<option value="${g}">${g}</option>`;
+    });
+
+    const refUrlBox = document.getElementById('displayRefUrl');
+    if (data.formRefUrl) {
+      refUrlBox.style.display = 'block';
+      refUrlBox.innerHTML = `🔗 <b>參考網址：</b><a href="${data.formRefUrl}" target="_blank">${data.formRefUrl}</a>`;
+    } else {
+      refUrlBox.style.display = 'none';
+    }
+
+    const headerImg = document.getElementById('displayImg');
+    if (data.formImgBase64) {
+      headerImg.src = data.formImgBase64;
+      headerImg.style.display = 'block';
+    } else {
+      headerImg.style.display = 'none';
+    }
+
+    const container = document.getElementById('checklistContainer');
+    container.innerHTML = "";
+
+    if (data.items && data.items.length > 0) {
+      const card = document.createElement('div');
+      card.className = "section-card";
+
+      data.items.forEach((item, index) => {
+        const requiredHtml = item.required ? `<span class="required-badge">必選</span>` : "";
+        let html = `
+          <label class="checkbox-item">
+            <input type="checkbox" class="rule-check" data-index="${index}">
+            <span><b>${index + 1}. ${item.title}</b> ${requiredHtml}</span>
+          </label>
+        `;
+        if (item.desc) html += `<div class="item-desc-box">${item.desc}</div>`;
+        if (item.refUrl) html += `<div class="item-desc-box" style="background:#eef3fc;">🔗 <b>參考網址：</b><a href="${item.refUrl}" target="_blank" style="color:#1a73e8; font-weight:bold;">${item.refUrl}</a></div>`;
+        if (item.imgBase64) html += `<img src="${item.imgBase64}" class="item-img-display">`;
+        card.innerHTML += html;
+      });
+      container.appendChild(card);
+    }
+  }
+
+  // 照片上傳壓縮引擎
   function handleImageUpload(fileInput, previewImgId, base64HiddenId) {
     const file = fileInput.files[0];
     if (!file) return;
 
     if (file.size > 1048576) {
-      alert("⚠️ 照片附件檔案大小不能超過 1MB！請選擇較小的圖片。");
+      alert("⚠️ 照片附件檔案大小不能超過 1MB！");
       fileInput.value = "";
       return;
     }
@@ -519,16 +798,14 @@
       img.onload = function() {
         const canvas = document.createElement('canvas');
         const maxWidth = 500;
-        let width = img.width;
-        let height = img.height;
+        let width = img.width, height = img.height;
 
         if (width > maxWidth) {
           height = Math.round((height * maxWidth) / width);
           width = maxWidth;
         }
 
-        canvas.width = width;
-        canvas.height = height;
+        canvas.width = width; canvas.height = height;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
 
@@ -559,145 +836,7 @@
     }
   }
 
-  // 抓取所有表單選單
-  function fetchFormList(targetFormId) {
-    fetch(GAS_WEB_APP_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'getFormList' })
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data.result === 'success' && data.list.length > 0) {
-        const select = document.getElementById('formSelect');
-        const adminSelect = document.getElementById('adminFormSelect');
-        select.innerHTML = "";
-        adminSelect.innerHTML = "<option value=''>-- 選擇表單進行編輯 --</option>";
-
-        data.list.forEach(item => {
-          select.innerHTML += `<option value="${item.formId}">${item.formTitle}</option>`;
-          adminSelect.innerHTML += `<option value="${item.formId}">${item.formTitle}</option>`;
-        });
-
-        currentFormId = targetFormId || data.list[0].formId;
-        select.value = currentFormId;
-        loadFormConfig(currentFormId);
-      } else {
-        document.getElementById('displayTitle').innerText = "尚未建立任何表單";
-        document.getElementById('displayDesc').innerText = "請點選右上角「管理者後台設定」建立第一份表單。";
-      }
-    });
-  }
-
-  // 切換選單表單
-  function switchForm() {
-    currentFormId = document.getElementById('formSelect').value;
-    const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?formId=' + currentFormId;
-    window.history.pushState({path:newUrl}, '', newUrl);
-    loadFormConfig(currentFormId);
-  }
-
-  // 載入特定表單設定並渲染前台畫面
-  function loadFormConfig(formId) {
-    fetch(GAS_WEB_APP_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'getFormConfig', formId: formId })
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data.result === 'success') {
-        currentFormConfig = data;
-        document.getElementById('displayTitle').innerText = data.formTitle;
-        document.getElementById('displayDesc').innerText = data.formDesc || "";
-
-        // 套用自訂填寫人與簽名標籤名稱 (增加防錯處理，避免顯示 JSON 字串)
-        let userNameLbl = data.userNameLabel || "填寫人姓名";
-        if (userNameLbl.startsWith("[") || userNameLbl.startsWith("{")) {
-          userNameLbl = "填寫人姓名";
-        }
-        document.getElementById('displayUserNameLabel').innerText = userNameLbl;
-
-        let signatureLbl = data.signatureLabel || "親筆簽名確認";
-        if (signatureLbl.startsWith("[") || signatureLbl.startsWith("{")) {
-          signatureLbl = "親筆簽名確認";
-        }
-        document.getElementById('displaySignatureLabel').innerText = signatureLbl;
-
-        // 動態渲染自訂延伸基本資料欄位
-        const extraContainer = document.getElementById('extraFieldsContainer');
-        extraContainer.innerHTML = "";
-        if (data.extraFields && data.extraFields.length > 0) {
-          data.extraFields.forEach((field) => {
-            const reqStar = field.required ? '<span style="color:red">*</span>' : '';
-            const reqAttr = field.required ? 'required' : '';
-            extraContainer.innerHTML += `
-              <div class="input-group">
-                <label>${field.label} ${reqStar}</label>
-                <input type="text" class="user-extra-input" data-label="${field.label}" data-required="${field.required ? 'true' : 'false'}" placeholder="請輸入${field.label}" ${reqAttr}>
-              </div>
-            `;
-          });
-        }
-
-        // 動態生成年級下拉選單選項
-        const gradeSelect = document.getElementById('userGrade');
-        gradeSelect.innerHTML = '<option value="">請選擇年級</option>';
-        const rawGradeStr = data.gradeOptions || "一年,二年,三年,四年,五年,六年";
-        const gradeList = rawGradeStr.split(/[,，]/).map(s => s.trim()).filter(Boolean);
-        gradeList.forEach(g => {
-          gradeSelect.innerHTML += `<option value="${g}">${g}</option>`;
-        });
-
-        const refUrlBox = document.getElementById('displayRefUrl');
-        if (data.formRefUrl) {
-          refUrlBox.style.display = 'block';
-          refUrlBox.innerHTML = `🔗 <b>參考網址：</b><a href="${data.formRefUrl}" target="_blank">${data.formRefUrl}</a>`;
-        } else {
-          refUrlBox.style.display = 'none';
-        }
-
-        const headerImg = document.getElementById('displayImg');
-        if (data.formImgBase64) {
-          headerImg.src = data.formImgBase64;
-          headerImg.style.display = 'block';
-        } else {
-          headerImg.style.display = 'none';
-        }
-
-        const container = document.getElementById('checklistContainer');
-        container.innerHTML = "";
-
-        if (data.items && data.items.length > 0) {
-          const card = document.createElement('div');
-          card.className = "section-card";
-
-          data.items.forEach((item, index) => {
-            const requiredHtml = item.required ? `<span class="required-badge">必選</span>` : "";
-            let html = `
-              <label class="checkbox-item">
-                <input type="checkbox" class="rule-check" data-index="${index}">
-                <span><b>${index + 1}. ${item.title}</b> ${requiredHtml}</span>
-              </label>
-            `;
-            if (item.desc) {
-              html += `<div class="item-desc-box">${item.desc}</div>`;
-            }
-            if (item.refUrl) {
-              html += `<div class="item-desc-box" style="background:#eef3fc;">🔗 <b>參考網址：</b><a href="${item.refUrl}" target="_blank" style="color:#1a73e8; font-weight:bold;">${item.refUrl}</a></div>`;
-            }
-            if (item.imgBase64) {
-              html += `<img src="${item.imgBase64}" class="item-img-display">`;
-            }
-            card.innerHTML += html;
-          });
-          container.appendChild(card);
-        }
-      }
-    });
-  }
-
-  // 手寫簽名引擎 (高度適應 216px)
+  // 手寫簽名引擎
   const canvas = document.getElementById('signatureCanvas');
   const ctx = canvas.getContext('2d');
   let isDrawing = false, hasSigned = false, lastX = 0, lastY = 0;
@@ -763,13 +902,12 @@
     });
   }
 
-  // 送出填寫表單
+  // 前台送出填寫表單
   document.getElementById('mainForm').addEventListener('submit', function(e) {
     e.preventDefault();
     const checkboxes = document.querySelectorAll('.rule-check');
     const checkedBoxes = document.querySelectorAll('.rule-check:checked');
 
-    // A. 檢查「必選」項目
     let missingRequiredList = [];
     checkboxes.forEach((box) => {
       const idx = box.getAttribute('data-index');
@@ -783,13 +921,11 @@
       return alert("⚠️ 以下為「必選項」，請確認勾選：\n\n• " + missingRequiredList.join("\n• "));
     }
 
-    // B. 檢查「最少需勾選數量」
     const minReqCount = parseInt(currentFormConfig.minRequiredCount || 0, 10);
     if (minReqCount > 0 && checkedBoxes.length < minReqCount) {
       return alert(`⚠️ 本表單設定最少需勾選 ${minReqCount} 項！（您目前已勾選 ${checkedBoxes.length} 項）`);
     }
 
-    // 讀取 年級、班級與座號
     const grade = document.getElementById('userGrade').value;
     const userClass = document.getElementById('userClass').value;
     const seat = document.getElementById('userSeat').value.trim();
@@ -798,7 +934,6 @@
       return alert("請完整選擇並填寫【年級、班級與座號】！");
     }
 
-    // C. 收集與驗證自訂延伸欄位
     const extraInputs = document.querySelectorAll('.user-extra-input');
     let extraFieldData = [];
     let missingExtraLabels = [];
@@ -808,9 +943,7 @@
       const isReq = input.getAttribute('data-required') === 'true';
       const val = input.value.trim();
 
-      if (isReq && !val) {
-        missingExtraLabels.push(lbl);
-      }
+      if (isReq && !val) missingExtraLabels.push(lbl);
       extraFieldData.push({ label: lbl, value: val });
     });
 
@@ -843,15 +976,6 @@
       }
     });
 
-    const classGroupStr = `${grade}${userClass}`;
-    const seatNoStr = seat;
-
-    let userNameLbl = currentFormConfig.userNameLabel || "填寫人姓名";
-    if (userNameLbl.startsWith("[") || userNameLbl.startsWith("{")) userNameLbl = "填寫人姓名";
-
-    let signatureLbl = currentFormConfig.signatureLabel || "親筆簽名確認";
-    if (signatureLbl.startsWith("[") || signatureLbl.startsWith("{")) signatureLbl = "親筆簽名確認";
-
     const payload = {
       action: 'submitForm',
       formId: currentFormId,
@@ -859,11 +983,11 @@
       formDesc: currentFormConfig.formDesc,
       formRefUrl: currentFormConfig.formRefUrl || "",
       formImgBase64: currentFormConfig.formImgBase64 || "",
-      userNameLabel: userNameLbl,
-      signatureLabel: signatureLbl,
+      userNameLabel: currentFormConfig.userNameLabel || "填寫人姓名",
+      signatureLabel: currentFormConfig.signatureLabel || "親筆簽名確認",
       userName: document.getElementById('userName').value.trim(),
-      classGroup: classGroupStr,
-      seatNo: seatNoStr,
+      classGroup: `${grade}${userClass}`,
+      seatNo: seat,
       extraFieldData: extraFieldData,
       checkedCount: checkedBoxes.length,
       totalCount: checkboxes.length,
@@ -892,11 +1016,26 @@
   });
 
   // 管理者後台功能
-  function openAdminLogin() { document.getElementById('loginModal').style.display = 'flex'; }
+  function openAdminLogin() { 
+    document.getElementById('adminPasswordInput').value = "";
+    document.getElementById('loginModal').style.display = 'flex'; 
+    document.getElementById('adminPasswordInput').focus();
+  }
   function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+  // 後台頁籤切換
+  function switchAdminTab(tabId) {
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+    
+    event.target.classList.add('active');
+    document.getElementById(tabId).classList.add('active');
+  }
 
   function submitAdminLogin() {
     const pwd = document.getElementById('adminPasswordInput').value;
+    if (!pwd) return alert("請輸入密碼！");
+
     fetch(GAS_WEB_APP_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -908,10 +1047,24 @@
         adminPasswordToken = pwd;
         closeModal('loginModal');
         document.getElementById('adminModal').style.display = 'flex';
+        populateAdminFormSelect();
       } else {
         alert(data.message);
       }
     });
+  }
+
+  // 填入後台選單
+  function populateAdminFormSelect() {
+    const adminSelect = document.getElementById('adminFormSelect');
+    adminSelect.innerHTML = "<option value=''>-- 選擇表單進行編輯 --</option>";
+    allParsedForms.forEach(item => {
+      adminSelect.innerHTML += `<option value="${item.formId}">${item.formTitle}</option>`;
+    });
+    if (currentFormId) {
+      adminSelect.value = currentFormId;
+      loadFormToAdmin();
+    }
   }
 
   // 載入表單資料至後台編輯器
@@ -919,59 +1072,50 @@
     const formId = document.getElementById('adminFormSelect').value;
     if (!formId) return;
 
-    fetch(GAS_WEB_APP_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'getFormConfig', formId: formId })
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data.result === 'success') {
-        document.getElementById('adminFormId').value = data.formId;
-        document.getElementById('adminFormTitle').value = data.formTitle;
-        document.getElementById('adminFormDesc').value = data.formDesc || "";
+    const data = allParsedForms.find(f => f.formId === formId);
+    if (!data) return;
 
-        let uLbl = data.userNameLabel || "填寫人姓名";
-        if (uLbl.startsWith("[") || uLbl.startsWith("{")) uLbl = "填寫人姓名";
-        document.getElementById('adminUserNameLabel').value = uLbl;
+    document.getElementById('adminFormId').value = data.formId;
+    document.getElementById('adminFormTitle').value = data.formTitle;
+    document.getElementById('adminFormDesc').value = data.formDesc || "";
 
-        let sLbl = data.signatureLabel || "親筆簽名確認";
-        if (sLbl.startsWith("[") || sLbl.startsWith("{")) sLbl = "親筆簽名確認";
-        document.getElementById('adminSignatureLabel').value = sLbl;
+    let uLbl = data.userNameLabel || "填寫人姓名";
+    if (uLbl.startsWith("[") || uLbl.startsWith("{")) uLbl = "填寫人姓名";
+    document.getElementById('adminUserNameLabel').value = uLbl;
 
-        document.getElementById('adminGradeOptions').value = data.gradeOptions || "一年,二年,三年,四年,五年,六年";
-        document.getElementById('adminMinRequiredCount').value = data.minRequiredCount || 0;
-        document.getElementById('adminFormRefUrl').value = data.formRefUrl || "";
-        document.getElementById('adminFormImgBase64').value = data.formImgBase64 || "";
+    let sLbl = data.signatureLabel || "親筆簽名確認";
+    if (sLbl.startsWith("[") || sLbl.startsWith("{")) sLbl = "親筆簽名確認";
+    document.getElementById('adminSignatureLabel').value = sLbl;
 
-        const extraContainer = document.getElementById('adminExtraFieldsContainer');
-        extraContainer.innerHTML = "";
-        if (data.extraFields) {
-          data.extraFields.forEach(f => addAdminExtraFieldRow(f.label, f.required));
-        }
+    document.getElementById('adminGradeOptions').value = data.gradeOptions || "一年,二年,三年,四年,五年,六年";
+    document.getElementById('adminMinRequiredCount').value = data.minRequiredCount || 0;
+    document.getElementById('adminFormRefUrl').value = data.formRefUrl || "";
+    document.getElementById('adminFormImgBase64').value = data.formImgBase64 || "";
 
-        const headerPreview = document.getElementById('adminFormImgPreview');
-        if (data.formImgBase64) {
-          headerPreview.src = data.formImgBase64;
-          headerPreview.style.display = 'block';
-          document.getElementById('clearHeaderImgBtn').style.display = 'inline-block';
-        } else {
-          headerPreview.style.display = 'none';
-          document.getElementById('clearHeaderImgBtn').style.display = 'none';
-        }
+    const extraContainer = document.getElementById('adminExtraFieldsContainer');
+    extraContainer.innerHTML = "";
+    if (data.extraFields) {
+      data.extraFields.forEach(f => addAdminExtraFieldRow(f.label, f.required));
+    }
 
-        const container = document.getElementById('adminItemsContainer');
-        container.innerHTML = "";
-        if (data.items) {
-          data.items.forEach(item => addAdminItemRow(item.title, item.desc, item.refUrl, item.imgBase64, item.required));
-        }
+    const headerPreview = document.getElementById('adminFormImgPreview');
+    if (data.formImgBase64) {
+      headerPreview.src = data.formImgBase64;
+      headerPreview.style.display = 'block';
+      document.getElementById('clearHeaderImgBtn').style.display = 'inline-block';
+    } else {
+      headerPreview.style.display = 'none';
+      document.getElementById('clearHeaderImgBtn').style.display = 'none';
+    }
 
-        const formUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?formId=' + data.formId;
-        const urlBox = document.getElementById('adminFormUrlBox');
-        urlBox.style.display = 'block';
-        urlBox.innerHTML = `🔗 <b>此表單專屬網址：</b><br><a href="${formUrl}" target="_blank">${formUrl}</a>`;
-      }
-    });
+    const container = document.getElementById('adminItemsContainer');
+    container.innerHTML = "";
+    if (data.items) {
+      data.items.forEach(item => addAdminItemRow(item.title, item.desc, item.refUrl, item.imgBase64, item.required));
+    }
+
+    // 渲染專屬網址 UI 區塊 (含一鍵複製功能)
+    renderAdminFormUrlBox(data.formId);
   }
 
   function createNewFormInAdmin() {
@@ -993,11 +1137,8 @@
 
   function addAdminExtraFieldRow(label = "", required = false) {
     const container = document.getElementById('adminExtraFieldsContainer');
-    const rowId = "extra_row_" + Date.now() + "_" + Math.floor(Math.random()*1000);
-
     const div = document.createElement('div');
     div.className = "admin-extra-field-row";
-    div.id = rowId;
     div.style.cssText = "display:flex; align-items:center; gap:10px; margin-bottom:8px; background:white; padding:8px; border-radius:4px; border:1px solid #ccc;";
     div.innerHTML = `
       <label><b>欄位名稱：</b></label>
@@ -1028,11 +1169,11 @@
       </div>
       <div style="margin-bottom:6px;">
         <label><b>題目詳細說明：</b></label>
-        <textarea class="admin-item-desc" style="width:100%; height:50px; padding:4px;" placeholder="請輸入本題說明/實例內容...">${desc}</textarea>
+        <textarea class="admin-item-desc" style="width:100%; height:50px; padding:4px;" placeholder="請輸入本題說明...">${desc}</textarea>
       </div>
       <div style="margin-bottom:6px;">
         <label><b>題目參考網址：</b></label>
-        <input type="url" class="admin-item-refurl" value="${refUrl}" placeholder="例如：https://..." style="width:100%; padding:4px;">
+        <input type="url" class="admin-item-refurl" value="${refUrl}" placeholder="https://..." style="width:100%; padding:4px;">
       </div>
       <div>
         <label><b>題目照片附件 (限制 1MB 以內)：</b></label>
@@ -1055,7 +1196,7 @@
     if (!file) return;
 
     if (file.size > 1048576) {
-      alert("⚠️ 照片附件檔案大小不能超過 1MB！請選擇較小的圖片。");
+      alert("⚠️ 照片附件檔案大小不能超過 1MB！");
       fileInput.value = "";
       return;
     }
@@ -1096,8 +1237,10 @@
     row.querySelector('.clear-item-img-btn').style.display = 'none';
   }
 
+  // 儲存表單設定 (儲存後自動生成專屬網址，不關閉後台視窗)
   function saveAdminFormConfig() {
     const saveBtn = document.getElementById('saveAdminFormBtn');
+    const saveStatus = document.getElementById('adminSaveStatus');
     const formId = document.getElementById('adminFormId').value;
     const formTitle = document.getElementById('adminFormTitle').value.trim();
     const formDesc = document.getElementById('adminFormDesc').value.trim();
@@ -1105,10 +1248,7 @@
     const formImgBase64 = document.getElementById('adminFormImgBase64').value;
     
     let userNameLabel = document.getElementById('adminUserNameLabel').value.trim() || "填寫人姓名";
-    if (userNameLabel.startsWith("[") || userNameLabel.startsWith("{")) userNameLabel = "填寫人姓名";
-
     let signatureLabel = document.getElementById('adminSignatureLabel').value.trim() || "親筆簽名確認";
-    if (signatureLabel.startsWith("[") || signatureLabel.startsWith("{")) signatureLabel = "親筆簽名確認";
 
     const minRequiredCount = document.getElementById('adminMinRequiredCount').value || 0;
     const gradeOptions = document.getElementById('adminGradeOptions').value.trim() || "一年,二年,三年,四年,五年,六年";
@@ -1120,9 +1260,7 @@
     extraRows.forEach(row => {
       const lbl = row.querySelector('.admin-extra-label').value.trim();
       const isReq = row.querySelector('.admin-extra-required').checked;
-      if (lbl) {
-        extraFields.push({ label: lbl, required: isReq });
-      }
+      if (lbl) extraFields.push({ label: lbl, required: isReq });
     });
 
     const itemRows = document.querySelectorAll('.admin-item-row');
@@ -1134,12 +1272,10 @@
       const img = row.querySelector('.admin-item-img-base64').value;
       const isReq = row.querySelector('.admin-item-required').checked;
 
-      if (t) {
-        items.push({ title: t, desc: d, refUrl: u, imgBase64: img, required: isReq });
-      }
+      if (t) items.push({ title: t, desc: d, refUrl: u, imgBase64: img, required: isReq });
     });
 
-    saveBtn.innerText = "執行中...";
+    saveBtn.innerText = "⏳ 儲存中...";
     saveBtn.disabled = true;
 
     const payload = {
@@ -1165,22 +1301,171 @@
     })
     .then(res => res.json())
     .then(data => {
-      saveBtn.innerText = "💾 儲存表單並自動建立試算表工作表";
+      saveBtn.innerText = "💾 儲存表單設定";
       saveBtn.disabled = false;
 
       if (data.result === 'success') {
-        alert(data.message);
-        document.getElementById('adminFormId').value = data.formId;
-        fetchFormList(data.formId);
-        closeModal('adminModal');
+        const savedFormId = data.formId;
+
+        // 1. 回填 FormID 欄位
+        document.getElementById('adminFormId').value = savedFormId;
+
+        // 2. 儲存成功後【立即自動顯示/更新專屬網址區塊】(含一鍵複製按鈕)
+        renderAdminFormUrlBox(savedFormId);
+
+        // 3. 即時更新本地快取並重新載入選單 (不需等待 CSV 發佈延遲)
+        updateLocalParsedForms(payload, savedFormId);
+        populateAdminFormSelect();
+        document.getElementById('adminFormSelect').value = savedFormId;
+
+        // 4. 顯示成功提示文字
+        saveStatus.style.display = 'block';
+        saveStatus.innerText = data.message;
+        setTimeout(() => { saveStatus.style.display = 'none'; }, 4000);
+
+        alert(data.message + "\n\n🔗 專屬網址已成功生成！您可直接點擊「📋 複製網址」。");
       } else {
         alert("儲存失敗：" + data.message);
       }
     })
     .catch(err => {
-      saveBtn.innerText = "💾 儲存表單並自動建立試算表工作表";
+      saveBtn.innerText = "💾 儲存表單設定";
       saveBtn.disabled = false;
-      alert("儲存失敗：請求過程發生錯誤或回應異常，請重試。(" + err.toString() + ")");
+      alert("儲存失敗：" + err.toString());
+    });
+  }
+
+  // 載入 PDF 檔案列表
+  function loadAdminPdfList() {
+    const container = document.getElementById('pdfListContainer');
+    container.innerHTML = "資料載入中...";
+
+    fetch(GAS_WEB_APP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'getPdfList', password: adminPasswordToken })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.result === 'success') {
+        if (data.list.length === 0) {
+          container.innerHTML = "<p>目前尚無任何 PDF 檔案紀錄。</p>";
+          return;
+        }
+
+        let html = `
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>檔名</th>
+                <th>大小</th>
+                <th>建立時間</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+        data.list.forEach(file => {
+          html += `
+            <tr>
+              <td><b>${file.name}</b></td>
+              <td>${file.size}</td>
+              <td>${file.created}</td>
+              <td>
+                <a href="${file.url}" target="_blank" style="color:#1a73e8; font-weight:bold; margin-right:8px;">📄 檢視/下載</a>
+                <button type="button" onclick="deletePdfFile('${file.id}', '${file.name}')" style="background:#d93025; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer;">🗑️ 刪除</button>
+              </td>
+            </tr>
+          `;
+        });
+        html += "</tbody></table>";
+        container.innerHTML = html;
+      } else {
+        container.innerHTML = "<p style='color:red;'>讀取失敗：" + data.message + "</p>";
+      }
+    });
+  }
+
+  function deletePdfFile(fileId, fileName) {
+    if (!confirm(`確定要刪除 PDF 檔案【${fileName}】嗎？刪除後無法復原！`)) return;
+
+    fetch(GAS_WEB_APP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'deletePdfFile', password: adminPasswordToken, fileId: fileId })
+    })
+    .then(res => res.json())
+    .then(data => {
+      alert(data.message);
+      if (data.result === 'success') loadAdminPdfList();
+    });
+  }
+
+  // 載入附件照片列表
+  function loadAdminImageList() {
+    const container = document.getElementById('imageListContainer');
+    container.innerHTML = "資料載入中...";
+
+    fetch(GAS_WEB_APP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'getImageList', password: adminPasswordToken })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.result === 'success') {
+        if (data.list.length === 0) {
+          container.innerHTML = "<p>目前尚無任何照片附件檔案。</p>";
+          return;
+        }
+
+        let html = `
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>預覽圖</th>
+                <th>檔名</th>
+                <th>大小</th>
+                <th>建立時間</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+        data.list.forEach(file => {
+          html += `
+            <tr>
+              <td><img src="${file.url}" style="width:60px; height:60px; object-fit:cover; border-radius:4px; border:1px solid #ccc;"></td>
+              <td><b>${file.name}</b></td>
+              <td>${file.size}</td>
+              <td>${file.created}</td>
+              <td>
+                <a href="${file.url}" target="_blank" style="color:#1a73e8; font-weight:bold; margin-right:8px;">🖼️ 開啟原圖</a>
+                <button type="button" onclick="deleteImageFile('${file.id}', '${file.name}')" style="background:#d93025; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer;">🗑️ 刪除</button>
+              </td>
+            </tr>
+          `;
+        });
+        html += "</tbody></table>";
+        container.innerHTML = html;
+      } else {
+        container.innerHTML = "<p style='color:red;'>讀取失敗：" + data.message + "</p>";
+      }
+    });
+  }
+
+  function deleteImageFile(fileId, fileName) {
+    if (!confirm(`確定要刪除照片檔案【${fileName}】嗎？刪除後無法復原！`)) return;
+
+    fetch(GAS_WEB_APP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'deleteImageFile', password: adminPasswordToken, fileId: fileId })
+    })
+    .then(res => res.json())
+    .then(data => {
+      alert(data.message);
+      if (data.result === 'success') loadAdminImageList();
     });
   }
 </script>
