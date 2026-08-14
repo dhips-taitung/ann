@@ -427,7 +427,7 @@
     <h3>🔐 管理者登入</h3>
     <div class="input-group">
       <label>請輸入管理者密碼：</label>
-      <!-- [修改] 支援 Enter 鍵按鍵登入 -->
+      <!-- 支援 Enter 鍵按鍵登入 -->
       <input type="password" id="adminPasswordInput" placeholder="請輸入密碼" onkeyup="if(event.key==='Enter') submitAdminLogin()">
     </div>
     <button class="query-btn" style="width:100%;" onclick="submitAdminLogin()">登入後台</button>
@@ -517,7 +517,8 @@
       <button type="button" onclick="addAdminItemRow()" style="padding:8px 14px; background:#1a73e8; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">➕ 新增檢核項目</button>
 
       <br><br>
-      <div id="adminFormUrlBox" style="background:#e8f0fe; padding:10px; border-radius:6px; font-size:13px; display:none; word-break:break-all;"></div>
+      <!-- 動態顯示表單專屬網址區域 (含一鍵複製功能) -->
+      <div id="adminFormUrlBox" style="background:#e8f0fe; padding:12px 15px; border-radius:6px; font-size:13.5px; display:none; word-break:break-all; border:1px solid #c2d7fa;"></div>
       <br>
 
       <div id="adminSaveStatus" style="font-weight:bold; color:green; margin-bottom:8px; display:none;"></div>
@@ -558,6 +559,61 @@
   let currentFormConfig = null;
   let adminPasswordToken = "";
   let allParsedForms = [];
+
+  // 一鍵複製網址功能
+  function copyFormUrl(url) {
+    navigator.clipboard.writeText(url).then(() => {
+      alert("✅ 專屬網址已成功複製到剪貼簿！\n\n網址：" + url);
+    }).catch(err => {
+      const input = document.createElement('input');
+      input.value = url;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand('copy');
+      document.body.removeChild(input);
+      alert("✅ 專屬網址已成功複製到剪貼簿！");
+    });
+  }
+
+  // 本地端快取更新 (解決 Google CSV 發佈延遲問題)
+  function updateLocalParsedForms(payload, formId) {
+    const existingIndex = allParsedForms.findIndex(f => f.formId === formId);
+    const formData = {
+      formId: formId,
+      formTitle: payload.formTitle,
+      formDesc: payload.formDesc,
+      items: payload.items,
+      formImgBase64: payload.formImgBase64,
+      formRefUrl: payload.formRefUrl,
+      minRequiredCount: payload.minRequiredCount,
+      gradeOptions: payload.gradeOptions,
+      userNameLabel: payload.userNameLabel,
+      signatureLabel: payload.signatureLabel,
+      extraFields: payload.extraFields
+    };
+
+    if (existingIndex >= 0) {
+      allParsedForms[existingIndex] = formData;
+    } else {
+      allParsedForms.push(formData);
+    }
+  }
+
+  // 渲染專屬網址 UI 區塊 (含一鍵複製按鈕)
+  function renderAdminFormUrlBox(formId) {
+    const formUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?formId=' + formId;
+    const urlBox = document.getElementById('adminFormUrlBox');
+    urlBox.style.display = 'block';
+    urlBox.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <div style="word-break:break-all; flex:1;">
+          🔗 <b>此表單專屬網址：</b><br>
+          <a href="${formUrl}" target="_blank" style="color:#1a73e8; font-weight:bold;">${formUrl}</a>
+        </div>
+        <button type="button" onclick="copyFormUrl('${formUrl}')" style="padding:6px 14px; background:#1a73e8; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold; white-space:nowrap;">📋 複製網址</button>
+      </div>
+    `;
+  }
 
   // CSV 高效解析器 (處理包含 JSON 與雙引號的情況)
   function parseCSV(text) {
@@ -1058,10 +1114,8 @@
       data.items.forEach(item => addAdminItemRow(item.title, item.desc, item.refUrl, item.imgBase64, item.required));
     }
 
-    const formUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?formId=' + data.formId;
-    const urlBox = document.getElementById('adminFormUrlBox');
-    urlBox.style.display = 'block';
-    urlBox.innerHTML = `🔗 <b>此表單專屬網址：</b><br><a href="${formUrl}" target="_blank">${formUrl}</a>`;
+    // 渲染專屬網址 UI 區塊 (含一鍵複製功能)
+    renderAdminFormUrlBox(data.formId);
   }
 
   function createNewFormInAdmin() {
@@ -1183,7 +1237,7 @@
     row.querySelector('.clear-item-img-btn').style.display = 'none';
   }
 
-  // 儲存表單設定 (不關閉視窗)
+  // 儲存表單設定 (儲存後自動生成專屬網址，不關閉後台視窗)
   function saveAdminFormConfig() {
     const saveBtn = document.getElementById('saveAdminFormBtn');
     const saveStatus = document.getElementById('adminSaveStatus');
@@ -1251,15 +1305,25 @@
       saveBtn.disabled = false;
 
       if (data.result === 'success') {
+        const savedFormId = data.formId;
+
+        // 1. 回填 FormID 欄位
+        document.getElementById('adminFormId').value = savedFormId;
+
+        // 2. 儲存成功後【立即自動顯示/更新專屬網址區塊】(含一鍵複製按鈕)
+        renderAdminFormUrlBox(savedFormId);
+
+        // 3. 即時更新本地快取並重新載入選單 (不需等待 CSV 發佈延遲)
+        updateLocalParsedForms(payload, savedFormId);
+        populateAdminFormSelect();
+        document.getElementById('adminFormSelect').value = savedFormId;
+
+        // 4. 顯示成功提示文字
         saveStatus.style.display = 'block';
         saveStatus.innerText = data.message;
         setTimeout(() => { saveStatus.style.display = 'none'; }, 4000);
 
-        document.getElementById('adminFormId').value = data.formId;
-        
-        // 重新重新載入資料 (不安裝/不關閉 Modal)
-        loadFormFromCSV(data.formId);
-        alert(data.message);
+        alert(data.message + "\n\n🔗 專屬網址已成功生成！您可直接點擊「📋 複製網址」。");
       } else {
         alert("儲存失敗：" + data.message);
       }
@@ -1271,7 +1335,7 @@
     });
   }
 
-  // [新增] 載入 PDF 檔案列表
+  // 載入 PDF 檔案列表
   function loadAdminPdfList() {
     const container = document.getElementById('pdfListContainer');
     container.innerHTML = "資料載入中...";
@@ -1337,7 +1401,7 @@
     });
   }
 
-  // [新增] 載入附件照片列表
+  // 載入附件照片列表
   function loadAdminImageList() {
     const container = document.getElementById('imageListContainer');
     container.innerHTML = "資料載入中...";
