@@ -48,70 +48,55 @@
     }
     .admin-btn:hover { background: #f29900; }
 
-    /* 查詢區塊與切換分頁 */
     .query-card {
       background-color: #eef3fc;
       border: 1px solid #c2d7fa;
       border-radius: 8px;
-      padding: 14px 18px;
+      padding: 15px 18px;
       margin-bottom: 20px;
-    }
-    .query-mode-bar {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 10px;
-      border-bottom: 1px solid #c2d7fa;
-      padding-bottom: 8px;
-    }
-    .query-mode-btn {
-      background: transparent;
-      border: none;
-      padding: 5px 10px;
-      font-size: 13.5px;
-      color: #5f6368;
-      cursor: pointer;
-      border-radius: 4px;
-      font-weight: bold;
-    }
-    .query-mode-btn.active {
-      background: #1a73e8;
-      color: white;
     }
     .query-input-group {
       display: flex;
       gap: 10px;
-      margin-top: 6px;
+      margin-top: 8px;
     }
     .query-input-group input {
       flex: 1;
-      padding: 9px 12px;
+      padding: 10px 12px;
       border: 1px solid #ccc;
-      border-radius: 4px;
+      border-radius: 6px;
       font-size: 14px;
     }
     .query-btn {
-      padding: 8px 16px;
+      padding: 10px 20px;
       background-color: #1a73e8;
       color: white;
       border: none;
-      border-radius: 4px;
+      border-radius: 6px;
       cursor: pointer;
       font-weight: bold;
-      white-space: nowrap;
-    }
-    .query-result-box {
-      margin-top: 10px;
       font-size: 14px;
-      line-height: 1.6;
     }
-    .phone-record-card {
-      background: white;
-      border: 1px solid #cbd5e1;
+    .query-btn:hover { background-color: #1558b0; }
+
+    /* 查詢結果卡片樣式 */
+    .query-result-item {
+      background: #ffffff;
+      border: 1px solid #d0e1fd;
       border-radius: 6px;
-      padding: 10px 14px;
-      margin-top: 8px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      padding: 12px 15px;
+      margin-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
     }
+    .query-result-info {
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .query-result-info b { color: #1a73e8; }
 
     h2 { text-align: center; color: #1a73e8; margin-top: 0; }
     .header-desc {
@@ -358,7 +343,7 @@
     .download-btn {
       display: inline-block;
       margin-top: 10px;
-      padding: 12px 24px;
+      padding: 10px 20px;
       background: #d93025;
       color: white;
       text-decoration: none;
@@ -376,33 +361,15 @@
     <button class="admin-btn" onclick="openAdminLogin()">🔐 管理者後台設定</button>
   </div>
 
-  <!-- 【全新升級】：雙模式查詢區塊 (支援 ID 查詢與手機查詢) -->
+  <!-- 重複下載查詢區塊 (支援 ID 或 家長電話) -->
   <div class="query-card">
-    <div class="query-mode-bar">
-      <button type="button" class="query-mode-btn active" id="btnModeId" onclick="switchQueryMode('id')">🔢 依 6 位數 ID 查詢</button>
-      <button type="button" class="query-mode-btn" id="btnModePhone" onclick="switchQueryMode('phone')">📱 忘記 ID？依手機查詢</button>
+    <div style="font-weight: bold; color: #1a73e8;">🔍 查詢已填寫表單 (下載 PDF)</div>
+    <div style="font-size: 12.5px; color: #666; margin-top: 3px;">忘記 ID 亦可直接輸入填表時登記的「家長手機號碼」查詢</div>
+    <div class="query-input-group">
+      <input type="text" id="queryFileId" placeholder="請輸入 6 位數 ID 或 家長手機號碼 (例如：0912345678)" onkeyup="if(event.key==='Enter') queryPDF()">
+      <button type="button" class="query-btn" onclick="queryPDF()">查詢紀錄</button>
     </div>
-
-    <!-- 模式 1：依 ID 查詢 -->
-    <div id="queryByIdPanel">
-      <div style="font-size: 13.5px; color: #475569; margin-bottom: 4px;">請輸入提交時獲得的 6 位數檔案 ID：</div>
-      <div class="query-input-group">
-        <input type="text" id="queryFileId" placeholder="例如：849201" onkeyup="if(event.key==='Enter') queryPDF()">
-        <button type="button" class="query-btn" onclick="queryPDF()">查詢 PDF</button>
-      </div>
-    </div>
-
-    <!-- 模式 2：依手機查詢 (防止忘記 ID) -->
-    <div id="queryByPhonePanel" style="display: none;">
-      <div style="font-size: 13.5px; color: #475569; margin-bottom: 4px;">請輸入填表時填寫的<b>家長/聯絡手機號碼</b>：</div>
-      <div class="query-input-group">
-        <input type="tel" id="queryPhoneInput" placeholder="例如：0912345678" onkeyup="if(event.key==='Enter') queryByPhone()">
-        <button type="button" class="query-btn" style="background:#0d9488;" onclick="queryByPhone()">🔍 查詢 ID 與檔案</button>
-      </div>
-    </div>
-
-    <!-- 查詢結果輸出區 -->
-    <div id="queryResult" class="query-result-box"></div>
+    <div id="queryResult"></div>
   </div>
 
   <!-- 前台填表畫面 -->
@@ -414,10 +381,16 @@
     <div id="displayRefUrl" class="ref-link-box" style="display:none;"></div>
     <img id="displayImg" class="header-img-display" style="display:none;">
 
-    <!-- 個人基本資料 -->
+    <!-- 個人基本資料 (姓名與新增的家長電話) -->
     <div class="input-group">
       <label><span id="displayUserNameLabel">填寫人姓名</span> <span style="color:red">*</span></label>
       <input type="text" id="userName" placeholder="請輸入姓名" required>
+    </div>
+
+    <!-- 家長電話 (核心新增欄位，用於防遺忘查詢) -->
+    <div class="input-group">
+      <label>家長電話 (手機號碼) <span style="color:red">*</span></label>
+      <input type="tel" id="parentPhone" placeholder="請輸入手機號碼 (例如：0912345678，方便日後查詢)" required pattern="[0-9\- ]{8,15}">
     </div>
 
     <!-- 班級使用版：年級、班級、座號欄位 -->
@@ -469,7 +442,7 @@
   <!-- 送出成功結果 -->
   <div id="successBox">
     <h3 style="color:#34a853;">🎉 表單與簽名已成功提交！</h3>
-    <p>請保存您的專屬 6 位數檔案 ID（若遺失亦可使用手機號碼查詢）：</p>
+    <p>您的專屬 6 位數檔案 ID（亦可隨時使用家長電話查詢）：</p>
     <div class="file-id-box" id="resFileId">000000</div>
     <a href="#" target="_blank" class="download-btn" id="resDownloadBtn">📄 立即下載 PDF 檔</a>
     <br><br>
@@ -537,7 +510,7 @@
       </div>
 
       <div style="background:#f1f5f9; padding:12px; border-radius:6px; border:1px solid #cbd5e1; margin-bottom:15px;">
-        <h5 style="margin:0 0 8px 0; color:#1e293b;">自訂延伸基本資料欄位 (如：家長電話)</h5>
+        <h5 style="margin:0 0 8px 0; color:#1e293b;">自訂延伸基本資料欄位</h5>
         <div id="adminExtraFieldsContainer"></div>
         <button type="button" onclick="addAdminExtraFieldRow()" style="padding:5px 10px; background:#475569; color:white; border:none; border-radius:4px; cursor:pointer;">➕ 新增基本資料欄位</button>
       </div>
@@ -611,106 +584,6 @@
   let adminPasswordToken = "";
   let allParsedForms = [];
 
-  // 切換查詢模式 (ID 查詢 vs 手機號碼查詢)
-  function switchQueryMode(mode) {
-    const btnId = document.getElementById('btnModeId');
-    const btnPhone = document.getElementById('btnModePhone');
-    const panelId = document.getElementById('queryByIdPanel');
-    const panelPhone = document.getElementById('queryByPhonePanel');
-    const resDiv = document.getElementById('queryResult');
-    resDiv.innerHTML = "";
-
-    if (mode === 'id') {
-      btnId.classList.add('active');
-      btnPhone.classList.remove('active');
-      panelId.style.display = 'block';
-      panelPhone.style.display = 'none';
-      document.getElementById('queryFileId').focus();
-    } else {
-      btnPhone.classList.add('active');
-      btnId.classList.remove('active');
-      panelPhone.style.display = 'block';
-      panelId.style.display = 'none';
-      document.getElementById('queryPhoneInput').focus();
-    }
-  }
-
-  // 1. 依 ID 查詢 PDF
-  function queryPDF() {
-    const queryId = document.getElementById('queryFileId').value.trim();
-    const resultDiv = document.getElementById('queryResult');
-    if (!queryId) return alert("請輸入 6 位數檔案 ID");
-
-    resultDiv.innerHTML = "<span style='color:#1a73e8;'>⏳ 查詢中...</span>";
-    fetch(GAS_WEB_APP_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'querySubmission', queryId: queryId, formId: currentFormId })
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data.result === 'success') {
-        resultDiv.innerHTML = `
-          <div class="phone-record-card" style="border-left: 4px solid #34a853;">
-            <div style="font-size:16px; font-weight:bold; color:#1a73e8;">✅ 查詢成功！</div>
-            <div><b>檔案 ID：</b><span style="font-size:16px; color:#d93025; font-weight:bold;">${data.fileId}</span></div>
-            <div><b>填寫人：</b>${data.userName} (${data.classGroup || ''} ${data.seatNo ? data.seatNo + '號' : ''})</div>
-            <div><b>填表時間：</b>${data.createdAt}</div>
-            <div style="margin-top:8px;">
-              <a href="${data.downloadUrl}" target="_blank" class="download-btn" style="padding:6px 14px; font-size:13px;">📄 點此下載 PDF 檔案</a>
-            </div>
-          </div>
-        `;
-      } else {
-        resultDiv.innerHTML = `<span style="color:#d93025; font-weight:bold;">❌ ${data.message}</span>`;
-      }
-    })
-    .catch(err => {
-      resultDiv.innerHTML = `<span style="color:#d93025;">❌ 查詢失敗：${err.toString()}</span>`;
-    });
-  }
-
-  // 2. 【全新功能】：依手機號碼查詢 ID 與 PDF
-  function queryByPhone() {
-    const phone = document.getElementById('queryPhoneInput').value.trim();
-    const resultDiv = document.getElementById('queryResult');
-    if (!phone) return alert("請輸入手機號碼！");
-
-    resultDiv.innerHTML = "<span style='color:#0d9488;'>⏳ 手機號碼比對中，請稍候...</span>";
-    fetch(GAS_WEB_APP_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'queryByPhone', phone: phone, formId: currentFormId })
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data.result === 'success') {
-        let html = `<div style="font-weight:bold; color:#0d9488; margin-bottom:6px;">🎉 找到 ${data.count} 筆符合的手機紀錄：</div>`;
-        data.list.forEach((rec, idx) => {
-          html += `
-            <div class="phone-record-card">
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                <span style="font-weight:bold; font-size:15px; color:#1e293b;">👤 ${rec.userName} (${rec.classGroup || ''} ${rec.seatNo ? rec.seatNo + '號' : ''})</span>
-                <span style="background:#e8f0fe; color:#1a73e8; padding:2px 8px; border-radius:4px; font-weight:bold; font-size:14px;">ID: ${rec.fileId}</span>
-              </div>
-              <div style="font-size:12.5px; color:#64748b;">🕒 提交時間：${rec.createdAt}</div>
-              <div style="margin-top:6px;">
-                <a href="${rec.downloadUrl}" target="_blank" style="display:inline-block; padding:5px 12px; background:#d93025; color:white; border-radius:4px; text-decoration:none; font-weight:bold; font-size:13px;">📄 下載此份 PDF</a>
-              </div>
-            </div>
-          `;
-        });
-        resultDiv.innerHTML = html;
-      } else {
-        resultDiv.innerHTML = `<span style="color:#d93025; font-weight:bold;">❌ ${data.message}</span>`;
-      }
-    })
-    .catch(err => {
-      resultDiv.innerHTML = `<span style="color:#d93025;">❌ 查詢失敗：${err.toString()}</span>`;
-    });
-  }
-
-  // 一鍵複製網址功能
   function copyFormUrl(url) {
     navigator.clipboard.writeText(url).then(() => {
       alert("✅ 專屬網址已成功複製到剪貼簿！\n\n網址：" + url);
@@ -725,7 +598,6 @@
     });
   }
 
-  // 本地端快取更新
   function updateLocalParsedForms(payload, formId) {
     const existingIndex = allParsedForms.findIndex(f => f.formId === formId);
     const formData = {
@@ -749,7 +621,6 @@
     }
   }
 
-  // 渲染專屬網址 UI 區塊
   function renderAdminFormUrlBox(formId) {
     const formUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?formId=' + formId;
     const urlBox = document.getElementById('adminFormUrlBox');
@@ -765,7 +636,6 @@
     `;
   }
 
-  // CSV 解析器
   function parseCSV(text) {
     const result = [];
     let row = [];
@@ -791,7 +661,6 @@
     return result;
   }
 
-  // 網頁載入初始化
   window.addEventListener('load', () => {
     initCanvas();
     const urlParams = new URLSearchParams(window.location.search);
@@ -799,7 +668,6 @@
     loadFormFromCSV(formIdFromUrl);
   });
 
-  // 從 CSV 讀取表單設定
   function loadFormFromCSV(targetFormId) {
     fetch(CONFIG_CSV_URL + "&t=" + new Date().getTime())
       .then(res => res.text())
@@ -852,7 +720,6 @@
       });
   }
 
-  // 渲染前台表單
   function renderFrontendForm(data) {
     currentFormConfig = data;
     document.getElementById('displayTitle').innerText = data.formTitle;
@@ -882,7 +749,7 @@
       });
     }
 
-    // 年級選單
+    // 年級下拉選單
     const gradeSelect = document.getElementById('userGrade');
     gradeSelect.innerHTML = '<option value="">請選擇年級</option>';
     const rawGradeStr = data.gradeOptions || "一年,二年,三年,四年,五年,六年";
@@ -931,7 +798,6 @@
     }
   }
 
-  // 照片上傳壓縮引擎
   function handleImageUpload(fileInput, previewImgId, base64HiddenId) {
     const file = fileInput.files[0];
     if (!file) return;
@@ -986,7 +852,7 @@
     }
   }
 
-  // 手寫簽名引擎
+  // 手寫簽名
   const canvas = document.getElementById('signatureCanvas');
   const ctx = canvas.getContext('2d');
   let isDrawing = false, hasSigned = false, lastX = 0, lastY = 0;
@@ -1030,6 +896,45 @@
     ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height); hasSigned = false;
   }
 
+  // 查詢 PDF 檔 (支援手機號碼或 6 位數 ID)
+  function queryPDF() {
+    const queryKey = document.getElementById('queryFileId').value.trim();
+    const resultDiv = document.getElementById('queryResult');
+    if (!queryKey) return alert("請輸入 6 位數 ID 或家長手機號碼");
+
+    resultDiv.innerHTML = "<div style='margin-top:8px; color:#1a73e8;'>⏳ 正在查詢紀錄...</div>";
+    
+    fetch(GAS_WEB_APP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'querySubmission', queryKey: queryKey, formId: currentFormId })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.result === 'success' && data.matches && data.matches.length > 0) {
+        let html = `<div style="margin-top:10px; color:#34a853; font-weight:bold;">🎉 查詢成功！共找到 ${data.matches.length} 筆紀錄：</div>`;
+        data.matches.forEach(item => {
+          html += `
+            <div class="query-result-item">
+              <div class="query-result-info">
+                <div><b>查詢 ID：</b>${item.fileId}</div>
+                <div><b>填表人：</b>${item.userName || "未填寫"} (${item.classGroup || "未分班"})</div>
+                <div style="font-size:12px; color:#777;">填表時間：${item.time}</div>
+              </div>
+              <a href="${item.downloadUrl}" target="_blank" class="download-btn" style="margin-top:0; padding:6px 14px; font-size:13px;">📄 下載 PDF</a>
+            </div>
+          `;
+        });
+        resultDiv.innerHTML = html;
+      } else {
+        resultDiv.innerHTML = `<div style="margin-top:8px; color:#d93025; font-weight:bold;">❌ ${data.message}</div>`;
+      }
+    })
+    .catch(err => {
+      resultDiv.innerHTML = `<div style="margin-top:8px; color:#d93025;">查詢失敗：${err.toString()}</div>`;
+    });
+  }
+
   // 前台送出填寫表單
   document.getElementById('mainForm').addEventListener('submit', function(e) {
     e.preventDefault();
@@ -1057,6 +962,11 @@
     const grade = document.getElementById('userGrade').value;
     const userClass = document.getElementById('userClass').value;
     const seat = document.getElementById('userSeat').value.trim();
+    const parentPhone = document.getElementById('parentPhone').value.trim();
+
+    if (!parentPhone) {
+      return alert("請填寫【家長電話】！");
+    }
 
     if (!grade || !userClass || !seat) {
       return alert("請完整選擇並填寫【年級、班級與座號】！");
@@ -1114,6 +1024,7 @@
       userNameLabel: currentFormConfig.userNameLabel || "填寫人姓名",
       signatureLabel: currentFormConfig.signatureLabel || "親筆簽名確認",
       userName: document.getElementById('userName').value.trim(),
+      parentPhone: parentPhone,
       classGroup: `${grade}${userClass}`,
       seatNo: seat,
       extraFieldData: extraFieldData,
@@ -1266,7 +1177,7 @@
     div.style.cssText = "display:flex; align-items:center; gap:10px; margin-bottom:8px; background:white; padding:8px; border-radius:4px; border:1px solid #ccc;";
     div.innerHTML = `
       <label><b>欄位名稱：</b></label>
-      <input type="text" class="admin-extra-label" value="${label}" placeholder="例如：家長手機" style="flex:1; padding:4px;">
+      <input type="text" class="admin-extra-label" value="${label}" placeholder="例如：備用聯絡人" style="flex:1; padding:4px;">
       <label style="color:#d93025; font-weight:bold; cursor:pointer;">
         <input type="checkbox" class="admin-extra-required" ${required ? 'checked' : ''}> 必填
       </label>
@@ -1431,7 +1342,6 @@
         const savedFormId = data.formId;
         document.getElementById('adminFormId').value = savedFormId;
         renderAdminFormUrlBox(savedFormId);
-
         updateLocalParsedForms(payload, savedFormId);
         populateAdminFormSelect();
         document.getElementById('adminFormSelect').value = savedFormId;
