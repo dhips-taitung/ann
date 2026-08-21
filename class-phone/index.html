@@ -79,7 +79,6 @@
     }
     .query-btn:hover { background-color: #1558b0; }
 
-    /* 查詢結果卡片樣式 */
     .query-result-item {
       background: #ffffff;
       border: 1px solid #d0e1fd;
@@ -381,15 +380,15 @@
     <div id="displayRefUrl" class="ref-link-box" style="display:none;"></div>
     <img id="displayImg" class="header-img-display" style="display:none;">
 
-    <!-- 個人基本資料 (姓名與新增的家長電話) -->
+    <!-- 個人基本資料 (姓名與家長電話) -->
     <div class="input-group">
       <label><span id="displayUserNameLabel">填寫人姓名</span> <span style="color:red">*</span></label>
       <input type="text" id="userName" placeholder="請輸入姓名" required>
     </div>
 
-    <!-- 家長電話 (核心新增欄位，用於防遺忘查詢) -->
+    <!-- 家長電話 -->
     <div class="input-group">
-      <label>家長電話 (手機號碼) <span style="color:red">*</span></label>
+      <label><span id="displayPhoneLabel">家長電話</span> <span style="color:red">*</span></label>
       <input type="tel" id="parentPhone" placeholder="請輸入手機號碼 (例如：0912345678，方便日後查詢)" required pattern="[0-9\- ]{8,15}">
     </div>
 
@@ -458,7 +457,7 @@
       <label>請輸入管理者密碼：</label>
       <input type="password" id="adminPasswordInput" placeholder="請輸入密碼" onkeyup="if(event.key==='Enter') submitAdminLogin()">
     </div>
-    <button class="query-btn" style="width:100%;" onclick="submitAdminLogin()">登入後台</button>
+    <button class="query-btn" id="adminLoginSubmitBtn" style="width:100%;" onclick="submitAdminLogin()">登入後台</button>
     <button style="width:100%; margin-top:8px;" onclick="closeModal('loginModal')">取消</button>
   </div>
 </div>
@@ -498,12 +497,17 @@
         <textarea id="adminFormDesc" style="width:100%; height:80px; border-radius:6px; padding:8px;" placeholder="請輸入說明條文內容..."></textarea>
       </div>
 
-      <div style="display:flex; gap:10px;">
-        <div class="input-group" style="flex:1;">
+      <!-- 欄位名稱設定區 (姓名、電話、簽名) -->
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <div class="input-group" style="flex:1; min-width:180px;">
           <label>「填寫人姓名」欄位名稱：</label>
           <input type="text" id="adminUserNameLabel" placeholder="預設：填寫人姓名">
         </div>
-        <div class="input-group" style="flex:1;">
+        <div class="input-group" style="flex:1; min-width:180px;">
+          <label>「家長電話」欄位名稱：</label>
+          <input type="text" id="adminPhoneLabel" placeholder="預設：家長電話">
+        </div>
+        <div class="input-group" style="flex:1; min-width:180px;">
           <label>「親筆簽名」欄位名稱：</label>
           <input type="text" id="adminSignatureLabel" placeholder="預設：親筆簽名確認">
         </div>
@@ -576,7 +580,10 @@
 </div>
 
 <script>
+  // 試算表 CSV 極速發佈網址
   const CONFIG_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ5litqXIpQfJ8FgIF8RG8McnDt47iKVzmfUv_fYa_C5-jiGD8wuMfFHwmbczqS4iG1ehovSRoE0gjE/pub?gid=245320041&single=true&output=csv";
+  
+  // Apps Script Web App URL
   const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyfshBCpMbJmA8TYSLwHTQEvH145cJCSypkoVYgLV9lkzIvBr6ZrPitFGkePhVDqnuL/exec";
 
   let currentFormId = "";
@@ -611,6 +618,7 @@
       gradeOptions: payload.gradeOptions,
       userNameLabel: payload.userNameLabel,
       signatureLabel: payload.signatureLabel,
+      phoneLabel: payload.phoneLabel,
       extraFields: payload.extraFields
     };
 
@@ -699,7 +707,8 @@
               gradeOptions: row[8] || "一年,二年,三年,四年,五年,六年",
               userNameLabel: row[9] || "填寫人姓名",
               signatureLabel: row[10] || "親筆簽名確認",
-              extraFields: extraFields
+              extraFields: extraFields,
+              phoneLabel: row[12] || "家長電話"
             });
           }
         }
@@ -728,6 +737,10 @@
     let userNameLbl = data.userNameLabel || "填寫人姓名";
     if (userNameLbl.startsWith("[") || userNameLbl.startsWith("{")) userNameLbl = "填寫人姓名";
     document.getElementById('displayUserNameLabel').innerText = userNameLbl;
+
+    let phoneLbl = data.phoneLabel || "家長電話";
+    if (phoneLbl.startsWith("[") || phoneLbl.startsWith("{")) phoneLbl = "家長電話";
+    document.getElementById('displayPhoneLabel').innerText = phoneLbl;
 
     let signatureLbl = data.signatureLabel || "親筆簽名確認";
     if (signatureLbl.startsWith("[") || signatureLbl.startsWith("{")) signatureLbl = "親筆簽名確認";
@@ -965,7 +978,7 @@
     const parentPhone = document.getElementById('parentPhone').value.trim();
 
     if (!parentPhone) {
-      return alert("請填寫【家長電話】！");
+      return alert("請填寫【" + (currentFormConfig.phoneLabel || "家長電話") + "】！");
     }
 
     if (!grade || !userClass || !seat) {
@@ -1023,6 +1036,7 @@
       formImgBase64: currentFormConfig.formImgBase64 || "",
       userNameLabel: currentFormConfig.userNameLabel || "填寫人姓名",
       signatureLabel: currentFormConfig.signatureLabel || "親筆簽名確認",
+      phoneLabel: currentFormConfig.phoneLabel || "家長電話",
       userName: document.getElementById('userName').value.trim(),
       parentPhone: parentPhone,
       classGroup: `${grade}${userClass}`,
@@ -1070,9 +1084,14 @@
     document.getElementById(tabId).classList.add('active');
   }
 
+  // 管理者登入 (優化：顯示「登入中...」與防重複點擊)
   function submitAdminLogin() {
     const pwd = document.getElementById('adminPasswordInput').value;
+    const loginBtn = document.getElementById('adminLoginSubmitBtn');
     if (!pwd) return alert("請輸入密碼！");
+
+    loginBtn.innerText = "⏳ 登入中...";
+    loginBtn.disabled = true;
 
     fetch(GAS_WEB_APP_URL, {
       method: 'POST',
@@ -1081,6 +1100,9 @@
     })
     .then(res => res.json())
     .then(data => {
+      loginBtn.innerText = "登入後台";
+      loginBtn.disabled = false;
+
       if (data.result === 'success') {
         adminPasswordToken = pwd;
         closeModal('loginModal');
@@ -1089,6 +1111,11 @@
       } else {
         alert(data.message);
       }
+    })
+    .catch(err => {
+      loginBtn.innerText = "登入後台";
+      loginBtn.disabled = false;
+      alert("登入失敗：" + err.toString());
     });
   }
 
@@ -1118,6 +1145,10 @@
     let uLbl = data.userNameLabel || "填寫人姓名";
     if (uLbl.startsWith("[") || uLbl.startsWith("{")) uLbl = "填寫人姓名";
     document.getElementById('adminUserNameLabel').value = uLbl;
+
+    let pLbl = data.phoneLabel || "家長電話";
+    if (pLbl.startsWith("[") || pLbl.startsWith("{")) pLbl = "家長電話";
+    document.getElementById('adminPhoneLabel').value = pLbl;
 
     let sLbl = data.signatureLabel || "親筆簽名確認";
     if (sLbl.startsWith("[") || sLbl.startsWith("{")) sLbl = "親筆簽名確認";
@@ -1159,6 +1190,7 @@
     document.getElementById('adminFormTitle').value = "";
     document.getElementById('adminFormDesc').value = "";
     document.getElementById('adminUserNameLabel').value = "填寫人姓名";
+    document.getElementById('adminPhoneLabel').value = "家長電話";
     document.getElementById('adminSignatureLabel').value = "親筆簽名確認";
     document.getElementById('adminGradeOptions').value = "一年,二年,三年,四年,五年,六年";
     document.getElementById('adminMinRequiredCount').value = "0";
@@ -1282,6 +1314,7 @@
     const formImgBase64 = document.getElementById('adminFormImgBase64').value;
     
     let userNameLabel = document.getElementById('adminUserNameLabel').value.trim() || "填寫人姓名";
+    let phoneLabel = document.getElementById('adminPhoneLabel').value.trim() || "家長電話";
     let signatureLabel = document.getElementById('adminSignatureLabel').value.trim() || "親筆簽名確認";
 
     const minRequiredCount = document.getElementById('adminMinRequiredCount').value || 0;
@@ -1321,6 +1354,7 @@
       formRefUrl: formRefUrl,
       formImgBase64: formImgBase64,
       userNameLabel: userNameLabel,
+      phoneLabel: phoneLabel,
       signatureLabel: signatureLabel,
       extraFields: extraFields,
       minRequiredCount: minRequiredCount,
