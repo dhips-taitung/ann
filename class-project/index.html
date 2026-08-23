@@ -215,7 +215,8 @@
     <div class="top-bar-title">📋 同意書檢核填報系統</div>
     <div class="top-bar-actions">
       <button type="button" class="nav-btn" onclick="showQuerySection()">🔍 查詢紀錄</button>
-      <button type="button" class="admin-btn" onclick="openAdminModal()">⚙️ 系統與表單管理</button>
+      <!-- 加入 id="adminNavBtn" 以供 JavaScript 動態控制隱藏 -->
+      <button type="button" class="admin-btn" id="adminNavBtn" onclick="openAdminModal()">⚙️ 系統與表單管理</button>
     </div>
   </div>
 
@@ -331,7 +332,7 @@
       <button class="tab-btn" onclick="switchAdminTab('tabImageFiles', event); loadAdminImageList();">🖼️ 照片管理</button>
     </div>
 
-    <!-- 頁籤 1: 系統外接設定 (已隱藏 GAS URL) -->
+    <!-- 頁籤 1: 系統外接設定 -->
     <div id="tabConnection" class="tab-content active">
       <div class="setup-banner">
         💡 <b>外接式專案說明：</b><br>
@@ -495,6 +496,16 @@
     if (urlParams.get('csv')) CSV_URL = urlParams.get('csv');
     const formIdFromUrl = urlParams.get('formId') || urlParams.get('fid');
 
+    // 判斷是否為「家長填報專屬連結」：若有帶入 formId 且網址沒有 admin=1 參數，隱藏管理按鈕
+    const isFormPage = !!(formIdFromUrl);
+    const isAdminParam = urlParams.get('admin') === '1';
+
+    if (isFormPage && !isAdminParam) {
+      document.getElementById('adminNavBtn').style.display = 'none';
+    } else {
+      document.getElementById('adminNavBtn').style.display = 'inline-block';
+    }
+
     // 填回設定欄位
     document.getElementById('cfgSpreadsheetId').value = SPREADSHEET_ID;
     document.getElementById('cfgPdfFolderId').value = PDF_FOLDER_ID;
@@ -542,7 +553,6 @@
     document.getElementById(tabId).classList.add('active');
   }
 
-  // 儲存連線設定並初始化 (不再儲存 GAS URL，僅操作 Sheet 及 Drive IDs)
   function saveSystemConnection(doInit) {
     SPREADSHEET_ID = parseId(document.getElementById('cfgSpreadsheetId').value);
     PDF_FOLDER_ID = parseId(document.getElementById('cfgPdfFolderId').value);
@@ -576,7 +586,6 @@
     }
   }
 
-  // CSV 解析加速
   function parseCSV(text) {
     const result = []; let row = [], cell = '', inQuotes = false;
     for (let i = 0; i < text.length; i++) {
@@ -996,13 +1005,16 @@
   }
 
   function renderAdminUrlBox(formId) {
-    const url = `${window.location.origin}${window.location.pathname}?sid=${SPREADSHEET_ID}&pid=${PDF_FOLDER_ID}&iid=${IMG_FOLDER_ID}&fid=${formId}${CSV_URL ? '&csv=' + encodeURIComponent(CSV_URL) : ''}`;
+    const parentUrl = `${window.location.origin}${window.location.pathname}?sid=${SPREADSHEET_ID}&pid=${PDF_FOLDER_ID}&iid=${IMG_FOLDER_ID}&fid=${formId}${CSV_URL ? '&csv=' + encodeURIComponent(CSV_URL) : ''}`;
+    const adminUrl = `${parentUrl}&admin=1`;
     const box = document.getElementById('adminFormUrlBox');
     box.style.display = 'block';
     box.innerHTML = `
-      <b>🔗 本表單專屬填寫網址：</b><br>
-      <a href="${url}" target="_blank" style="color:#1a73e8;">${url}</a>
-      <button type="button" onclick="navigator.clipboard.writeText('${url}'); alert('已複製網址！');" style="margin-left:10px; padding:4px 8px;">📋 複製</button>
+      <b>🔗 【發送給家長】的填寫網址 (已自動隱藏管理按鈕)：</b><br>
+      <a href="${parentUrl}" target="_blank" style="color:#1a73e8;">${parentUrl}</a>
+      <button type="button" onclick="navigator.clipboard.writeText('${parentUrl}'); alert('已複製家長專屬網址！');" style="margin-left:10px; padding:4px 8px;">📋 複製家長網址</button>
+      <br><br>
+      <small style="color:#666;">💡 管理者若要在該表單下進入後台，請使用帶有管理模式的連結：<a href="${adminUrl}" target="_blank">${adminUrl}</a></small>
     `;
   }
 
