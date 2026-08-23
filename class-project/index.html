@@ -219,7 +219,7 @@
     </div>
   </div>
 
-  <!-- 提示設定區 (若尚未設定試算表時提示) -->
+  <!-- 提示設定區 -->
   <div id="unconfiguredBanner" class="setup-banner" style="display:none;">
     ⚠️ <b>系統尚未完成設定</b>：請先點選右上角「⚙️ 系統與表單管理」填入您的試算表 ID 及資料夾 ID 並完成初始化。
   </div>
@@ -325,22 +325,17 @@
     </div>
 
     <div class="tab-bar">
-      <button class="tab-btn active" onclick="switchAdminTab('tabConnection', event)">🔗 系統與試算表外接設定</button>
+      <button class="tab-btn active" onclick="switchAdminTab('tabConnection', event)">🔗 試算表與雲端外接設定</button>
       <button class="tab-btn" onclick="switchAdminTab('tabFormConfig', event)">📝 表單題目編輯</button>
       <button class="tab-btn" onclick="switchAdminTab('tabPdfFiles', event); loadAdminPdfList();">📄 PDF 管理</button>
       <button class="tab-btn" onclick="switchAdminTab('tabImageFiles', event); loadAdminImageList();">🖼️ 照片管理</button>
     </div>
 
-    <!-- 頁籤 1: 系統外接設定 -->
+    <!-- 頁籤 1: 系統外接設定 (已隱藏 GAS URL) -->
     <div id="tabConnection" class="tab-content active">
       <div class="setup-banner">
         💡 <b>外接式專案說明：</b><br>
-        本系統為主程式外接架構，請在此填入您的 Google 試算表及雲端硬碟資料夾 ID。使用者的 Google 試算表內<b>不需寫入任何 GAS 程式碼</b>！
-      </div>
-
-      <div class="input-group">
-        <label>GAS 主程式 Web App URL：</label>
-        <input type="url" id="cfgGasUrl" placeholder="https://script.google.com/macros/s/.../exec">
+        本系統為主程式外接架構，請在此填入您的 Google 試算表及雲端硬碟資料夾 ID。使用者的 Google 試算表內<b>不需寫入任何程式碼</b>！
       </div>
 
       <div class="input-group">
@@ -468,8 +463,12 @@
 </div>
 
 <script>
-  // 系統全域設定 (優先從 URL 參數或 localStorage 讀取)
-  let GAS_URL = localStorage.getItem('cfgGasUrl') || "https://script.google.com/macros/s/AKfycbxxfJ77RCWK6yJEz-qOwqzEyIHUvq8SH29Uep0zLPVrOmJeN5C2Jjut_axN3u3wdN009w/exec";
+  // =========================================================================
+  // 核心後端 GAS Web App 部署網址 (直接在此寫入，不露出在前端介面)
+  // =========================================================================
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbxxfJ77RCWK6yJEz-qOwqzEyIHUvq8SH29Uep0zLPVrOmJeN5C2Jjut_axN3u3wdN009w/exec";
+
+  // 使用者設定變數 (讀取自 URL 參數或 LocalStorage)
   let SPREADSHEET_ID = localStorage.getItem('cfgSpreadsheetId') || "";
   let PDF_FOLDER_ID = localStorage.getItem('cfgPdfFolderId') || "";
   let IMG_FOLDER_ID = localStorage.getItem('cfgImgFolderId') || "";
@@ -490,15 +489,13 @@
     initCanvas();
 
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('gas')) GAS_URL = urlParams.get('gas');
     if (urlParams.get('sid')) SPREADSHEET_ID = parseId(urlParams.get('sid'));
     if (urlParams.get('pid')) PDF_FOLDER_ID = parseId(urlParams.get('pid'));
     if (urlParams.get('iid')) IMG_FOLDER_ID = parseId(urlParams.get('iid'));
     if (urlParams.get('csv')) CSV_URL = urlParams.get('csv');
     const formIdFromUrl = urlParams.get('formId') || urlParams.get('fid');
 
-    // 填回後台設定欄位
-    document.getElementById('cfgGasUrl').value = GAS_URL;
+    // 填回設定欄位
     document.getElementById('cfgSpreadsheetId').value = SPREADSHEET_ID;
     document.getElementById('cfgPdfFolderId').value = PDF_FOLDER_ID;
     document.getElementById('cfgImgFolderId').value = IMG_FOLDER_ID;
@@ -545,15 +542,13 @@
     document.getElementById(tabId).classList.add('active');
   }
 
-  // 儲存連線設定並初始化
+  // 儲存連線設定並初始化 (不再儲存 GAS URL，僅操作 Sheet 及 Drive IDs)
   function saveSystemConnection(doInit) {
-    GAS_URL = document.getElementById('cfgGasUrl').value.trim();
     SPREADSHEET_ID = parseId(document.getElementById('cfgSpreadsheetId').value);
     PDF_FOLDER_ID = parseId(document.getElementById('cfgPdfFolderId').value);
     IMG_FOLDER_ID = parseId(document.getElementById('cfgImgFolderId').value);
     CSV_URL = document.getElementById('cfgCsvUrl').value.trim();
 
-    localStorage.setItem('cfgGasUrl', GAS_URL);
     localStorage.setItem('cfgSpreadsheetId', SPREADSHEET_ID);
     localStorage.setItem('cfgPdfFolderId', PDF_FOLDER_ID);
     localStorage.setItem('cfgImgFolderId', IMG_FOLDER_ID);
@@ -1005,7 +1000,7 @@
     const box = document.getElementById('adminFormUrlBox');
     box.style.display = 'block';
     box.innerHTML = `
-      <b>🔗 本表單專屬填寫網址 (已包含資料庫設定)：</b><br>
+      <b>🔗 本表單專屬填寫網址：</b><br>
       <a href="${url}" target="_blank" style="color:#1a73e8;">${url}</a>
       <button type="button" onclick="navigator.clipboard.writeText('${url}'); alert('已複製網址！');" style="margin-left:10px; padding:4px 8px;">📋 複製</button>
     `;
