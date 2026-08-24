@@ -63,7 +63,6 @@
     }
     .admin-btn:hover { background: #f29900; }
 
-    /* 獨立查詢頁面區塊 */
     .query-view-card {
       background-color: #f8fafd;
       border: 1px solid #c2d7fa;
@@ -189,6 +188,34 @@
     .input-group { margin-bottom: 15px; }
     .input-group label { display: block; font-weight: bold; margin-bottom: 5px; }
     .input-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
+
+    /* 後台欄位顯示設定區塊樣式 */
+    .field-config-box {
+      background: #f0f4f9;
+      padding: 12px 15px;
+      border-radius: 6px;
+      border: 1px solid #c2d7fa;
+      margin-bottom: 15px;
+    }
+    .field-config-title {
+      font-weight: bold;
+      color: #1a73e8;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    .field-config-options {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .field-config-options label {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: normal;
+    }
 
     .signature-container {
       border: 2px dashed #1a73e8;
@@ -353,7 +380,7 @@
     </div>
   </div>
 
-  <!-- 獨立查詢視圖 (預設隱藏，點選頂部查詢按鈕時切換進入) -->
+  <!-- 獨立查詢視圖 (預設隱藏) -->
   <div id="queryViewSection" style="display:none;">
     <div class="query-view-card">
       <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -381,21 +408,20 @@
       <div id="displayRefUrl" class="ref-link-box" style="display:none;"></div>
       <img id="displayImg" class="header-img-display" style="display:none;">
 
-      <!-- 個人基本資料 -->
-      <div class="input-group">
+      <!-- 個人基本資料欄位區塊 (依據後台設定動態隱藏/顯示) -->
+      <div class="input-group" id="groupUserName">
         <label>填寫人姓名 <span style="color:red">*</span></label>
         <input type="text" id="userName" placeholder="請輸入姓名" required>
       </div>
       
-      <!-- 新增：手機號碼 (必填) -->
-      <div class="input-group">
-        <label>手機號碼 <span style="color:red">*</span> (用於忘記 ID 時查詢下載紀錄)</label>
-        <input type="tel" id="userPhone" placeholder="例如：0912345678" required pattern="09[0-9]{8}">
-      </div>
-
-      <div class="input-group">
+      <div class="input-group" id="groupSchoolUnit">
         <label>單位名稱 / 學校與隊別</label>
         <input type="text" id="schoolUnit" placeholder="例如：XX國小 體育組長/教練">
+      </div>
+
+      <div class="input-group" id="groupUserPhone">
+        <label>手機號碼 <span style="color:red">*</span> (用於忘記 ID 時查詢下載紀錄)</label>
+        <input type="tel" id="userPhone" placeholder="例如：0912345678" required pattern="09[0-9]{8}">
       </div>
 
       <!-- 動態檢核題目渲染區 -->
@@ -475,6 +501,16 @@
         <textarea id="adminFormDesc" style="width:100%; height:80px; border-radius:6px; padding:8px;" placeholder="請輸入說明條文內容..."></textarea>
       </div>
 
+      <!-- 新增：管理者可勾選決定前台顯示之欄位 -->
+      <div class="field-config-box">
+        <div class="field-config-title">📋 前台基本資料欄位顯示設定 (勾選表示在前台顯示此欄位)：</div>
+        <div class="field-config-options">
+          <label><input type="checkbox" id="adminShowName" checked> 1. 填寫人姓名</label>
+          <label><input type="checkbox" id="adminShowUnit" checked> 2. 單位名稱 / 學校與隊別</label>
+          <label><input type="checkbox" id="adminShowPhone" checked> 3. 手機號碼 (方便查詢 ID)</label>
+        </div>
+      </div>
+
       <div class="input-group" style="background:#eef3fc; padding:10px; border-radius:6px; border:1px solid #c2d7fa;">
         <label style="color:#1a73e8;">全表單最少需勾選數量 (0 表不限制數量)：</label>
         <input type="number" id="adminMinRequiredCount" min="0" value="0" placeholder="0">
@@ -539,7 +575,6 @@
   let adminPasswordToken = "";
   let allParsedForms = [];
 
-  // 切換填表與查詢視圖
   function toggleQueryView() {
     const formView = document.getElementById('formViewSection');
     const queryView = document.getElementById('queryViewSection');
@@ -580,7 +615,8 @@
       items: payload.items,
       formImgBase64: payload.formImgBase64,
       formRefUrl: payload.formRefUrl,
-      minRequiredCount: payload.minRequiredCount
+      minRequiredCount: payload.minRequiredCount,
+      fieldSettings: payload.fieldSettings
     };
 
     if (existingIndex >= 0) {
@@ -653,6 +689,16 @@
             let items = [];
             try { items = JSON.parse(cleanItemsStr); } catch(e){}
 
+            let cleanFieldSettingsStr = (row[8] || "{}").trim();
+            if (cleanFieldSettingsStr.startsWith("'")) cleanFieldSettingsStr = cleanFieldSettingsStr.substring(1);
+
+            let fieldSettings = { showName: true, showUnit: true, showPhone: true };
+            try {
+              if (cleanFieldSettingsStr) {
+                fieldSettings = Object.assign(fieldSettings, JSON.parse(cleanFieldSettingsStr));
+              }
+            } catch(e){}
+
             allParsedForms.push({
               formId: row[0].trim(),
               formTitle: row[1] || "",
@@ -661,7 +707,8 @@
               createdAt: row[4] || "",
               formImgBase64: row[5] || "",
               formRefUrl: row[6] || "",
-              minRequiredCount: parseInt(row[7] || "0", 10)
+              minRequiredCount: parseInt(row[7] || "0", 10),
+              fieldSettings: fieldSettings
             });
           }
         }
@@ -701,6 +748,43 @@
       headerImg.style.display = 'block';
     } else {
       headerImg.style.display = 'none';
+    }
+
+    // 依據管理者設定，動態控制前台基本資料欄位的顯示/隱藏與驗證規則
+    const fieldSettings = data.fieldSettings || { showName: true, showUnit: true, showPhone: true };
+    
+    // 1. 填寫人姓名
+    const groupName = document.getElementById('groupUserName');
+    const inputName = document.getElementById('userName');
+    if (fieldSettings.showName !== false) {
+      groupName.style.display = 'block';
+      inputName.required = true;
+    } else {
+      groupName.style.display = 'none';
+      inputName.required = false;
+      inputName.value = "";
+    }
+
+    // 2. 單位名稱 / 學校與隊別
+    const groupUnit = document.getElementById('groupSchoolUnit');
+    const inputUnit = document.getElementById('schoolUnit');
+    if (fieldSettings.showUnit !== false) {
+      groupUnit.style.display = 'block';
+    } else {
+      groupUnit.style.display = 'none';
+      inputUnit.value = "";
+    }
+
+    // 3. 手機號碼
+    const groupPhone = document.getElementById('groupUserPhone');
+    const inputPhone = document.getElementById('userPhone');
+    if (fieldSettings.showPhone !== false) {
+      groupPhone.style.display = 'block';
+      inputPhone.required = true;
+    } else {
+      groupPhone.style.display = 'none';
+      inputPhone.required = false;
+      inputPhone.value = "";
     }
 
     const container = document.getElementById('checklistContainer');
@@ -824,7 +908,7 @@
     ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height); hasSigned = false;
   }
 
-  // 查詢 PDF 檔 (支援 6 位數 ID 或 手機號碼)
+  // 查詢 PDF 檔
   function queryPDF() {
     const keyword = document.getElementById('queryKeyword').value.trim();
     const resultDiv = document.getElementById('queryResult');
@@ -1007,6 +1091,12 @@
     document.getElementById('adminFormRefUrl').value = data.formRefUrl || "";
     document.getElementById('adminFormImgBase64').value = data.formImgBase64 || "";
 
+    // 載入基本資料欄位勾選設定
+    const fs = data.fieldSettings || { showName: true, showUnit: true, showPhone: true };
+    document.getElementById('adminShowName').checked = (fs.showName !== false);
+    document.getElementById('adminShowUnit').checked = (fs.showUnit !== false);
+    document.getElementById('adminShowPhone').checked = (fs.showPhone !== false);
+
     const headerPreview = document.getElementById('adminFormImgPreview');
     if (data.formImgBase64) {
       headerPreview.src = data.formImgBase64;
@@ -1033,6 +1123,12 @@
     document.getElementById('adminFormDesc').value = "";
     document.getElementById('adminMinRequiredCount').value = "0";
     document.getElementById('adminFormRefUrl').value = "";
+    
+    // 新增表單時預設全部欄位皆開啟
+    document.getElementById('adminShowName').checked = true;
+    document.getElementById('adminShowUnit').checked = true;
+    document.getElementById('adminShowPhone').checked = true;
+
     clearImageUpload('adminFormImgFile', 'adminFormImgPreview', 'adminFormImgBase64');
     document.getElementById('adminItemsContainer').innerHTML = "";
     document.getElementById('adminFormUrlBox').style.display = 'none';
@@ -1149,6 +1245,13 @@
       if (t) items.push({ title: t, desc: d, refUrl: u, imgBase64: img, required: isReq });
     });
 
+    // 收集基本資料欄位開關設定
+    const fieldSettings = {
+      showName: document.getElementById('adminShowName').checked,
+      showUnit: document.getElementById('adminShowUnit').checked,
+      showPhone: document.getElementById('adminShowPhone').checked
+    };
+
     saveBtn.innerText = "⏳ 儲存中...";
     saveBtn.disabled = true;
 
@@ -1161,6 +1264,7 @@
       formRefUrl: formRefUrl,
       formImgBase64: formImgBase64,
       minRequiredCount: minRequiredCount,
+      fieldSettings: fieldSettings,
       items: items
     };
 
