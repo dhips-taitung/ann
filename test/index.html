@@ -346,26 +346,39 @@
     }
 
     #loadingOverlay { display: none; text-align: center; margin-top: 15px; color: #1a73e8; font-weight: bold; }
-    #successBox { display: none; text-align: center; padding: 20px; }
+    
+    #successBox {
+      display: none;
+      text-align: center;
+      padding: 25px 20px;
+      background: #ffffff;
+      border-radius: 8px;
+      border: 1px solid #c2d7fa;
+      margin-top: 15px;
+    }
     .file-id-box {
       background: #e8f0fe;
-      padding: 10px;
-      font-size: 24px;
+      padding: 12px;
+      font-size: 26px;
       font-weight: bold;
       color: #1a73e8;
       border-radius: 6px;
-      margin: 10px 0;
+      margin: 15px auto;
+      max-width: 300px;
+      letter-spacing: 2px;
     }
     .download-btn {
       display: inline-block;
-      margin-top: 10px;
+      margin-top: 8px;
       padding: 12px 24px;
       background: #d93025;
       color: white;
       text-decoration: none;
       border-radius: 6px;
       font-weight: bold;
+      font-size: 16px;
     }
+    .download-btn:hover { background: #b31f15; }
   </style>
 </head>
 <body>
@@ -375,6 +388,7 @@
   <div class="top-bar">
     <div class="top-bar-title">📋 人事表單填報與檢核系統</div>
     <div class="top-bar-actions">
+      <!-- 點擊在「🔍 表單查詢」與「📝 填寫新表單」之間自動切換 -->
       <button type="button" class="nav-btn" id="toggleQueryBtn" onclick="toggleQueryView()">🔍 表單查詢</button>
       <button type="button" class="admin-btn" onclick="openAdminLogin()">🔐 設定管理</button>
     </div>
@@ -385,7 +399,8 @@
     <div class="query-view-card">
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <h3 style="margin:0; color:#1a73e8;">🔍 查詢已填寫表單 (下載 PDF)</h3>
-        <button type="button" onclick="toggleQueryView()" style="padding:4px 10px; cursor:pointer;">✖ 返回填表</button>
+        <!-- 點擊直接執行重設並返回填寫新表單 -->
+        <button type="button" onclick="resetFormForNewEntry()" style="padding:6px 12px; cursor:pointer; background:#fff; border:1px solid #c2d7fa; border-radius:4px; font-weight:bold; color:#1a73e8;">✖ 填寫新表單</button>
       </div>
       <p style="font-size:14px; color:#666; margin:8px 0 12px 0;">請輸入您的 <b>6 位數檔案 ID</b> 或填表時留下的 <b>手機號碼</b> 進行查詢：</p>
       
@@ -444,12 +459,12 @@
 
   <!-- 送出成功結果 -->
   <div id="successBox">
-    <h3 style="color:#34a853;">🎉 表單與簽名已成功提交！</h3>
+    <h3 style="color:#34a853; margin-top:0;">🎉 表單與簽名已成功提交！</h3>
     <p>請妥善保存您的專屬 6 位數檔案 ID (亦可使用手機號碼查詢)：</p>
     <div class="file-id-box" id="resFileId">000000</div>
     <a href="#" target="_blank" class="download-btn" id="resDownloadBtn">📄 立即下載 PDF 檔</a>
     <br><br>
-    <button type="button" onclick="resetFormForNewEntry()" style="padding:10px 20px; font-weight:bold; cursor:pointer; background:#1a73e8; color:white; border:none; border-radius:6px; font-size:15px;">📝 填寫新表單</button>
+    <button type="button" onclick="resetFormForNewEntry()" style="padding:10px 22px; font-weight:bold; cursor:pointer; background:#1a73e8; color:white; border:none; border-radius:6px; font-size:15px; box-shadow:0 2px 6px rgba(26,115,232,0.3);">📝 填寫新表單</button>
   </div>
 </div>
 
@@ -610,7 +625,7 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  // 切換填表與查詢視圖 (每次切換至查詢時自動清空前次查詢號碼與結果)
+  // 切換填表與查詢視圖 (按鈕顯示「📝 填寫新表單」，再次點擊自動清空並返回填寫頁)
   function toggleQueryView() {
     const formView = document.getElementById('formViewSection');
     const queryView = document.getElementById('queryViewSection');
@@ -621,16 +636,17 @@
       formView.style.display = 'none';
       if (successBox) successBox.style.display = 'none';
       queryView.style.display = 'block';
-      toggleBtn.innerText = '📝 返回填寫表單';
+      
+      // 切換為「填寫新表單」
+      toggleBtn.innerText = '📝 填寫新表單';
 
-      // 每次開啟查詢時，自動清空輸入框與搜尋結果
+      // 自動清空輸入框與搜尋結果
       document.getElementById('queryKeyword').value = '';
       document.getElementById('queryResult').innerHTML = '';
       document.getElementById('queryKeyword').focus();
     } else {
-      queryView.style.display = 'none';
-      formView.style.display = 'block';
-      toggleBtn.innerText = '🔍 表單查詢';
+      // 點擊「填寫新表單」直接執行全新重設並返回填報
+      resetFormForNewEntry();
     }
   }
 
