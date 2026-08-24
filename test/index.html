@@ -93,6 +93,7 @@
       font-size: 15px;
     }
     .query-btn:hover { background-color: #1557b0; }
+    .query-btn:disabled { background-color: #9aa0a6; cursor: not-allowed; }
 
     .query-result-item {
       background: #ffffff;
@@ -189,7 +190,6 @@
     .input-group label { display: block; font-weight: bold; margin-bottom: 5px; }
     .input-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
 
-    /* 後台欄位顯示設定區塊樣式 */
     .field-config-box {
       background: #f0f4f9;
       padding: 12px 15px;
@@ -371,7 +371,7 @@
 <body>
 
 <div class="container">
-  <!-- 頂部功能列 (整合查詢與後台登入按鈕) -->
+  <!-- 頂部功能列 -->
   <div class="top-bar">
     <div class="top-bar-title">📋 人事表單填報與檢核系統</div>
     <div class="top-bar-actions">
@@ -390,7 +390,7 @@
       <p style="font-size:14px; color:#666; margin:8px 0 12px 0;">請輸入您的 <b>6 位數檔案 ID</b> 或填表時留下的 <b>手機號碼</b> 進行查詢：</p>
       
       <div class="query-input-group">
-        <input type="text" id="queryKeyword" placeholder="請輸入 6 位數 ID 或 手機號碼 (例如：0912345678)">
+        <input type="text" id="queryKeyword" placeholder="請輸入 6 位數 ID 或 手機號碼 (例如：0912345678)" onkeyup="if(event.key==='Enter') queryPDF()">
         <button type="button" class="query-btn" onclick="queryPDF()">立即查詢</button>
       </div>
       
@@ -408,7 +408,7 @@
       <div id="displayRefUrl" class="ref-link-box" style="display:none;"></div>
       <img id="displayImg" class="header-img-display" style="display:none;">
 
-      <!-- 個人基本資料欄位區塊 (依據後台設定動態隱藏/顯示) -->
+      <!-- 個人基本資料欄位區塊 -->
       <div class="input-group" id="groupUserName">
         <label>填寫人姓名 <span style="color:red">*</span></label>
         <input type="text" id="userName" placeholder="請輸入姓名" required>
@@ -449,7 +449,8 @@
     <div class="file-id-box" id="resFileId">000000</div>
     <a href="#" target="_blank" class="download-btn" id="resDownloadBtn">📄 立即下載 PDF 檔</a>
     <br><br>
-    <button type="button" onclick="location.reload()" style="padding:8px 16px; cursor:pointer;">填寫新表單</button>
+    <!-- 修改：點擊執行完整清空表單與簽名並返回填報 -->
+    <button type="button" onclick="resetFormForNewEntry()" style="padding:10px 20px; font-weight:bold; cursor:pointer; background:#1a73e8; color:white; border:none; border-radius:6px; font-size:15px;">📝 填寫新表單</button>
   </div>
 </div>
 
@@ -461,8 +462,8 @@
       <label>請輸入管理者密碼：</label>
       <input type="password" id="adminPasswordInput" placeholder="請輸入密碼" onkeyup="if(event.key==='Enter') submitAdminLogin()">
     </div>
-    <button class="query-btn" style="width:100%;" onclick="submitAdminLogin()">登入後台</button>
-    <button style="width:100%; margin-top:8px;" onclick="closeModal('loginModal')">取消</button>
+    <button class="query-btn" id="adminLoginBtn" style="width:100%;" onclick="submitAdminLogin()">登入後台</button>
+    <button style="width:100%; margin-top:8px; padding:8px; border:1px solid #ccc; border-radius:4px; cursor:pointer; background:#fff;" onclick="closeModal('loginModal')">取消</button>
   </div>
 </div>
 
@@ -501,7 +502,6 @@
         <textarea id="adminFormDesc" style="width:100%; height:80px; border-radius:6px; padding:8px;" placeholder="請輸入說明條文內容..."></textarea>
       </div>
 
-      <!-- 新增：管理者可勾選決定前台顯示之欄位 -->
       <div class="field-config-box">
         <div class="field-config-title">📋 前台基本資料欄位顯示設定 (勾選表示在前台顯示此欄位)：</div>
         <div class="field-config-options">
@@ -575,6 +575,35 @@
   let adminPasswordToken = "";
   let allParsedForms = [];
 
+  // 清除所有填表欄位、勾選與手寫簽名，返回填寫新表單
+  function resetFormForNewEntry() {
+    // 1. 清空文字輸入框
+    document.getElementById('userName').value = '';
+    document.getElementById('schoolUnit').value = '';
+    document.getElementById('userPhone').value = '';
+
+    // 2. 清除所有題目勾選
+    document.querySelectorAll('.rule-check').forEach(cb => { cb.checked = false; });
+
+    // 3. 清空親筆簽名畫布
+    clearSignature();
+
+    // 4. 重置送出按鈕狀態與載入提示
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.disabled = false;
+    submitBtn.innerText = '確認送出表單並生成 PDF';
+    document.getElementById('loadingOverlay').style.display = 'none';
+
+    // 5. 隱藏結果區與查詢區，顯示表單主畫面
+    document.getElementById('successBox').style.display = 'none';
+    document.getElementById('queryViewSection').style.display = 'none';
+    document.getElementById('formViewSection').style.display = 'block';
+    document.getElementById('mainForm').style.display = 'block';
+
+    // 6. 平滑滾動至頁面頂端
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
   function toggleQueryView() {
     const formView = document.getElementById('formViewSection');
     const queryView = document.getElementById('queryViewSection');
@@ -588,7 +617,7 @@
     } else {
       queryView.style.display = 'none';
       formView.style.display = 'block';
-      toggleBtn.innerText = '🔍 查詢已填寫表單';
+      toggleBtn.innerText = '🔍 表單查詢';
     }
   }
 
@@ -721,7 +750,7 @@
           renderFrontendForm(selected);
         } else {
           document.getElementById('displayTitle').innerText = "尚未建立任何表單";
-          document.getElementById('displayDesc').innerText = "請點選右上角「管理者後台設定」建立第一份表單。";
+          document.getElementById('displayDesc').innerText = "請點選右上角「設定管理」建立第一份表單。";
         }
       })
       .catch(err => {
@@ -750,7 +779,6 @@
       headerImg.style.display = 'none';
     }
 
-    // 依據管理者設定，動態控制前台基本資料欄位的顯示/隱藏與驗證規則
     const fieldSettings = data.fieldSettings || { showName: true, showUnit: true, showPhone: true };
     
     // 1. 填寫人姓名
@@ -1029,10 +1057,17 @@
   });
 
   function openAdminLogin() { 
-    document.getElementById('adminPasswordInput').value = "";
+    const pwdInput = document.getElementById('adminPasswordInput');
+    const loginBtn = document.getElementById('adminLoginBtn');
+    pwdInput.value = "";
+    pwdInput.disabled = false;
+    loginBtn.disabled = false;
+    loginBtn.innerText = "登入後台";
+
     document.getElementById('loginModal').style.display = 'flex'; 
-    document.getElementById('adminPasswordInput').focus();
+    pwdInput.focus();
   }
+
   function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
   function switchAdminTab(tabId) {
@@ -1043,9 +1078,18 @@
     document.getElementById(tabId).classList.add('active');
   }
 
+  // 管理者登入驗證 (含 Enter 支援與「登入中...」按鈕狀態切換)
   function submitAdminLogin() {
-    const pwd = document.getElementById('adminPasswordInput').value;
+    const pwdInput = document.getElementById('adminPasswordInput');
+    const loginBtn = document.getElementById('adminLoginBtn');
+    const pwd = pwdInput.value.trim();
+
     if (!pwd) return alert("請輸入密碼！");
+
+    // 切換按鈕狀態為登入中，並暫時停用輸入
+    loginBtn.disabled = true;
+    loginBtn.innerText = "⏳ 登入中...";
+    pwdInput.disabled = true;
 
     fetch(GAS_WEB_APP_URL, {
       method: 'POST',
@@ -1054,6 +1098,11 @@
     })
     .then(res => res.json())
     .then(data => {
+      // 恢復按鈕狀態
+      loginBtn.disabled = false;
+      loginBtn.innerText = "登入後台";
+      pwdInput.disabled = false;
+
       if (data.result === 'success') {
         adminPasswordToken = pwd;
         closeModal('loginModal');
@@ -1061,7 +1110,15 @@
         populateAdminFormSelect();
       } else {
         alert(data.message);
+        pwdInput.focus();
+        pwdInput.select();
       }
+    })
+    .catch(err => {
+      loginBtn.disabled = false;
+      loginBtn.innerText = "登入後台";
+      pwdInput.disabled = false;
+      alert("連線驗證失敗：" + err.toString());
     });
   }
 
@@ -1091,7 +1148,6 @@
     document.getElementById('adminFormRefUrl').value = data.formRefUrl || "";
     document.getElementById('adminFormImgBase64').value = data.formImgBase64 || "";
 
-    // 載入基本資料欄位勾選設定
     const fs = data.fieldSettings || { showName: true, showUnit: true, showPhone: true };
     document.getElementById('adminShowName').checked = (fs.showName !== false);
     document.getElementById('adminShowUnit').checked = (fs.showUnit !== false);
@@ -1124,7 +1180,6 @@
     document.getElementById('adminMinRequiredCount').value = "0";
     document.getElementById('adminFormRefUrl').value = "";
     
-    // 新增表單時預設全部欄位皆開啟
     document.getElementById('adminShowName').checked = true;
     document.getElementById('adminShowUnit').checked = true;
     document.getElementById('adminShowPhone').checked = true;
@@ -1245,7 +1300,6 @@
       if (t) items.push({ title: t, desc: d, refUrl: u, imgBase64: img, required: isReq });
     });
 
-    // 收集基本資料欄位開關設定
     const fieldSettings = {
       showName: document.getElementById('adminShowName').checked,
       showUnit: document.getElementById('adminShowUnit').checked,
