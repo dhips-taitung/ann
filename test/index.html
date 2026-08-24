@@ -449,7 +449,6 @@
     <div class="file-id-box" id="resFileId">000000</div>
     <a href="#" target="_blank" class="download-btn" id="resDownloadBtn">📄 立即下載 PDF 檔</a>
     <br><br>
-    <!-- 修改：點擊執行完整清空表單與簽名並返回填報 -->
     <button type="button" onclick="resetFormForNewEntry()" style="padding:10px 20px; font-weight:bold; cursor:pointer; background:#1a73e8; color:white; border:none; border-radius:6px; font-size:15px;">📝 填寫新表單</button>
   </div>
 </div>
@@ -575,7 +574,7 @@
   let adminPasswordToken = "";
   let allParsedForms = [];
 
-  // 清除所有填表欄位、勾選與手寫簽名，返回填寫新表單
+  // 清除所有填表欄位、勾選與手寫簽名，並將頂部按鈕固定為「🔍 表單查詢」
   function resetFormForNewEntry() {
     // 1. 清空文字輸入框
     document.getElementById('userName').value = '';
@@ -594,25 +593,39 @@
     submitBtn.innerText = '確認送出表單並生成 PDF';
     document.getElementById('loadingOverlay').style.display = 'none';
 
-    // 5. 隱藏結果區與查詢區，顯示表單主畫面
+    // 5. 確保頂部按鈕文字固定為「🔍 表單查詢」
+    document.getElementById('toggleQueryBtn').innerText = '🔍 表單查詢';
+
+    // 6. 清空查詢欄位與前次查詢結果
+    document.getElementById('queryKeyword').value = '';
+    document.getElementById('queryResult').innerHTML = '';
+
+    // 7. 隱藏結果區與查詢區，顯示表單主畫面
     document.getElementById('successBox').style.display = 'none';
     document.getElementById('queryViewSection').style.display = 'none';
     document.getElementById('formViewSection').style.display = 'block';
     document.getElementById('mainForm').style.display = 'block';
 
-    // 6. 平滑滾動至頁面頂端
+    // 8. 平滑滾動至頁面頂端
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
+  // 切換填表與查詢視圖 (每次切換至查詢時自動清空前次查詢號碼與結果)
   function toggleQueryView() {
     const formView = document.getElementById('formViewSection');
     const queryView = document.getElementById('queryViewSection');
     const toggleBtn = document.getElementById('toggleQueryBtn');
+    const successBox = document.getElementById('successBox');
 
     if (queryView.style.display === 'none') {
       formView.style.display = 'none';
+      if (successBox) successBox.style.display = 'none';
       queryView.style.display = 'block';
       toggleBtn.innerText = '📝 返回填寫表單';
+
+      // 每次開啟查詢時，自動清空輸入框與搜尋結果
+      document.getElementById('queryKeyword').value = '';
+      document.getElementById('queryResult').innerHTML = '';
       document.getElementById('queryKeyword').focus();
     } else {
       queryView.style.display = 'none';
@@ -1048,6 +1061,7 @@
         document.getElementById('successBox').style.display = 'block';
         document.getElementById('resFileId').innerText = data.fileId;
         document.getElementById('resDownloadBtn').href = data.downloadUrl;
+        document.getElementById('toggleQueryBtn').innerText = '🔍 表單查詢';
       } else {
         alert("提交失敗：" + data.message);
         submitBtn.disabled = false;
@@ -1078,7 +1092,6 @@
     document.getElementById(tabId).classList.add('active');
   }
 
-  // 管理者登入驗證 (含 Enter 支援與「登入中...」按鈕狀態切換)
   function submitAdminLogin() {
     const pwdInput = document.getElementById('adminPasswordInput');
     const loginBtn = document.getElementById('adminLoginBtn');
@@ -1086,7 +1099,6 @@
 
     if (!pwd) return alert("請輸入密碼！");
 
-    // 切換按鈕狀態為登入中，並暫時停用輸入
     loginBtn.disabled = true;
     loginBtn.innerText = "⏳ 登入中...";
     pwdInput.disabled = true;
@@ -1098,7 +1110,6 @@
     })
     .then(res => res.json())
     .then(data => {
-      // 恢復按鈕狀態
       loginBtn.disabled = false;
       loginBtn.innerText = "登入後台";
       pwdInput.disabled = false;
