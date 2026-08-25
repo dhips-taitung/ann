@@ -79,6 +79,7 @@
       font-size: 14px;
     }
     .query-btn:hover { background-color: #1558b0; }
+    .query-btn:disabled { background-color: #93b7eb; cursor: not-allowed; }
 
     .query-result-item {
       background: #ffffff;
@@ -396,7 +397,8 @@
       <input type="password" id="adminLoginPassword" placeholder="預設密碼為 1234" onkeyup="if(event.key==='Enter') submitAdminLogin()">
     </div>
     <div style="display:flex; gap:10px;">
-      <button type="button" class="query-btn" style="flex:1;" onclick="submitAdminLogin()">登入後台</button>
+      <!-- 加上 id 以便在 JS 中切換「登入中...」狀態 -->
+      <button type="button" id="adminLoginSubmitBtn" class="query-btn" style="flex:1;" onclick="submitAdminLogin()">登入後台</button>
       <button type="button" class="nav-btn" style="border:1px solid #ccc;" onclick="closeModal('adminLoginModal')">取消</button>
     </div>
   </div>
@@ -517,7 +519,6 @@
           <label>自訂年級下拉選單 (以逗號分隔)：</label>
           <input type="text" id="adminGradeOptions" placeholder="例如: 一年,二年,三年,四年,五年,六年"
                  onfocus="showQuickTips('gradeTips')" onblur="hideQuickTips('gradeTips')">
-          <!-- 點擊輔助提示浮窗 -->
           <div id="gradeTips" class="quick-tips-box">
             <div class="quick-tip-title">💡 常用年級範本 (點擊快速套用)：</div>
             <span class="quick-tip-item" onmousedown="applyQuickTip('adminGradeOptions', '一年,二年,三年,四年,五年,六年')">一年,二年,三年,四年,五年,六年</span>
@@ -532,7 +533,6 @@
           <label>自訂班級下拉選單 (以逗號分隔)：</label>
           <input type="text" id="adminClassOptions" placeholder="例如: 一班,二班,三班,四班,五班,六班"
                  onfocus="showQuickTips('classTips')" onblur="hideQuickTips('classTips')">
-          <!-- 點擊輔助提示浮窗 -->
           <div id="classTips" class="quick-tips-box">
             <div class="quick-tip-title">💡 常用班級範本 (點擊快速套用)：</div>
             <span class="quick-tip-item" onmousedown="applyQuickTip('adminClassOptions', '一班,二班,三班,四班,五班,六班')">一班,二班,三班,四班,五班,六班</span>
@@ -674,6 +674,7 @@
     document.getElementById('queryFileId').focus();
   }
 
+  // 管理者登入驗證
   function openAdminLoginModal() {
     if (isAdminAuthenticated) {
       openAdminModalDirectly();
@@ -687,6 +688,10 @@
   function submitAdminLogin() {
     const pwd = document.getElementById('adminLoginPassword').value.trim();
     if (!pwd) return alert("請輸入管理者密碼！");
+
+    const loginBtn = document.getElementById('adminLoginSubmitBtn');
+    loginBtn.innerText = "⏳ 登入中...";
+    loginBtn.disabled = true;
 
     fetch(GAS_URL, {
       method: 'POST',
@@ -703,7 +708,11 @@
         alert(data.message);
       }
     })
-    .catch(err => alert("登入驗證失敗：" + err));
+    .catch(err => alert("登入驗證失敗：" + err))
+    .finally(() => {
+      loginBtn.innerText = "登入後台";
+      loginBtn.disabled = false;
+    });
   }
 
   function openAdminModalDirectly() {
@@ -1242,7 +1251,9 @@
     `;
   }
 
+  // 儲存並發布表單 (含防重複點擊狀態)
   function saveAdminFormConfig() {
+    const saveBtn = document.getElementById('saveAdminFormBtn');
     const formTitle = document.getElementById('adminFormTitle').value.trim();
     if (!formTitle) return alert("請填寫表單主題！");
 
@@ -1285,6 +1296,9 @@
       items: items
     };
 
+    saveBtn.innerText = "⏳ 儲存並發布中...";
+    saveBtn.disabled = true;
+
     fetch(GAS_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -1298,6 +1312,13 @@
         renderAdminUrlBox(data.formId);
         loadAdminFormList();
       }
+    })
+    .catch(err => {
+      alert("儲存失敗：" + err);
+    })
+    .finally(() => {
+      saveBtn.innerText = "💾 儲存並發布此表單";
+      saveBtn.disabled = false;
     });
   }
 
