@@ -137,7 +137,7 @@
     .item-img-display { max-width: 280px; max-height: 200px; border-radius: 6px; margin-top: 6px; margin-bottom: 10px; margin-left: 32px; display: block; border: 1px solid #ddd; }
 
     /* 標準統一輸入框樣式 */
-    .input-group { margin-bottom: 15px; }
+    .input-group { margin-bottom: 15px; position: relative; }
     .input-group label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
     .input-group input, .input-group select, .input-group textarea,
     .admin-form-input, .admin-form-textarea {
@@ -148,6 +148,45 @@
       font-size: 14px;
       box-sizing: border-box;
       font-family: inherit;
+    }
+
+    /* 輔助快捷輸入氣泡樣式 */
+    .quick-tips-box {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: #ffffff;
+      border: 1px solid #1a73e8;
+      box-shadow: 0 4px 12px rgba(26,115,232,0.2);
+      border-radius: 6px;
+      padding: 8px 10px;
+      z-index: 1050;
+      margin-top: 4px;
+    }
+    .quick-tip-title {
+      font-size: 12px;
+      color: #1a73e8;
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+    .quick-tip-item {
+      display: inline-block;
+      background: #eef3fc;
+      border: 1px solid #c2d7fa;
+      color: #1a73e8;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12.5px;
+      margin-right: 6px;
+      margin-bottom: 4px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .quick-tip-item:hover {
+      background: #1a73e8;
+      color: #ffffff;
     }
 
     .class-info-group { display: flex; gap: 12px; margin-bottom: 15px; flex-wrap: wrap; }
@@ -204,7 +243,6 @@
     .admin-table th, .admin-table td { border: 1px solid #ddd; padding: 8px 10px; text-align: left; }
     .admin-table th { background: #f1f5f9; }
 
-    /* 後台動態項目美化卡片 */
     .admin-extra-field-row {
       display: flex;
       align-items: center;
@@ -369,7 +407,6 @@
   <div class="modal-card">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
       <h3 style="margin:0; color:#1a73e8;">⚙️ 專案管理與設定系統</h3>
-      <!-- 修改處：將 ✖ 改為 🚪 登出 按鈕 -->
       <button type="button" onclick="adminLogout()" style="padding:6px 14px; background:#d93025; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:bold; font-size:13.5px;">🚪 登出</button>
     </div>
 
@@ -429,7 +466,7 @@
       </div>
     </div>
 
-    <!-- 頁籤 2: 表單題目編輯 -->
+    <!-- 頁籤 2: 表單題目編輯 (含年級與班級輔助輸入) -->
     <div id="tabFormConfig" class="tab-content">
       <div class="input-group">
         <label>選擇要編輯的表單：</label>
@@ -467,22 +504,42 @@
         </div>
       </div>
 
-      <!-- 自訂延伸基本資料欄位 -->
       <div style="background:#f1f5f9; padding:15px; border-radius:8px; border:1px solid #cbd5e1; margin-bottom:15px;">
         <h5 style="margin:0 0 10px 0; font-size:14px;">自訂延伸基本資料欄位</h5>
         <div id="adminExtraFieldsContainer"></div>
         <button type="button" onclick="addAdminExtraFieldRow()" style="padding:6px 12px; background:#475569; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">➕ 新增欄位</button>
       </div>
 
-      <!-- 年級與班級自訂欄位 -->
+      <!-- 年級與班級自訂欄位 (含快捷提示框) -->
       <div style="display:flex; gap:12px; flex-wrap:wrap;">
+        <!-- 年級輸入框 -->
         <div class="input-group" style="flex:1; min-width:240px;">
           <label>自訂年級下拉選單 (以逗號分隔)：</label>
-          <input type="text" id="adminGradeOptions" placeholder="一年,二年,三年,四年,五年,六年">
+          <input type="text" id="adminGradeOptions" placeholder="例如: 一年,二年,三年,四年,五年,六年"
+                 onfocus="showQuickTips('gradeTips')" onblur="hideQuickTips('gradeTips')">
+          <!-- 點擊輔助提示浮窗 -->
+          <div id="gradeTips" class="quick-tips-box">
+            <div class="quick-tip-title">💡 常用年級範本 (點擊快速套用)：</div>
+            <span class="quick-tip-item" onmousedown="applyQuickTip('adminGradeOptions', '一年,二年,三年,四年,五年,六年')">一年,二年,三年,四年,五年,六年</span>
+            <span class="quick-tip-item" onmousedown="applyQuickTip('adminGradeOptions', '國一,國二,國三')">國一,國二,國三</span>
+            <span class="quick-tip-item" onmousedown="applyQuickTip('adminGradeOptions', '高一,高二,高三')">高一,高二,高三</span>
+            <span class="quick-tip-item" onmousedown="applyQuickTip('adminGradeOptions', '幼幼班,小班,中班,大班')">幼幼班,小班,中班,大班</span>
+          </div>
         </div>
+
+        <!-- 班級輸入框 -->
         <div class="input-group" style="flex:1; min-width:240px;">
           <label>自訂班級下拉選單 (以逗號分隔)：</label>
-          <input type="text" id="adminClassOptions" placeholder="一班,二班,三班,四班,五班,六班">
+          <input type="text" id="adminClassOptions" placeholder="例如: 一班,二班,三班,四班,五班,六班"
+                 onfocus="showQuickTips('classTips')" onblur="hideQuickTips('classTips')">
+          <!-- 點擊輔助提示浮窗 -->
+          <div id="classTips" class="quick-tips-box">
+            <div class="quick-tip-title">💡 常用班級範本 (點擊快速套用)：</div>
+            <span class="quick-tip-item" onmousedown="applyQuickTip('adminClassOptions', '一班,二班,三班,四班,五班,六班')">一班,二班,三班,四班,五班,六班</span>
+            <span class="quick-tip-item" onmousedown="applyQuickTip('adminClassOptions', '1班,2班,3班,4班,5班,6班,7班,8班')">1班,2班,3班,4班,5班,6班,7班,8班</span>
+            <span class="quick-tip-item" onmousedown="applyQuickTip('adminClassOptions', '忠班,孝班,仁班,愛班,信班,義班,和班,平班')">忠班,孝班,仁班,愛班...</span>
+            <span class="quick-tip-item" onmousedown="applyQuickTip('adminClassOptions', '甲班,乙班,丙班,丁班')">甲班,乙班,丙班,丁班</span>
+          </div>
         </div>
       </div>
 
@@ -539,7 +596,7 @@
   // =========================================================================
   // 後端 GAS Web App URL
   // =========================================================================
-  const GAS_URL = "https://script.google.com/macros/s/AKfycbxdMWMLG1RSi_V7phYOH4jQ5JeMw9sIH-IzJ4AhFnoiUm9i4xhftTAITjZVl20uNrs6/exec";
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbw0Rz6DBte9YKXf3u1A0bqPMqdDvtlPaoWx2k-w2r-yuHGnrz0V9TR-mJak2-P1S3Rx/exec";
 
   let SPREADSHEET_ID = localStorage.getItem('cfgSpreadsheetId') || "";
   let PDF_FOLDER_ID = localStorage.getItem('cfgPdfFolderId') || "";
@@ -557,6 +614,13 @@
     return m ? m[0] : str.trim();
   }
 
+  // 輔助快捷輸入控制
+  function showQuickTips(id) { document.getElementById(id).style.display = 'block'; }
+  function hideQuickTips(id) { setTimeout(() => { document.getElementById(id).style.display = 'none'; }, 200); }
+  function applyQuickTip(inputId, value) {
+    document.getElementById(inputId).value = value;
+  }
+
   // 初始化載入
   window.addEventListener('load', () => {
     initCanvas();
@@ -568,7 +632,6 @@
     if (urlParams.get('csv')) CSV_URL = urlParams.get('csv');
     const formIdFromUrl = urlParams.get('formId') || urlParams.get('fid');
 
-    // 家長模式自動隱藏管理按鈕
     const isFormPage = !!(formIdFromUrl);
     const isAdminParam = urlParams.get('admin') === '1';
 
@@ -611,7 +674,6 @@
     document.getElementById('queryFileId').focus();
   }
 
-  // 管理者登入驗證
   function openAdminLoginModal() {
     if (isAdminAuthenticated) {
       openAdminModalDirectly();
@@ -651,7 +713,6 @@
 
   function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
-  // 管理者登出並關閉後台視窗
   function adminLogout() {
     isAdminAuthenticated = false;
     document.getElementById('adminLoginPassword').value = "";
@@ -683,7 +744,8 @@
         document.getElementById('adminOldPwd').value = "";
         document.getElementById('adminNewPwd').value = "";
       }
-    });
+    })
+    .catch(err => alert("密碼變更失敗，請確認 GAS 是否已發布最新版本：" + err));
   }
 
   function saveSystemConnection(doInit) {
@@ -833,11 +895,13 @@
       `;
     });
 
+    // 動態年級
     const gradeSelect = document.getElementById('userGrade');
     gradeSelect.innerHTML = '<option value="">請選擇年級</option>';
     const gradeList = (data.gradeOptions || "一年,二年,三年,四年,五年,六年").split(/[,，]/).map(s => s.trim()).filter(Boolean);
     gradeList.forEach(g => gradeSelect.innerHTML += `<option value="${g}">${g}</option>`);
 
+    // 動態班級
     const classSelect = document.getElementById('userClass');
     classSelect.innerHTML = '<option value="">請選擇班級</option>';
     const classList = (data.classOptions || "一班,二班,三班,四班,五班,六班").split(/[,，]/).map(s => s.trim()).filter(Boolean);
