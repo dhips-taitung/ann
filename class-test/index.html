@@ -137,7 +137,6 @@
     }
     .item-img-display { max-width: 280px; max-height: 200px; border-radius: 6px; margin-top: 6px; margin-bottom: 10px; margin-left: 32px; display: block; border: 1px solid #ddd; }
 
-    /* 標準統一輸入框樣式 */
     .input-group { margin-bottom: 15px; position: relative; }
     .input-group label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
     .input-group input, .input-group select, .input-group textarea,
@@ -151,7 +150,6 @@
       font-family: inherit;
     }
 
-    /* 輔助快捷輸入氣泡樣式 */
     .quick-tips-box {
       display: none;
       position: absolute;
@@ -166,12 +164,7 @@
       z-index: 1050;
       margin-top: 4px;
     }
-    .quick-tip-title {
-      font-size: 12px;
-      color: #1a73e8;
-      font-weight: bold;
-      margin-bottom: 6px;
-    }
+    .quick-tip-title { font-size: 12px; color: #1a73e8; font-weight: bold; margin-bottom: 6px; }
     .quick-tip-item {
       display: inline-block;
       background: #eef3fc;
@@ -185,10 +178,7 @@
       cursor: pointer;
       transition: background 0.15s;
     }
-    .quick-tip-item:hover {
-      background: #1a73e8;
-      color: #ffffff;
-    }
+    .quick-tip-item:hover { background: #1a73e8; color: #ffffff; }
 
     .class-info-group { display: flex; gap: 12px; margin-bottom: 15px; flex-wrap: wrap; }
     .class-info-item { flex: 1; min-width: 100px; }
@@ -326,19 +316,16 @@
     <div id="displayRefUrl" class="ref-link-box" style="display:none;"></div>
     <img id="displayImg" class="header-img-display" style="display:none;">
 
-    <!-- 填寫人姓名 -->
     <div class="input-group">
       <label><span id="displayUserNameLabel">填寫人姓名</span> <span style="color:red">*</span></label>
       <input type="text" id="userName" placeholder="請輸入姓名" required>
     </div>
 
-    <!-- 家長電話 -->
     <div class="input-group">
       <label><span id="displayPhoneLabel">家長電話</span> <span style="color:red">*</span></label>
       <input type="tel" id="parentPhone" placeholder="請輸入手機號碼 (方便日後查詢下載)" required pattern="[0-9\- ]{8,15}">
     </div>
 
-    <!-- 班級座號 (動態年級與班級) -->
     <div class="class-info-group">
       <div class="class-info-item">
         <label>年級 <span style="color:red">*</span></label>
@@ -363,7 +350,6 @@
     <div id="extraFieldsContainer"></div>
     <div id="checklistContainer"></div>
 
-    <!-- 手寫簽名 -->
     <div class="input-group">
       <label><span id="displaySignatureLabel">親筆簽名確認</span> <span style="color:red">*</span></label>
       <div class="signature-container">
@@ -377,7 +363,6 @@
     <div id="loadingOverlay">資料處理中，請稍候...</div>
   </form>
 
-  <!-- 成功畫面 -->
   <div id="successBox">
     <h3 style="color:#34a853;">🎉 表單與簽名已成功提交！</h3>
     <p>您的專屬 6 位數檔案 ID（亦可直接使用電話查詢）：</p>
@@ -397,7 +382,6 @@
       <input type="password" id="adminLoginPassword" placeholder="預設密碼為 1234" onkeyup="if(event.key==='Enter') submitAdminLogin()">
     </div>
     <div style="display:flex; gap:10px;">
-      <!-- 加上 id 以便在 JS 中切換「登入中...」狀態 -->
       <button type="button" id="adminLoginSubmitBtn" class="query-btn" style="flex:1;" onclick="submitAdminLogin()">登入後台</button>
       <button type="button" class="nav-btn" style="border:1px solid #ccc;" onclick="closeModal('adminLoginModal')">取消</button>
     </div>
@@ -468,7 +452,7 @@
       </div>
     </div>
 
-    <!-- 頁籤 2: 表單題目編輯 (含年級與班級輔助輸入) -->
+    <!-- 頁籤 2: 表單題目編輯 -->
     <div id="tabFormConfig" class="tab-content">
       <div class="input-group">
         <label>選擇要編輯的表單：</label>
@@ -512,9 +496,8 @@
         <button type="button" onclick="addAdminExtraFieldRow()" style="padding:6px 12px; background:#475569; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">➕ 新增欄位</button>
       </div>
 
-      <!-- 年級與班級自訂欄位 (含快捷提示框) -->
+      <!-- 年級與班級自訂欄位 -->
       <div style="display:flex; gap:12px; flex-wrap:wrap;">
-        <!-- 年級輸入框 -->
         <div class="input-group" style="flex:1; min-width:240px;">
           <label>自訂年級下拉選單 (以逗號分隔)：</label>
           <input type="text" id="adminGradeOptions" placeholder="例如: 一年,二年,三年,四年,五年,六年"
@@ -528,7 +511,6 @@
           </div>
         </div>
 
-        <!-- 班級輸入框 -->
         <div class="input-group" style="flex:1; min-width:240px;">
           <label>自訂班級下拉選單 (以逗號分隔)：</label>
           <input type="text" id="adminClassOptions" placeholder="例如: 一班,二班,三班,四班,五班,六班"
@@ -596,7 +578,7 @@
   // =========================================================================
   // 後端 GAS Web App URL
   // =========================================================================
-  const GAS_URL = "https://script.google.com/macros/s/AKfycbw0Rz6DBte9YKXf3u1A0bqPMqdDvtlPaoWx2k-w2r-yuHGnrz0V9TR-mJak2-P1S3Rx/exec";
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbxxfJ77RCWK6yJEz-qOwqzEyIHUvq8SH29Uep0zLPVrOmJeN5C2Jjut_axN3u3wdN009w/exec";
 
   let SPREADSHEET_ID = localStorage.getItem('cfgSpreadsheetId') || "";
   let PDF_FOLDER_ID = localStorage.getItem('cfgPdfFolderId') || "";
@@ -614,14 +596,30 @@
     return m ? m[0] : str.trim();
   }
 
-  // 輔助快捷輸入控制
+  // 統一後端請求通訊函式 (防解析崩潰)
+  async function callGAS(payload) {
+    const res = await fetch(GAS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    });
+    const text = await res.text();
+    try {
+      return JSON.parse(text);
+    } catch (e) {
+      if (text.includes("<!DOCTYPE") || text.includes("<html") || text.includes("<HTML")) {
+        throw new Error("後端權限異常！請確認：\n1. GAS 部署的「誰可以存取」是否設定為「所有人 (Anyone)」\n2.「執行身分」是否為「我 (Me)」\n3. 是否已建立新版本部署。");
+      }
+      throw new Error("伺服器回應異常：" + text.substring(0, 80));
+    }
+  }
+
   function showQuickTips(id) { document.getElementById(id).style.display = 'block'; }
   function hideQuickTips(id) { setTimeout(() => { document.getElementById(id).style.display = 'none'; }, 200); }
   function applyQuickTip(inputId, value) {
     document.getElementById(inputId).value = value;
   }
 
-  // 初始化載入
   window.addEventListener('load', () => {
     initCanvas();
 
@@ -674,7 +672,6 @@
     document.getElementById('queryFileId').focus();
   }
 
-  // 管理者登入驗證
   function openAdminLoginModal() {
     if (isAdminAuthenticated) {
       openAdminModalDirectly();
@@ -685,7 +682,7 @@
     }
   }
 
-  function submitAdminLogin() {
+  async function submitAdminLogin() {
     const pwd = document.getElementById('adminLoginPassword').value.trim();
     if (!pwd) return alert("請輸入管理者密碼！");
 
@@ -693,13 +690,8 @@
     loginBtn.innerText = "⏳ 登入中...";
     loginBtn.disabled = true;
 
-    fetch(GAS_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'adminLogin', spreadsheetId: SPREADSHEET_ID, password: pwd })
-    })
-    .then(res => res.json())
-    .then(data => {
+    try {
+      const data = await callGAS({ action: 'adminLogin', spreadsheetId: SPREADSHEET_ID, password: pwd });
       if (data.result === 'success') {
         isAdminAuthenticated = true;
         closeModal('adminLoginModal');
@@ -707,12 +699,12 @@
       } else {
         alert(data.message);
       }
-    })
-    .catch(err => alert("登入驗證失敗：" + err))
-    .finally(() => {
+    } catch (err) {
+      alert("登入驗證失敗：\n" + err.message);
+    } finally {
       loginBtn.innerText = "登入後台";
       loginBtn.disabled = false;
-    });
+    }
   }
 
   function openAdminModalDirectly() {
@@ -736,28 +728,24 @@
     document.getElementById(tabId).classList.add('active');
   }
 
-  function changeAdminPasswordAction() {
+  async function changeAdminPasswordAction() {
     const oldP = document.getElementById('adminOldPwd').value.trim();
     const newP = document.getElementById('adminNewPwd').value.trim();
     if (!oldP || !newP) return alert("請完整填寫目前密碼與新密碼！");
 
-    fetch(GAS_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'changeAdminPassword', spreadsheetId: SPREADSHEET_ID, oldPassword: oldP, newPassword: newP })
-    })
-    .then(res => res.json())
-    .then(data => {
+    try {
+      const data = await callGAS({ action: 'changeAdminPassword', spreadsheetId: SPREADSHEET_ID, oldPassword: oldP, newPassword: newP });
       alert(data.message);
       if (data.result === 'success') {
         document.getElementById('adminOldPwd').value = "";
         document.getElementById('adminNewPwd').value = "";
       }
-    })
-    .catch(err => alert("密碼變更失敗，請確認 GAS 是否已發布最新版本：" + err));
+    } catch (err) {
+      alert("密碼變更失敗：\n" + err.message);
+    }
   }
 
-  function saveSystemConnection(doInit) {
+  async function saveSystemConnection(doInit) {
     SPREADSHEET_ID = parseId(document.getElementById('cfgSpreadsheetId').value);
     PDF_FOLDER_ID = parseId(document.getElementById('cfgPdfFolderId').value);
     IMG_FOLDER_ID = parseId(document.getElementById('cfgImgFolderId').value);
@@ -771,20 +759,16 @@
     if (!SPREADSHEET_ID) return alert("請輸入試算表 ID！");
 
     if (doInit) {
-      fetch(GAS_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ action: 'initSpreadsheet', spreadsheetId: SPREADSHEET_ID })
-      })
-      .then(res => res.json())
-      .then(data => {
+      try {
+        const data = await callGAS({ action: 'initSpreadsheet', spreadsheetId: SPREADSHEET_ID });
         alert(data.message);
         if (data.result === 'success') {
           document.getElementById('unconfiguredBanner').style.display = 'none';
           loadAdminFormList();
         }
-      })
-      .catch(err => alert("連線初始化失敗：" + err));
+      } catch (err) {
+        alert("連線初始化失敗：\n" + err.message);
+      }
     } else {
       alert("設定已儲存至瀏覽器！");
     }
@@ -847,33 +831,24 @@
       .catch(() => loadFormFromGAS(targetFormId));
   }
 
-  function loadFormFromGAS(targetFormId) {
-    fetch(GAS_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'getFormList', spreadsheetId: SPREADSHEET_ID })
-    })
-    .then(res => res.json())
-    .then(data => {
+  async function loadFormFromGAS(targetFormId) {
+    try {
+      const data = await callGAS({ action: 'getFormList', spreadsheetId: SPREADSHEET_ID });
       if (data.result === 'success' && data.list.length > 0) {
         let fId = targetFormId || data.list[0].formId;
-        fetch(GAS_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({ action: 'getFormConfig', spreadsheetId: SPREADSHEET_ID, formId: fId })
-        })
-        .then(res => res.json())
-        .then(fData => {
-          if (fData.result === 'success') {
-            currentFormId = fData.formId;
-            renderFrontendForm(fData);
-          }
-        });
+        const fData = await callGAS({ action: 'getFormConfig', spreadsheetId: SPREADSHEET_ID, formId: fId });
+        if (fData.result === 'success') {
+          currentFormId = fData.formId;
+          renderFrontendForm(fData);
+        }
       } else {
         document.getElementById('displayTitle').innerText = "尚未建立任何表單";
         document.getElementById('displayDesc').innerText = "請點選右上角「⚙️ 系統與表單管理」新增您的第一份同意書。";
       }
-    });
+    } catch (e) {
+      document.getElementById('displayTitle').innerText = "連線失敗";
+      document.getElementById('displayDesc').innerText = e.message;
+    }
   }
 
   function applyFormSelection(targetFormId) {
@@ -904,13 +879,11 @@
       `;
     });
 
-    // 動態年級
     const gradeSelect = document.getElementById('userGrade');
     gradeSelect.innerHTML = '<option value="">請選擇年級</option>';
     const gradeList = (data.gradeOptions || "一年,二年,三年,四年,五年,六年").split(/[,，]/).map(s => s.trim()).filter(Boolean);
     gradeList.forEach(g => gradeSelect.innerHTML += `<option value="${g}">${g}</option>`);
 
-    // 動態班級
     const classSelect = document.getElementById('userClass');
     classSelect.innerHTML = '<option value="">請選擇班級</option>';
     const classList = (data.classOptions || "一班,二班,三班,四班,五班,六班").split(/[,，]/).map(s => s.trim()).filter(Boolean);
@@ -953,7 +926,6 @@
     }
   }
 
-  // 簽名板
   const canvas = document.getElementById('signatureCanvas');
   const ctx = canvas.getContext('2d');
   let isDrawing = false, hasSigned = false, lastX = 0, lastY = 0;
@@ -983,8 +955,7 @@
     ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height); hasSigned = false;
   }
 
-  // 送出表單
-  document.getElementById('mainForm').addEventListener('submit', function(e) {
+  document.getElementById('mainForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     const checkboxes = document.querySelectorAll('.rule-check');
     const checkedBoxes = document.querySelectorAll('.rule-check:checked');
@@ -1041,13 +1012,8 @@
       signatureBase64: canvas.toDataURL('image/png')
     };
 
-    fetch(GAS_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(payload)
-    })
-    .then(res => res.json())
-    .then(data => {
+    try {
+      const data = await callGAS(payload);
       if (data.result === 'success') {
         document.getElementById('mainForm').style.display = 'none';
         document.getElementById('successBox').style.display = 'block';
@@ -1057,23 +1023,20 @@
         alert("提交失敗：" + data.message);
         submitBtn.disabled = false; loading.style.display = 'none';
       }
-    });
+    } catch (err) {
+      alert("提交失敗：\n" + err.message);
+      submitBtn.disabled = false; loading.style.display = 'none';
+    }
   });
 
-  // 查詢紀錄
-  function queryPDF() {
+  async function queryPDF() {
     const key = document.getElementById('queryFileId').value.trim();
     const resDiv = document.getElementById('queryResult');
     if (!key) return alert("請輸入查詢 ID 或手機號碼！");
 
     resDiv.innerHTML = "⏳ 正在查詢中...";
-    fetch(GAS_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'querySubmission', spreadsheetId: SPREADSHEET_ID, queryKey: key, formId: currentFormId })
-    })
-    .then(res => res.json())
-    .then(data => {
+    try {
+      const data = await callGAS({ action: 'querySubmission', spreadsheetId: SPREADSHEET_ID, queryKey: key, formId: currentFormId });
       if (data.result === 'success') {
         let html = `<div style="color:green; font-weight:bold; margin-top:10px;">共找到 ${data.matches.length} 筆資料：</div>`;
         data.matches.forEach(m => {
@@ -1088,38 +1051,29 @@
       } else {
         resDiv.innerHTML = `<div style="color:red; margin-top:10px;">${data.message}</div>`;
       }
-    });
+    } catch (err) {
+      resDiv.innerHTML = `<div style="color:red; margin-top:10px;">查詢失敗: ${err.message}</div>`;
+    }
   }
 
-  // 後台表單管理
-  function loadAdminFormList() {
-    fetch(GAS_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'getFormList', spreadsheetId: SPREADSHEET_ID })
-    })
-    .then(res => res.json())
-    .then(data => {
+  async function loadAdminFormList() {
+    try {
+      const data = await callGAS({ action: 'getFormList', spreadsheetId: SPREADSHEET_ID });
       const select = document.getElementById('adminFormSelect');
       select.innerHTML = "<option value=''>-- 請選擇表單 --</option>";
       if (data.result === 'success' && data.list) {
         data.list.forEach(f => select.innerHTML += `<option value="${f.formId}">${f.formTitle}</option>`);
         if (currentFormId) { select.value = currentFormId; loadFormToAdmin(); }
       }
-    });
+    } catch (e) {}
   }
 
-  function loadFormToAdmin() {
+  async function loadFormToAdmin() {
     const formId = document.getElementById('adminFormSelect').value;
     if (!formId) return;
 
-    fetch(GAS_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'getFormConfig', spreadsheetId: SPREADSHEET_ID, formId: formId })
-    })
-    .then(res => res.json())
-    .then(data => {
+    try {
+      const data = await callGAS({ action: 'getFormConfig', spreadsheetId: SPREADSHEET_ID, formId: formId });
       if (data.result === 'success') {
         document.getElementById('adminFormId').value = data.formId;
         document.getElementById('adminFormTitle').value = data.formTitle;
@@ -1143,7 +1097,7 @@
 
         renderAdminUrlBox(data.formId);
       }
-    });
+    } catch (e) {}
   }
 
   function createNewFormInAdmin() {
@@ -1251,8 +1205,7 @@
     `;
   }
 
-  // 儲存並發布表單 (含防重複點擊狀態)
-  function saveAdminFormConfig() {
+  async function saveAdminFormConfig() {
     const saveBtn = document.getElementById('saveAdminFormBtn');
     const formTitle = document.getElementById('adminFormTitle').value.trim();
     if (!formTitle) return alert("請填寫表單主題！");
@@ -1299,39 +1252,27 @@
     saveBtn.innerText = "⏳ 儲存並發布中...";
     saveBtn.disabled = true;
 
-    fetch(GAS_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(payload)
-    })
-    .then(res => res.json())
-    .then(data => {
+    try {
+      const data = await callGAS(payload);
       alert(data.message);
       if (data.result === 'success') {
         document.getElementById('adminFormId').value = data.formId;
         renderAdminUrlBox(data.formId);
         loadAdminFormList();
       }
-    })
-    .catch(err => {
-      alert("儲存失敗：" + err);
-    })
-    .finally(() => {
+    } catch (err) {
+      alert("儲存失敗：\n" + err.message);
+    } finally {
       saveBtn.innerText = "💾 儲存並發布此表單";
       saveBtn.disabled = false;
-    });
+    }
   }
 
-  function loadAdminPdfList() {
+  async function loadAdminPdfList() {
     const con = document.getElementById('pdfListContainer');
     con.innerHTML = "載入中...";
-    fetch(GAS_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'getPdfList', driveFolderId: PDF_FOLDER_ID })
-    })
-    .then(res => res.json())
-    .then(data => {
+    try {
+      const data = await callGAS({ action: 'getPdfList', driveFolderId: PDF_FOLDER_ID });
       if (data.result === 'success') {
         let html = "<table class='admin-table'><tr><th>檔名</th><th>建立時間</th><th>操作</th></tr>";
         data.list.forEach(f => {
@@ -1339,30 +1280,27 @@
         });
         con.innerHTML = html + "</table>";
       }
-    });
+    } catch (e) {
+      con.innerHTML = "載入失敗: " + e.message;
+    }
   }
 
-  function deletePdf(id) {
+  async function deletePdf(id) {
     if (!confirm("確定刪除此 PDF 嗎？")) return;
-    fetch(GAS_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'deletePdfFile', fileId: id })
-    })
-    .then(res => res.json())
-    .then(d => { alert(d.message); loadAdminPdfList(); });
+    try {
+      const d = await callGAS({ action: 'deletePdfFile', fileId: id });
+      alert(d.message);
+      loadAdminPdfList();
+    } catch (e) {
+      alert("刪除失敗: " + e.message);
+    }
   }
 
-  function loadAdminImageList() {
+  async function loadAdminImageList() {
     const con = document.getElementById('imageListContainer');
     con.innerHTML = "載入中...";
-    fetch(GAS_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'getImageList', imageFolderId: IMG_FOLDER_ID })
-    })
-    .then(res => res.json())
-    .then(data => {
+    try {
+      const data = await callGAS({ action: 'getImageList', imageFolderId: IMG_FOLDER_ID });
       if (data.result === 'success') {
         let html = "<table class='admin-table'><tr><th>預覽</th><th>檔名</th><th>操作</th></tr>";
         data.list.forEach(f => {
@@ -1370,18 +1308,20 @@
         });
         con.innerHTML = html + "</table>";
       }
-    });
+    } catch (e) {
+      con.innerHTML = "載入失敗: " + e.message;
+    }
   }
 
-  function deleteImg(id) {
+  async function deleteImg(id) {
     if (!confirm("確定刪除此照片嗎？")) return;
-    fetch(GAS_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'deleteImageFile', fileId: id })
-    })
-    .then(res => res.json())
-    .then(d => { alert(d.message); loadAdminImageList(); });
+    try {
+      const d = await callGAS({ action: 'deleteImageFile', fileId: id });
+      alert(d.message);
+      loadAdminImageList();
+    } catch (e) {
+      alert("刪除失敗: " + e.message);
+    }
   }
 </script>
 </body>
