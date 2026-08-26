@@ -137,7 +137,6 @@
     }
     .item-img-display { max-width: 280px; max-height: 200px; border-radius: 6px; margin-top: 6px; margin-bottom: 10px; margin-left: 32px; display: block; border: 1px solid #ddd; }
 
-    /* 標準統一輸入框樣式 */
     .input-group { margin-bottom: 15px; position: relative; }
     .input-group label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
     .input-group input, .input-group select, .input-group textarea,
@@ -151,7 +150,6 @@
       font-family: inherit;
     }
 
-    /* 輔助快捷輸入氣泡樣式 */
     .quick-tips-box {
       display: none;
       position: absolute;
@@ -280,7 +278,6 @@
 <body>
 
 <div class="container">
-  <!-- 頂部導覽列 -->
   <div class="top-bar">
     <div class="top-bar-title">📋 同意書檢核填報系統</div>
     <div class="top-bar-actions">
@@ -289,12 +286,10 @@
     </div>
   </div>
 
-  <!-- 提示設定區 -->
   <div id="unconfiguredBanner" class="setup-banner" style="display:none;">
     ⚠️ <b>系統尚未完成設定</b>：請先點選右上角「⚙️ 系統與表單管理」填入您的試算表 ID 及資料夾 ID 並完成初始化。
   </div>
 
-  <!-- 查詢區塊 -->
   <div id="querySection" style="display:none;">
     <div class="query-card">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
@@ -310,7 +305,6 @@
     </div>
   </div>
 
-  <!-- 填表主畫面 -->
   <form id="mainForm">
     <h2 id="displayTitle">載入中...</h2>
     <div class="header-desc" id="displayDesc">正在讀取表單設定資料...</div>
@@ -375,7 +369,6 @@
   </div>
 </div>
 
-<!-- 管理者登入驗證 Modal -->
 <div class="modal-overlay" id="adminLoginModal">
   <div class="modal-card" style="max-width: 400px;">
     <h3 style="margin-top:0; color:#1a73e8;">🔐 管理者登入驗證</h3>
@@ -390,7 +383,6 @@
   </div>
 </div>
 
-<!-- 管理者後台設定 Modal -->
 <div class="modal-overlay" id="adminModal">
   <div class="modal-card">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
@@ -405,7 +397,6 @@
       <button class="tab-btn" onclick="switchAdminTab('tabImageFiles', event); loadAdminImageList();">🖼️ 照片管理</button>
     </div>
 
-    <!-- 頁籤 1: 系統外接設定與密碼變更 -->
     <div id="tabConnection" class="tab-content active">
       <div class="setup-banner">
         💡 <b>外接式專案說明：</b><br>
@@ -453,7 +444,6 @@
       </div>
     </div>
 
-    <!-- 頁籤 2: 表單題目編輯 -->
     <div id="tabFormConfig" class="tab-content">
       <div class="input-group">
         <label>選擇要編輯的表單：</label>
@@ -497,7 +487,6 @@
         <button type="button" onclick="addAdminExtraFieldRow()" style="padding:6px 12px; background:#475569; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">➕ 新增欄位</button>
       </div>
 
-      <!-- 年級與班級自訂欄位 -->
       <div style="display:flex; gap:12px; flex-wrap:wrap;">
         <div class="input-group" style="flex:1; min-width:240px;">
           <label>自訂年級下拉選單 (以逗號分隔)：</label>
@@ -550,13 +539,12 @@
       <button type="button" onclick="addAdminItemRow()" style="padding:10px 16px; background:#1a73e8; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">➕ 新增檢核項目</button>
 
       <br><br>
-      <!-- 直達短網址與 QR Code 展示區 -->
+      <!-- 原生極簡短網址與 QR Code 展示區 -->
       <div id="adminFormUrlBox" style="background:#eef3fc; padding:18px; border-radius:8px; border:1px solid #c2d7fa; display:none;"></div>
       <br>
       <button type="button" class="submit-btn" id="saveAdminFormBtn" onclick="saveAdminFormConfig()">💾 儲存並發布此表單</button>
     </div>
 
-    <!-- 頁籤 3: PDF 管理 -->
     <div id="tabPdfFiles" class="tab-content">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
         <h4 style="margin:0;">📁 PDF 檔案列表</h4>
@@ -565,7 +553,6 @@
       <div id="pdfListContainer">載入中...</div>
     </div>
 
-    <!-- 頁籤 4: 照片管理 -->
     <div id="tabImageFiles" class="tab-content">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
         <h4 style="margin:0;">🖼️ 照片附件列表</h4>
@@ -578,14 +565,22 @@
 
 <script>
   // =========================================================================
-  // 後端 GAS Web App URL
+  // 1. 後端 GAS Web App 部署網址
   // =========================================================================
   const GAS_URL = "https://script.google.com/macros/s/AKfycbxxfJ77RCWK6yJEz-qOwqzEyIHUvq8SH29Uep0zLPVrOmJeN5C2Jjut_axN3u3wdN009w/exec";
 
-  let SPREADSHEET_ID = localStorage.getItem('cfgSpreadsheetId') || "";
-  let PDF_FOLDER_ID = localStorage.getItem('cfgPdfFolderId') || "";
-  let IMG_FOLDER_ID = localStorage.getItem('cfgImgFolderId') || "";
-  let CSV_URL = localStorage.getItem('cfgCsvUrl') || "";
+  // =========================================================================
+  // 2. 專案預設資料庫設定 (在此填入後，發給家長的網址將自動成為極簡短網址，100% 無廣告)
+  // =========================================================================
+  const DEFAULT_SPREADSHEET_ID = "1W_9-wxjvwCcFYGkLYR9ulRbym2G67RNLtap4yLzLzb8";
+  const DEFAULT_PDF_FOLDER_ID = "1YbDblyf6ADIQZaLF01y3AY0V9QRjmEJU";
+  const DEFAULT_IMG_FOLDER_ID = "11b6MVjWtljY-AcRacWXH-E9bwFRq8rfx";
+  const DEFAULT_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT9F5kcL8x3JREcnPU7nrlOFV3koPTX2wpdE3BQ0iJoEbTFB5FEii6N3up-S4Jw4VuYGQDv_B84rS_w/pub?gid=865088739&single=true&output=csv";
+
+  let SPREADSHEET_ID = localStorage.getItem('cfgSpreadsheetId') || DEFAULT_SPREADSHEET_ID;
+  let PDF_FOLDER_ID = localStorage.getItem('cfgPdfFolderId') || DEFAULT_PDF_FOLDER_ID;
+  let IMG_FOLDER_ID = localStorage.getItem('cfgImgFolderId') || DEFAULT_IMG_FOLDER_ID;
+  let CSV_URL = localStorage.getItem('cfgCsvUrl') || DEFAULT_CSV_URL;
 
   let currentFormId = "";
   let currentFormConfig = null;
@@ -598,7 +593,6 @@
     return m ? m[0] : str.trim();
   }
 
-  // 統一後端請求通訊函式
   async function callGAS(payload) {
     const res = await fetch(GAS_URL, {
       method: 'POST',
@@ -616,7 +610,6 @@
     }
   }
 
-  // 下載 QR Code 圖片
   async function downloadQrCodeImage(qrImgUrl, fileName) {
     try {
       const response = await fetch(qrImgUrl);
@@ -634,7 +627,6 @@
     }
   }
 
-  // 複製 QR Code 圖片至剪貼簿
   async function copyQrCodeImage(qrImgUrl) {
     try {
       const response = await fetch(qrImgUrl);
@@ -644,9 +636,9 @@
           [blob.type]: blob
         })
       ]);
-      alert("✅ QR Code 圖片已複製到剪貼簿！可直接至 Line 或 Word 按 Ctrl+V 貼上。");
+      alert("✅ QR Code 圖片已成功複製到剪貼簿！可直接至 Line 或 Word 按 Ctrl+V 貼上。");
     } catch (err) {
-      alert("⚠️ 瀏覽器安全性限制無法直接複製圖片，請直接點選「📥 下載 QR Code」保存圖片！");
+      alert("⚠️ 瀏覽器安全性限制無法直接複製圖片，請點選「📥 下載 QR Code」直接保存！");
     }
   }
 
@@ -1246,40 +1238,31 @@
     document.getElementById(prevId).style.display = 'none';
   }
 
-  // 自動透過 GAS 後端生成 0秒直達短網址 (純淨 is.gd / CleanURI) + QR Code
-  async function renderAdminUrlBox(formId) {
-    const parentUrl = `${window.location.origin}${window.location.pathname}?sid=${SPREADSHEET_ID}&pid=${PDF_FOLDER_ID}&iid=${IMG_FOLDER_ID}&fid=${formId}${CSV_URL ? '&csv=' + encodeURIComponent(CSV_URL) : ''}`;
-    const adminUrl = `${parentUrl}&admin=1`;
+  // 自動生成學校專屬原生極簡短網址 (100% 絕對純淨無廣告、0秒直達) + QR Code
+  function renderAdminUrlBox(formId) {
+    // 原生極簡短網址（長度僅 50 多字元，絕不使用第三方危險縮網址）
+    const cleanShortUrl = `${window.location.origin}${window.location.pathname}?fid=${formId}`;
+    const adminUrl = `${cleanShortUrl}&admin=1`;
+    const fullParamUrl = `${window.location.origin}${window.location.pathname}?sid=${SPREADSHEET_ID}&pid=${PDF_FOLDER_ID}&iid=${IMG_FOLDER_ID}&fid=${formId}${CSV_URL ? '&csv=' + encodeURIComponent(CSV_URL) : ''}`;
     const box = document.getElementById('adminFormUrlBox');
     
+    // QR Code 採用極簡短網址，顆粒粗大清晰、1秒掃過
+    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(cleanShortUrl)}`;
+
     box.style.display = 'block';
-    box.innerHTML = `<div style="color:#1a73e8; font-weight:bold; padding:10px;">⏳ 正在透過後端生成 0 秒純淨直達短網址與 QR Code...</div>`;
-
-    let shortUrl = parentUrl;
-    try {
-      const data = await callGAS({ action: 'createShortUrl', url: parentUrl });
-      if (data.result === 'success' && data.shortUrl) {
-        shortUrl = data.shortUrl;
-      }
-    } catch (e) {
-      console.log("短網址生成異常，使用原網址", e);
-    }
-
-    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(shortUrl)}`;
-
     box.innerHTML = `
       <div style="display:flex; gap:20px; align-items:flex-start; flex-wrap:wrap;">
         <div style="flex:1; min-width:280px;">
-          <b style="color:#1e7e34; font-size:15px;">🎉 【發送給家長】直達短網址（已自動隱藏管理按鈕，0秒直接進入）：</b>
+          <b style="color:#1e7e34; font-size:15.5px;">🎉 【發送給家長】專屬極簡短網址（100% 官方無廣告直達）：</b>
           
           <div style="display:flex; align-items:center; gap:8px; margin:10px 0; flex-wrap:wrap;">
-            <a href="${shortUrl}" target="_blank" style="color:#1a73e8; font-weight:bold; font-size:16px; word-break:break-all;">${shortUrl}</a>
-            <button type="button" onclick="navigator.clipboard.writeText('${shortUrl}'); alert('✅ 已複製短網址至剪貼簿！');" style="padding:6px 12px; background:#1a73e8; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold; font-size:13px; white-space:nowrap;">📋 複製短網址</button>
+            <a href="${cleanShortUrl}" target="_blank" style="color:#1a73e8; font-weight:bold; font-size:16px; word-break:break-all;">${cleanShortUrl}</a>
+            <button type="button" onclick="navigator.clipboard.writeText('${cleanShortUrl}'); alert('✅ 已複製專屬短網址至剪貼簿！');" style="padding:6px 12px; background:#1a73e8; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold; font-size:13px; white-space:nowrap;">📋 複製短網址</button>
           </div>
 
           <details style="margin-top:10px; font-size:12px; color:#666;">
-            <summary style="cursor:pointer; font-weight:bold; color:#475569;">🔗 查看原始長網址</summary>
-            <div style="word-break:break-all; margin-top:5px; padding:6px; background:#fff; border-radius:4px; border:1px solid #ddd;">${parentUrl}</div>
+            <summary style="cursor:pointer; font-weight:bold; color:#475569;">🔗 查看帶有資料庫參數的完整網址</summary>
+            <div style="word-break:break-all; margin-top:5px; padding:6px; background:#fff; border-radius:4px; border:1px solid #ddd;">${fullParamUrl}</div>
           </details>
 
           <div style="margin-top:12px; font-size:12.5px; color:#555; background:#fff; padding:8px; border-radius:4px; border:1px dashed #cbd5e1;">
