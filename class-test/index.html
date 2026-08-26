@@ -437,7 +437,6 @@
         <button type="button" class="nav-btn" style="border:1px solid #ccc;" onclick="saveSystemConnection(false)">僅儲存設定</button>
       </div>
 
-      <!-- 密碼變更區塊 -->
       <div style="background:#f8f9fa; border:1px solid #cbd5e1; border-radius:8px; padding:15px;">
         <h4 style="margin:0 0 10px 0; color:#1e293b;">🔐 變更管理者登入密碼</h4>
         <div style="display:flex; gap:10px; flex-wrap:wrap;">
@@ -551,7 +550,7 @@
       <button type="button" onclick="addAdminItemRow()" style="padding:10px 16px; background:#1a73e8; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">➕ 新增檢核項目</button>
 
       <br><br>
-      <!-- 直達短網址與 QR Code 自動生成展示區 -->
+      <!-- 直達短網址與 QR Code 展示區 -->
       <div id="adminFormUrlBox" style="background:#eef3fc; padding:18px; border-radius:8px; border:1px solid #c2d7fa; display:none;"></div>
       <br>
       <button type="button" class="submit-btn" id="saveAdminFormBtn" onclick="saveAdminFormConfig()">💾 儲存並發布此表單</button>
@@ -1247,18 +1246,17 @@
     document.getElementById(prevId).style.display = 'none';
   }
 
-  // 自動透過 GAS 後端生成 0秒直達短網址與 QR Code (徹底解決瀏覽器 CORS 阻擋問題)
+  // 自動透過 GAS 後端生成 0秒直達短網址 (純淨 is.gd / CleanURI) + QR Code
   async function renderAdminUrlBox(formId) {
     const parentUrl = `${window.location.origin}${window.location.pathname}?sid=${SPREADSHEET_ID}&pid=${PDF_FOLDER_ID}&iid=${IMG_FOLDER_ID}&fid=${formId}${CSV_URL ? '&csv=' + encodeURIComponent(CSV_URL) : ''}`;
     const adminUrl = `${parentUrl}&admin=1`;
     const box = document.getElementById('adminFormUrlBox');
     
     box.style.display = 'block';
-    box.innerHTML = `<div style="color:#1a73e8; font-weight:bold; padding:10px;">⏳ 正在透過後端生成 0 秒直達短網址與 QR Code...</div>`;
+    box.innerHTML = `<div style="color:#1a73e8; font-weight:bold; padding:10px;">⏳ 正在透過後端生成 0 秒純淨直達短網址與 QR Code...</div>`;
 
     let shortUrl = parentUrl;
     try {
-      // 透過 GAS 後端發送請求，完全避開瀏覽器跨來源 (CORS) 阻擋
       const data = await callGAS({ action: 'createShortUrl', url: parentUrl });
       if (data.result === 'success' && data.shortUrl) {
         shortUrl = data.shortUrl;
