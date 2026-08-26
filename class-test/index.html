@@ -1247,27 +1247,24 @@
     document.getElementById(prevId).style.display = 'none';
   }
 
-  // 自動生成直達短網址 (is.gd 0秒無廣告直達) + QR Code
+  // 自動透過 GAS 後端生成 0秒直達短網址與 QR Code (徹底解決瀏覽器 CORS 阻擋問題)
   async function renderAdminUrlBox(formId) {
     const parentUrl = `${window.location.origin}${window.location.pathname}?sid=${SPREADSHEET_ID}&pid=${PDF_FOLDER_ID}&iid=${IMG_FOLDER_ID}&fid=${formId}${CSV_URL ? '&csv=' + encodeURIComponent(CSV_URL) : ''}`;
     const adminUrl = `${parentUrl}&admin=1`;
     const box = document.getElementById('adminFormUrlBox');
     
     box.style.display = 'block';
-    box.innerHTML = `<div style="color:#1a73e8; font-weight:bold; padding:10px;">⏳ 正在自動生成專屬直達短網址與 QR Code...</div>`;
+    box.innerHTML = `<div style="color:#1a73e8; font-weight:bold; padding:10px;">⏳ 正在透過後端生成 0 秒直達短網址與 QR Code...</div>`;
 
     let shortUrl = parentUrl;
     try {
-      // 使用 is.gd API，具備 0秒直接跳轉、無廣告、無倒數等候頁之優點
-      const res = await fetch(`https://is.gd/create.php?format=json&url=${encodeURIComponent(parentUrl)}`);
-      if (res.ok) {
-        const data = await res.json();
-        if (data.shorturl) {
-          shortUrl = data.shorturl;
-        }
+      // 透過 GAS 後端發送請求，完全避開瀏覽器跨來源 (CORS) 阻擋
+      const data = await callGAS({ action: 'createShortUrl', url: parentUrl });
+      if (data.result === 'success' && data.shortUrl) {
+        shortUrl = data.shortUrl;
       }
     } catch (e) {
-      console.log("短網址生成略過，使用原網址");
+      console.log("短網址生成異常，使用原網址", e);
     }
 
     const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(shortUrl)}`;
