@@ -137,6 +137,7 @@
     }
     .item-img-display { max-width: 280px; max-height: 200px; border-radius: 6px; margin-top: 6px; margin-bottom: 10px; margin-left: 32px; display: block; border: 1px solid #ddd; }
 
+    /* 標準統一輸入框樣式 */
     .input-group { margin-bottom: 15px; position: relative; }
     .input-group label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
     .input-group input, .input-group select, .input-group textarea,
@@ -150,6 +151,7 @@
       font-family: inherit;
     }
 
+    /* 輔助快捷輸入氣泡樣式 */
     .quick-tips-box {
       display: none;
       position: absolute;
@@ -435,7 +437,6 @@
         <button type="button" class="nav-btn" style="border:1px solid #ccc;" onclick="saveSystemConnection(false)">僅儲存設定</button>
       </div>
 
-      <!-- 密碼變更區塊 -->
       <div style="background:#f8f9fa; border:1px solid #cbd5e1; border-radius:8px; padding:15px;">
         <h4 style="margin:0 0 10px 0; color:#1e293b;">🔐 變更管理者登入密碼</h4>
         <div style="display:flex; gap:10px; flex-wrap:wrap;">
@@ -496,7 +497,6 @@
         <button type="button" onclick="addAdminExtraFieldRow()" style="padding:6px 12px; background:#475569; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">➕ 新增欄位</button>
       </div>
 
-      <!-- 年級與班級自訂欄位 -->
       <div style="display:flex; gap:12px; flex-wrap:wrap;">
         <div class="input-group" style="flex:1; min-width:240px;">
           <label>自訂年級下拉選單 (以逗號分隔)：</label>
@@ -513,11 +513,11 @@
 
         <div class="input-group" style="flex:1; min-width:240px;">
           <label>自訂班級下拉選單 (以逗號分隔)：</label>
-          <input type="text" id="adminClassOptions" placeholder="例如: 一班,二班,三班,四班,五班,六班"
+          <input type="text" id="adminClassOptions" placeholder="例如: 一班,二班,三班,四班"
                  onfocus="showQuickTips('classTips')" onblur="hideQuickTips('classTips')">
           <div id="classTips" class="quick-tips-box">
             <div class="quick-tip-title">💡 常用班級範本 (點擊快速套用)：</div>
-            <span class="quick-tip-item" onmousedown="applyQuickTip('adminClassOptions', '一班,二班,三班,四班,五班,六班')">一班,二班,三班,四班,五班,六班</span>
+            <span class="quick-tip-item" onmousedown="applyQuickTip('adminClassOptions', '一班,二班,三班,四班')">一班,二班,三班,四班</span>
             <span class="quick-tip-item" onmousedown="applyQuickTip('adminClassOptions', '1班,2班,3班,4班,5班,6班,7班,8班')">1班,2班,3班,4班,5班,6班,7班,8班</span>
             <span class="quick-tip-item" onmousedown="applyQuickTip('adminClassOptions', '忠班,孝班,仁班,愛班,信班,義班,和班,平班')">忠班,孝班,仁班,愛班...</span>
             <span class="quick-tip-item" onmousedown="applyQuickTip('adminClassOptions', '甲班,乙班,丙班,丁班')">甲班,乙班,丙班,丁班</span>
@@ -549,7 +549,8 @@
       <button type="button" onclick="addAdminItemRow()" style="padding:10px 16px; background:#1a73e8; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">➕ 新增檢核項目</button>
 
       <br><br>
-      <div id="adminFormUrlBox" style="background:#e8f0fe; padding:12px; border-radius:6px; font-size:13.5px; display:none; word-break:break-all; border:1px solid #c2d7fa;"></div>
+      <!-- 短網址與 QR Code 自動生成展示區 -->
+      <div id="adminFormUrlBox" style="background:#eef3fc; padding:18px; border-radius:8px; border:1px solid #c2d7fa; display:none;"></div>
       <br>
       <button type="button" class="submit-btn" id="saveAdminFormBtn" onclick="saveAdminFormConfig()">💾 儲存並發布此表單</button>
     </div>
@@ -611,6 +612,40 @@
         throw new Error("後端連線異常，請確認 GAS 部署權限是否已設定為「所有人 (Anyone)」。");
       }
       throw new Error("伺服器回應異常");
+    }
+  }
+
+  // 下載 QR Code 圖片
+  async function downloadQrCodeImage(qrImgUrl, fileName) {
+    try {
+      const response = await fetch(qrImgUrl);
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = fileName || "表單_QRCode.png";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      window.open(qrImgUrl, '_blank');
+    }
+  }
+
+  // 複製 QR Code 圖片至剪貼簿
+  async function copyQrCodeImage(qrImgUrl) {
+    try {
+      const response = await fetch(qrImgUrl);
+      const blob = await response.blob();
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          [blob.type]: blob
+        })
+      ]);
+      alert("✅ QR Code 圖片已複製到剪貼簿！可直接至 Line 或 Word 按 Ctrl+V 貼上。");
+    } catch (err) {
+      alert("⚠️ 瀏覽器安全性限制無法直接複製圖片，請直接點選「📥 下載 QR Code」進行保存！");
     }
   }
 
@@ -822,7 +857,7 @@
               signatureLabel: row[10] || "親筆簽名確認",
               extraFields: JSON.parse(cleanExtra || "[]"),
               phoneLabel: row[12] || "家長電話",
-              classOptions: row[13] || "一班,二班,三班,四班,五班,六班"
+              classOptions: row[13] || "一班,二班,三班,四班"
             });
           }
         }
@@ -886,7 +921,7 @@
 
     const classSelect = document.getElementById('userClass');
     classSelect.innerHTML = '<option value="">請選擇班級</option>';
-    const classList = (data.classOptions || "一班,二班,三班,四班,五班,六班").split(/[,，]/).map(s => s.trim()).filter(Boolean);
+    const classList = (data.classOptions || "一班,二班,三班,四班").split(/[,，]/).map(s => s.trim()).filter(Boolean);
     classList.forEach(c => classSelect.innerHTML += `<option value="${c}">${c}</option>`);
 
     const refUrlBox = document.getElementById('displayRefUrl');
@@ -1029,7 +1064,6 @@
     }
   });
 
-  // 查詢已簽署表單 (極速與友善提示版)
   async function queryPDF() {
     const key = document.getElementById('queryFileId').value.trim();
     const resDiv = document.getElementById('queryResult');
@@ -1211,17 +1245,56 @@
     document.getElementById(prevId).style.display = 'none';
   }
 
-  function renderAdminUrlBox(formId) {
+  // 自動生成短網址 + QR Code（含複製與下載）
+  async function renderAdminUrlBox(formId) {
     const parentUrl = `${window.location.origin}${window.location.pathname}?sid=${SPREADSHEET_ID}&pid=${PDF_FOLDER_ID}&iid=${IMG_FOLDER_ID}&fid=${formId}${CSV_URL ? '&csv=' + encodeURIComponent(CSV_URL) : ''}`;
     const adminUrl = `${parentUrl}&admin=1`;
     const box = document.getElementById('adminFormUrlBox');
+    
     box.style.display = 'block';
+    box.innerHTML = `<div style="color:#1a73e8; font-weight:bold; padding:10px;">⏳ 正在自動生成專屬短網址與 QR Code...</div>`;
+
+    let shortUrl = parentUrl;
+    try {
+      const res = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(parentUrl)}`);
+      if (res.ok) {
+        shortUrl = (await res.text()).trim();
+      }
+    } catch (e) {
+      console.log("短網址生成略過，使用原網址");
+    }
+
+    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(shortUrl)}`;
+
     box.innerHTML = `
-      <b>🔗 【發送給家長】的填寫網址 (已自動隱藏管理按鈕)：</b><br>
-      <a href="${parentUrl}" target="_blank" style="color:#1a73e8;">${parentUrl}</a>
-      <button type="button" onclick="navigator.clipboard.writeText('${parentUrl}'); alert('已複製家長專屬網址！');" style="margin-left:10px; padding:4px 8px;">📋 複製家長網址</button>
-      <br><br>
-      <small style="color:#666;">💡 管理者若要在該表單下進入後台，請使用管理模式連結：<a href="${adminUrl}" target="_blank">${adminUrl}</a></small>
+      <div style="display:flex; gap:20px; align-items:flex-start; flex-wrap:wrap;">
+        <div style="flex:1; min-width:280px;">
+          <b style="color:#1e7e34; font-size:15px;">🎉 【發送給家長】專屬短網址（已自動隱藏管理按鈕）：</b>
+          
+          <div style="display:flex; align-items:center; gap:8px; margin:10px 0; flex-wrap:wrap;">
+            <a href="${shortUrl}" target="_blank" style="color:#1a73e8; font-weight:bold; font-size:16px; word-break:break-all;">${shortUrl}</a>
+            <button type="button" onclick="navigator.clipboard.writeText('${shortUrl}'); alert('✅ 已複製短網址至剪貼簿！');" style="padding:6px 12px; background:#1a73e8; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold; font-size:13px; white-space:nowrap;">📋 複製短網址</button>
+          </div>
+
+          <details style="margin-top:10px; font-size:12px; color:#666;">
+            <summary style="cursor:pointer; font-weight:bold; color:#475569;">🔗 查看原始長網址</summary>
+            <div style="word-break:break-all; margin-top:5px; padding:6px; background:#fff; border-radius:4px; border:1px solid #ddd;">${parentUrl}</div>
+          </details>
+
+          <div style="margin-top:12px; font-size:12.5px; color:#555; background:#fff; padding:8px; border-radius:4px; border:1px dashed #cbd5e1;">
+            💡 <b>管理者專用模式：</b><a href="${adminUrl}" target="_blank" style="color:#1a73e8; font-weight:bold;">${adminUrl}</a>
+          </div>
+        </div>
+
+        <!-- QR Code 預覽、下載與複製區塊 -->
+        <div style="text-align:center; background:#ffffff; padding:12px; border-radius:8px; border:1px solid #cbd5e1; box-shadow:0 2px 6px rgba(0,0,0,0.05); min-width:180px;">
+          <img src="${qrCodeUrl}" width="140" height="140" style="display:block; margin:0 auto 10px auto; border-radius:4px;" alt="同意書 QR Code">
+          <div style="display:flex; flex-direction:column; gap:6px;">
+            <button type="button" onclick="downloadQrCodeImage('${qrCodeUrl}', '同意書_${formId}_QRCode.png')" style="padding:5px 10px; background:#1e7e34; color:white; border:none; border-radius:4px; font-size:12.5px; font-weight:bold; cursor:pointer;">📥 下載 QR Code</button>
+            <button type="button" onclick="copyQrCodeImage('${qrCodeUrl}')" style="padding:5px 10px; background:#475569; color:white; border:none; border-radius:4px; font-size:12.5px; font-weight:bold; cursor:pointer;">📋 複製 QR 圖片</button>
+          </div>
+        </div>
+      </div>
     `;
   }
 
