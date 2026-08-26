@@ -596,7 +596,7 @@
     return m ? m[0] : str.trim();
   }
 
-  // 統一後端請求通訊函式 (防解析崩潰)
+  // 統一後端請求通訊函式
   async function callGAS(payload) {
     const res = await fetch(GAS_URL, {
       method: 'POST',
@@ -608,9 +608,9 @@
       return JSON.parse(text);
     } catch (e) {
       if (text.includes("<!DOCTYPE") || text.includes("<html") || text.includes("<HTML")) {
-        throw new Error("後端權限異常！請確認：\n1. GAS 部署的「誰可以存取」是否設定為「所有人 (Anyone)」\n2.「執行身分」是否為「我 (Me)」\n3. 是否已建立新版本部署。");
+        throw new Error("後端連線異常，請確認 GAS 部署權限是否已設定為「所有人 (Anyone)」。");
       }
-      throw new Error("伺服器回應異常：" + text.substring(0, 80));
+      throw new Error("伺服器回應異常");
     }
   }
 
@@ -1029,30 +1029,50 @@
     }
   });
 
+  // 查詢已簽署表單 (極速與友善提示版)
   async function queryPDF() {
     const key = document.getElementById('queryFileId').value.trim();
     const resDiv = document.getElementById('queryResult');
-    if (!key) return alert("請輸入查詢 ID 或手機號碼！");
+    if (!key) return alert("請輸入 6 位數 ID 或家長手機號碼！");
 
-    resDiv.innerHTML = "⏳ 正在查詢中...";
+    resDiv.innerHTML = "<div style='margin-top:12px; color:#1a73e8; font-weight:bold;'>⏳ 正在快速比對紀錄中，請稍候...</div>";
+
     try {
-      const data = await callGAS({ action: 'querySubmission', spreadsheetId: SPREADSHEET_ID, queryKey: key, formId: currentFormId });
-      if (data.result === 'success') {
-        let html = `<div style="color:green; font-weight:bold; margin-top:10px;">共找到 ${data.matches.length} 筆資料：</div>`;
+      const data = await callGAS({
+        action: 'querySubmission',
+        spreadsheetId: SPREADSHEET_ID,
+        queryKey: key,
+        formId: currentFormId
+      });
+
+      if (data.result === 'success' && data.matches && data.matches.length > 0) {
+        let html = `<div style="color:#1e7e34; font-weight:bold; margin-top:12px; margin-bottom:8px;">🎉 查詢成功！共找到 ${data.matches.length} 筆已簽署紀錄：</div>`;
         data.matches.forEach(m => {
           html += `
             <div class="query-result-item">
-              <div><b>ID:</b> ${m.fileId} | <b>姓名:</b> ${m.userName} (${m.classGroup})<br><small>${m.time}</small></div>
-              <a href="${m.downloadUrl}" target="_blank" class="download-btn" style="margin-top:0; padding:6px 12px; font-size:13px;">📄 下載</a>
+              <div>
+                <div><b>查詢 ID：</b>${m.fileId}</div>
+                <div><b>填寫人：</b>${m.userName} (${m.classGroup || "未分班"})</div>
+                <div style="font-size:12px; color:#666;">填表時間：${m.time}</div>
+              </div>
+              <a href="${m.downloadUrl}" target="_blank" class="download-btn" style="margin-top:0; padding:8px 14px; font-size:13px;">📄 下載 PDF</a>
             </div>
           `;
         });
         resDiv.innerHTML = html;
       } else {
-        resDiv.innerHTML = `<div style="color:red; margin-top:10px;">${data.message}</div>`;
+        resDiv.innerHTML = `
+          <div style="color:#d93025; font-weight:bold; margin-top:12px; padding:12px; background:#fde8e8; border-radius:6px; border:1px solid #f8b4b4; line-height:1.5;">
+            ⚠️ <b>查無符合紀錄！</b><br>
+            請確認您的「6 位數檔案 ID」或填表時登記的「家長手機號碼」是否輸入正確，並重新查詢。
+          </div>`;
       }
     } catch (err) {
-      resDiv.innerHTML = `<div style="color:red; margin-top:10px;">查詢失敗: ${err.message}</div>`;
+      resDiv.innerHTML = `
+        <div style="color:#d93025; font-weight:bold; margin-top:12px; padding:12px; background:#fde8e8; border-radius:6px; border:1px solid #f8b4b4; line-height:1.5;">
+          ⚠️ <b>查無符合紀錄！</b><br>
+          請確認您的「6 位數檔案 ID」或填表時登記的「家長手機號碼」是否輸入正確，並重新查詢。
+        </div>`;
     }
   }
 
@@ -1082,7 +1102,7 @@
         document.getElementById('adminPhoneLabel').value = data.phoneLabel;
         document.getElementById('adminSignatureLabel').value = data.signatureLabel;
         document.getElementById('adminGradeOptions').value = data.gradeOptions || "一年,二年,三年,四年,五年,六年";
-        document.getElementById('adminClassOptions').value = data.classOptions || "一班,二班,三班,四班,五班,六班";
+        document.getElementById('adminClassOptions').value = data.classOptions || "一班,二班,三班,四班";
         document.getElementById('adminMinRequiredCount').value = data.minRequiredCount;
         document.getElementById('adminFormRefUrl').value = data.formRefUrl || "";
         document.getElementById('adminFormImgBase64').value = data.formImgBase64 || "";
@@ -1108,7 +1128,7 @@
     document.getElementById('adminExtraFieldsContainer').innerHTML = "";
     document.getElementById('adminItemsContainer').innerHTML = "";
     document.getElementById('adminGradeOptions').value = "一年,二年,三年,四年,五年,六年";
-    document.getElementById('adminClassOptions').value = "一班,二班,三班,四班,五班,六班";
+    document.getElementById('adminClassOptions').value = "一班,二班,三班,四班";
     document.getElementById('adminFormUrlBox').style.display = 'none';
     addAdminItemRow();
   }
