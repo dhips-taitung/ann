@@ -287,7 +287,7 @@
   </div>
 
   <div id="unconfiguredBanner" class="setup-banner" style="display:none;">
-    ⚠️ <b>系統尚未完成設定</b>：請先點選右上角「⚙️ 系統與表單管理」填入您的試算表 ID 及資料夾 ID 並完成初始化。
+    💡 <b>歡迎使用多使用者外接系統</b>：請點選右上角「⚙️ 系統與表單管理」，填入您的 Google 試算表 ID 及資料夾 ID 並完成初始化。
   </div>
 
   <div id="querySection" style="display:none;">
@@ -405,17 +405,17 @@
 
       <div class="input-group">
         <label>使用者 Google 試算表 ID 或網址： <span style="color:red">*</span></label>
-        <input type="text" id="cfgSpreadsheetId" placeholder="試算表 ID 或完整網址">
+        <input type="text" id="cfgSpreadsheetId" placeholder="請貼上您的試算表 ID 或完整網址">
       </div>
 
       <div class="input-group">
         <label>PDF 儲存目標資料夾 ID 或網址： <span style="color:red">*</span></label>
-        <input type="text" id="cfgPdfFolderId" placeholder="PDF 存放資料夾 ID 或網址">
+        <input type="text" id="cfgPdfFolderId" placeholder="請貼上 PDF 存放資料夾 ID 或網址">
       </div>
 
       <div class="input-group">
         <label>照片附件儲存資料夾 ID 或網址： <span style="color:red">*</span></label>
-        <input type="text" id="cfgImgFolderId" placeholder="照片存放資料夾 ID 或網址">
+        <input type="text" id="cfgImgFolderId" placeholder="請貼上照片存放資料夾 ID 或網址">
       </div>
 
       <div style="display:flex; gap:10px; margin-bottom: 20px;">
@@ -559,20 +559,14 @@
 
 <script>
   // =========================================================================
-  // 1. 後端 GAS Web App 部署網址 (單一共用主程式)
+  // 後端 GAS Web App 部署網址 (單一主程式)
   // =========================================================================
   const GAS_URL = "https://script.google.com/macros/s/AKfycbxxfJ77RCWK6yJEz-qOwqzEyIHUvq8SH29Uep0zLPVrOmJeN5C2Jjut_axN3u3wdN009w/exec";
 
-  // =========================================================================
-  // 2. 預設備用試算表設定 (若無帶參數時使用)
-  // =========================================================================
-  const DEFAULT_SPREADSHEET_ID = "1W_9-wxjvwCcFYGkLYR9ulRbym2G67RNLtap4yLzLzb8";
-  const DEFAULT_PDF_FOLDER_ID = "1YbDblyf6ADIQZaLF01y3AY0V9QRjmEJU";
-  const DEFAULT_IMG_FOLDER_ID = "11b6MVjWtljY-AcRacWXH-E9bwFRq8rfx";
-
-  let SPREADSHEET_ID = localStorage.getItem('cfgSpreadsheetId') || DEFAULT_SPREADSHEET_ID;
-  let PDF_FOLDER_ID = localStorage.getItem('cfgPdfFolderId') || DEFAULT_PDF_FOLDER_ID;
-  let IMG_FOLDER_ID = localStorage.getItem('cfgImgFolderId') || DEFAULT_IMG_FOLDER_ID;
+  // 全域變數預設為空白，讓每一位老師開啟時均為乾淨空白狀態
+  let SPREADSHEET_ID = "";
+  let PDF_FOLDER_ID = "";
+  let IMG_FOLDER_ID = "";
 
   let currentFormId = "";
   let currentFormConfig = null;
@@ -585,7 +579,6 @@
     return m ? m[0] : str.trim();
   }
 
-  // 取得目標試算表的 GViz 即時高速 CSV 網址 (小於 0.2 秒極速)
   function getGVizCsvUrl(sheetId) {
     const cleanId = parseId(sheetId);
     return `https://docs.google.com/spreadsheets/d/${cleanId}/gviz/tq?tqx=out:csv&sheet=_FormConfig`;
@@ -646,14 +639,14 @@
     document.getElementById(inputId).value = value;
   }
 
-  // 網頁載入時：自動依據網址的 sid/fid 即時抓取對應老師的 CSV
+  // 網頁載入：僅在網址帶有參數時才載入特定老師的設定，否則呈現空白
   window.addEventListener('load', () => {
     initCanvas();
 
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('sid')) SPREADSHEET_ID = parseId(urlParams.get('sid'));
-    if (urlParams.get('pid')) PDF_FOLDER_ID = parseId(urlParams.get('pid'));
-    if (urlParams.get('iid')) IMG_FOLDER_ID = parseId(urlParams.get('iid'));
+    const sidFromUrl = urlParams.get('sid');
+    const pidFromUrl = urlParams.get('pid');
+    const iidFromUrl = urlParams.get('iid');
     const formIdFromUrl = urlParams.get('formId') || urlParams.get('fid');
 
     const isFormPage = !!(formIdFromUrl);
@@ -665,18 +658,24 @@
       document.getElementById('adminNavBtn').style.display = 'inline-block';
     }
 
+    if (sidFromUrl) SPREADSHEET_ID = parseId(sidFromUrl);
+    if (pidFromUrl) PDF_FOLDER_ID = parseId(pidFromUrl);
+    if (iidFromUrl) IMG_FOLDER_ID = parseId(iidFromUrl);
+
+    // 填回輸入欄位 (若無參數則呈現空白 placeholder)
     document.getElementById('cfgSpreadsheetId').value = SPREADSHEET_ID;
     document.getElementById('cfgPdfFolderId').value = PDF_FOLDER_ID;
     document.getElementById('cfgImgFolderId').value = IMG_FOLDER_ID;
 
+    // 若完全沒有輸入試算表 ID，顯示提示並維持乾淨初始畫面
     if (!SPREADSHEET_ID) {
       document.getElementById('unconfiguredBanner').style.display = 'block';
-      document.getElementById('displayTitle').innerText = "系統尚未完成連線設定";
-      document.getElementById('displayDesc').innerText = "請點選右上角「⚙️ 系統與表單管理」完成試算表 ID 設定。";
+      document.getElementById('displayTitle').innerText = "同意書檢核填報系統";
+      document.getElementById('displayDesc').innerText = "歡迎使用！請點選右上角「⚙️ 系統與表單管理」設定您的試算表 ID。";
       return;
     }
 
-    // 自動組裝該老師專屬的 GViz CSV 網址，0.2 秒極速讀取
+    // 若有提供 SPREADSHEET_ID，立即進行 0.2 秒 GViz 極速載入
     const dynamicCsvUrl = getGVizCsvUrl(SPREADSHEET_ID);
     loadFormFromCSV(dynamicCsvUrl, formIdFromUrl);
   });
@@ -752,6 +751,7 @@
   }
 
   async function changeAdminPasswordAction() {
+    if (!SPREADSHEET_ID) return alert("請先填寫並儲存試算表 ID！");
     const oldP = document.getElementById('adminOldPwd').value.trim();
     const newP = document.getElementById('adminNewPwd').value.trim();
     if (!oldP || !newP) return alert("請完整填寫目前密碼與新密碼！");
@@ -773,10 +773,6 @@
     PDF_FOLDER_ID = parseId(document.getElementById('cfgPdfFolderId').value);
     IMG_FOLDER_ID = parseId(document.getElementById('cfgImgFolderId').value);
 
-    localStorage.setItem('cfgSpreadsheetId', SPREADSHEET_ID);
-    localStorage.setItem('cfgPdfFolderId', PDF_FOLDER_ID);
-    localStorage.setItem('cfgImgFolderId', IMG_FOLDER_ID);
-
     if (!SPREADSHEET_ID) return alert("請輸入試算表 ID！");
 
     if (doInit) {
@@ -791,7 +787,7 @@
         alert("連線初始化失敗：\n" + err.message);
       }
     } else {
-      alert("設定已儲存至瀏覽器！");
+      alert("設定已套用！");
     }
   }
 
@@ -815,7 +811,6 @@
     return result;
   }
 
-  // 0.2 秒極速 GViz CSV 動態載入通道
   function loadFormFromCSV(csvUrl, targetFormId) {
     fetch(csvUrl + (csvUrl.includes('?') ? '&' : '?') + "t=" + Date.now())
       .then(res => res.text())
@@ -831,7 +826,7 @@
             if (cleanExtra.startsWith("'")) cleanExtra = cleanExtra.substring(1);
 
             allParsedForms.push({
-              formId: row[0].trim(),
+              formId: String(row[0]).trim(),
               formTitle: row[1] || "",
               formDesc: row[2] || "",
               items: JSON.parse(cleanItems || "[]"),
@@ -855,7 +850,6 @@
       .catch(() => loadFormFromGAS(targetFormId));
   }
 
-  // 單次極速 GAS 備援載入
   async function loadFormFromGAS(targetFormId) {
     try {
       const fData = await callGAS({
@@ -1244,14 +1238,12 @@
     document.getElementById(prevId).style.display = 'none';
   }
 
-  // 生成支援多使用者的極簡專屬網址與 QR Code
+  // 自動生成支援多使用者的極簡專屬網址與 QR Code
   function renderAdminUrlBox(formId) {
-    // 支援多使用者專屬網址：攜帶 sid 與 fid，長度僅約 60 字元
     const multiUserUrl = `${window.location.origin}${window.location.pathname}?sid=${SPREADSHEET_ID}&fid=${formId}`;
     const adminUrl = `${multiUserUrl}&admin=1`;
     const box = document.getElementById('adminFormUrlBox');
     
-    // QR Code 直接以專屬網址生成，超大顆粒好掃
     const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(multiUserUrl)}`;
 
     box.style.display = 'block';
