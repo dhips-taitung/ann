@@ -418,9 +418,11 @@
         <input type="text" id="cfgImgFolderId" placeholder="請貼上照片存放資料夾 ID 或網址">
       </div>
 
-      <div style="display:flex; gap:10px; margin-bottom: 20px;">
-        <button type="button" class="query-btn" style="flex:1;" onclick="saveSystemConnection(true)">💾 儲存並初始化試算表</button>
+      <!-- 操作按鈕區：儲存、僅儲存、清除目前設定 -->
+      <div style="display:flex; gap:10px; margin-bottom: 20px; flex-wrap:wrap;">
+        <button type="button" class="query-btn" style="flex:1; min-width:180px;" onclick="saveSystemConnection(true)">💾 儲存並初始化試算表</button>
         <button type="button" class="nav-btn" style="border:1px solid #ccc;" onclick="saveSystemConnection(false)">僅儲存設定</button>
+        <button type="button" class="nav-btn" style="border:1px solid #d93025; color:#d93025;" onclick="clearSystemConnection()">🧹 清除目前設定</button>
       </div>
 
       <div style="background:#f8f9fa; border:1px solid #cbd5e1; border-radius:8px; padding:15px;">
@@ -559,11 +561,11 @@
 
 <script>
   // =========================================================================
-  // 後端 GAS Web App 部署網址 (單一主程式)
+  // 後端 GAS Web App 部署網址
   // =========================================================================
   const GAS_URL = "https://script.google.com/macros/s/AKfycbxxfJ77RCWK6yJEz-qOwqzEyIHUvq8SH29Uep0zLPVrOmJeN5C2Jjut_axN3u3wdN009w/exec";
 
-  // 全域變數預設為空白，讓每一位老師開啟時均為乾淨空白狀態
+  // 全域變數
   let SPREADSHEET_ID = "";
   let PDF_FOLDER_ID = "";
   let IMG_FOLDER_ID = "";
@@ -639,7 +641,7 @@
     document.getElementById(inputId).value = value;
   }
 
-  // 網頁載入：僅在網址帶有參數時才載入特定老師的設定，否則呈現空白
+  // 網頁載入：優先讀取網址參數，若無參數則讀取 localStorage 保留的設定
   window.addEventListener('load', () => {
     initCanvas();
 
@@ -658,16 +660,31 @@
       document.getElementById('adminNavBtn').style.display = 'inline-block';
     }
 
-    if (sidFromUrl) SPREADSHEET_ID = parseId(sidFromUrl);
-    if (pidFromUrl) PDF_FOLDER_ID = parseId(pidFromUrl);
-    if (iidFromUrl) IMG_FOLDER_ID = parseId(iidFromUrl);
+    // 讀取設定 (URL 參數優先，次之為 localStorage 保留值)
+    if (sidFromUrl) {
+      SPREADSHEET_ID = parseId(sidFromUrl);
+    } else {
+      SPREADSHEET_ID = parseId(localStorage.getItem('cfgSpreadsheetId') || "");
+    }
 
-    // 填回輸入欄位 (若無參數則呈現空白 placeholder)
+    if (pidFromUrl) {
+      PDF_FOLDER_ID = parseId(pidFromUrl);
+    } else {
+      PDF_FOLDER_ID = parseId(localStorage.getItem('cfgPdfFolderId') || "");
+    }
+
+    if (iidFromUrl) {
+      IMG_FOLDER_ID = parseId(iidFromUrl);
+    } else {
+      IMG_FOLDER_ID = parseId(localStorage.getItem('cfgImgFolderId') || "");
+    }
+
+    // 填回輸入欄位
     document.getElementById('cfgSpreadsheetId').value = SPREADSHEET_ID;
     document.getElementById('cfgPdfFolderId').value = PDF_FOLDER_ID;
     document.getElementById('cfgImgFolderId').value = IMG_FOLDER_ID;
 
-    // 若完全沒有輸入試算表 ID，顯示提示並維持乾淨初始畫面
+    // 若尚未設定試算表 ID，顯示提示
     if (!SPREADSHEET_ID) {
       document.getElementById('unconfiguredBanner').style.display = 'block';
       document.getElementById('displayTitle').innerText = "同意書檢核填報系統";
@@ -675,7 +692,7 @@
       return;
     }
 
-    // 若有提供 SPREADSHEET_ID，立即進行 0.2 秒 GViz 極速載入
+    // 自動進行 0.2 秒 GViz 極速載入
     const dynamicCsvUrl = getGVizCsvUrl(SPREADSHEET_ID);
     loadFormFromCSV(dynamicCsvUrl, formIdFromUrl);
   });
@@ -768,12 +785,18 @@
     }
   }
 
+  // 儲存設定並保留在系統中 (寫入 localStorage)
   async function saveSystemConnection(doInit) {
     SPREADSHEET_ID = parseId(document.getElementById('cfgSpreadsheetId').value);
     PDF_FOLDER_ID = parseId(document.getElementById('cfgPdfFolderId').value);
     IMG_FOLDER_ID = parseId(document.getElementById('cfgImgFolderId').value);
 
     if (!SPREADSHEET_ID) return alert("請輸入試算表 ID！");
+
+    // 保存至瀏覽器快取
+    localStorage.setItem('cfgSpreadsheetId', SPREADSHEET_ID);
+    localStorage.setItem('cfgPdfFolderId', PDF_FOLDER_ID);
+    localStorage.setItem('cfgImgFolderId', IMG_FOLDER_ID);
 
     if (doInit) {
       try {
@@ -787,8 +810,35 @@
         alert("連線初始化失敗：\n" + err.message);
       }
     } else {
-      alert("設定已套用！");
+      alert("✅ 設定已儲存保留！下次開啟網頁將自動帶入。");
     }
+  }
+
+  // 清除目前設定按鈕功能
+  function clearSystemConnection() {
+    if (!confirm("確定要清除目前已儲存的試算表與資料夾 ID 嗎？\n清除後可重新填入新的 ID。")) return;
+
+    // 清除快取
+    localStorage.removeItem('cfgSpreadsheetId');
+    localStorage.removeItem('cfgPdfFolderId');
+    localStorage.removeItem('cfgImgFolderId');
+
+    // 清空變數
+    SPREADSHEET_ID = "";
+    PDF_FOLDER_ID = "";
+    IMG_FOLDER_ID = "";
+
+    // 清空輸入框
+    document.getElementById('cfgSpreadsheetId').value = "";
+    document.getElementById('cfgPdfFolderId').value = "";
+    document.getElementById('cfgImgFolderId').value = "";
+
+    // 更新畫面狀態
+    document.getElementById('unconfiguredBanner').style.display = 'block';
+    document.getElementById('adminFormSelect').innerHTML = "<option value=''>-- 尚未載入表單 --</option>";
+    document.getElementById('adminFormUrlBox').style.display = 'none';
+
+    alert("✅ 已成功清除設定！您現在可以填入新的試算表與資料夾 ID。");
   }
 
   function parseCSV(text) {
@@ -1128,10 +1178,12 @@
         if (data.pdfFolderId) {
           PDF_FOLDER_ID = data.pdfFolderId;
           document.getElementById('cfgPdfFolderId').value = data.pdfFolderId;
+          localStorage.setItem('cfgPdfFolderId', data.pdfFolderId);
         }
         if (data.imageFolderId) {
           IMG_FOLDER_ID = data.imageFolderId;
           document.getElementById('cfgImgFolderId').value = data.imageFolderId;
+          localStorage.setItem('cfgImgFolderId', data.imageFolderId);
         }
 
         const extraCon = document.getElementById('adminExtraFieldsContainer');
@@ -1152,8 +1204,6 @@
     document.getElementById('adminFormId').value = "";
     document.getElementById('adminFormTitle').value = "";
     document.getElementById('adminFormDesc').value = "";
-    document.getElementById('adminExtraFieldsContainer').innerHTML = "";
-    document.getElementById('adminItemsContainer').innerHTML = "";
     document.getElementById('adminGradeOptions').value = "一年,二年,三年,四年,五年,六年";
     document.getElementById('adminClassOptions').value = "一班,二班,三班,四班";
     document.getElementById('adminFormUrlBox').style.display = 'none';
@@ -1238,7 +1288,6 @@
     document.getElementById(prevId).style.display = 'none';
   }
 
-  // 自動生成支援多使用者的極簡專屬網址與 QR Code
   function renderAdminUrlBox(formId) {
     const multiUserUrl = `${window.location.origin}${window.location.pathname}?sid=${SPREADSHEET_ID}&fid=${formId}`;
     const adminUrl = `${multiUserUrl}&admin=1`;
