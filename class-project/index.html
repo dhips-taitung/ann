@@ -6,12 +6,20 @@
   <title>同意書檢核填報系統 - 專案外接版</title>
   <style>
     * { box-sizing: border-box; }
+    
+    /* 動態字級縮放階梯變數 */
+    body.font-sm { --font-scale: 0.9; }
+    body.font-md { --font-scale: 1.0; }
+    body.font-lg { --font-scale: 1.18; }
+    body.font-xl { --font-scale: 1.35; }
+
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
       background-color: #f4f6f9;
       margin: 0;
       padding: 15px 10px;
       color: #333;
+      transition: font-size 0.2s ease;
     }
     .container {
       max-width: 820px;
@@ -29,7 +37,7 @@
       color: white;
       padding: 10px 18px;
       border-radius: 8px;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
       flex-wrap: wrap;
       gap: 10px;
     }
@@ -58,6 +66,49 @@
       font-size: 13.5px;
     }
     .admin-btn:hover { background: #f29900; }
+
+    /* 字體大小調整列樣式 */
+    .font-size-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      background: #f1f5f9;
+      padding: 6px 12px;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      gap: 8px;
+      flex-wrap: wrap;
+      border: 1px solid #e2e8f0;
+    }
+    .font-toolbar-title {
+      font-size: 13px;
+      color: #475569;
+      font-weight: bold;
+    }
+    .font-btn-group {
+      display: inline-flex;
+      background: #ffffff;
+      border-radius: 4px;
+      border: 1px solid #cbd5e1;
+      overflow: hidden;
+    }
+    .font-size-btn {
+      border: none;
+      background: transparent;
+      padding: 4px 10px;
+      font-size: 13px;
+      font-weight: bold;
+      color: #475569;
+      cursor: pointer;
+      border-right: 1px solid #cbd5e1;
+      transition: all 0.15s ease;
+    }
+    .font-size-btn:last-child { border-right: none; }
+    .font-size-btn:hover { background: #e2e8f0; }
+    .font-size-btn.active {
+      background: #1a73e8;
+      color: #ffffff;
+    }
 
     .query-card {
       background-color: #eef3fc;
@@ -94,14 +145,21 @@
       gap: 10px;
     }
 
-    h2 { text-align: center; color: #1a73e8; margin-top: 0; }
+    /* 支援等比縮放的文字樣式 */
+    h2#displayTitle {
+      text-align: center;
+      color: #1a73e8;
+      margin-top: 0;
+      font-size: calc(22px * var(--font-scale, 1));
+      line-height: 1.35;
+    }
     .header-desc {
-      font-size: 14px;
-      color: #5f6368;
-      line-height: 1.6;
+      font-size: calc(14px * var(--font-scale, 1));
+      color: #475569;
+      line-height: 1.7;
       background-color: #f8f9fa;
       border: 1px solid #e8eaed;
-      padding: 12px 15px;
+      padding: 14px 18px;
       border-radius: 6px;
       margin-bottom: 15px;
       white-space: pre-wrap;
@@ -112,7 +170,7 @@
       border: 1px solid #c2d7fa;
       padding: 8px 12px;
       border-radius: 6px;
-      font-size: 13.5px;
+      font-size: calc(13.5px * var(--font-scale, 1));
       margin-bottom: 15px;
       word-break: break-all;
     }
@@ -120,32 +178,52 @@
 
     .header-img-display { max-width: 100%; height: auto; border-radius: 8px; margin-bottom: 15px; display: block; }
     .section-card { background: #fafafa; border: 1px solid #e0e0e0; border-radius: 8px; padding: 18px 20px; margin-bottom: 20px; }
-    .checkbox-item { display: flex; align-items: flex-start; margin-bottom: 10px; font-size: 15px; line-height: 1.5; cursor: pointer; }
-    .checkbox-item input[type="checkbox"] { width: 20px; height: 20px; margin-right: 12px; margin-top: 2px; flex-shrink: 0; }
+    
+    .checkbox-item {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 10px;
+      font-size: calc(15px * var(--font-scale, 1));
+      line-height: 1.55;
+      cursor: pointer;
+    }
+    .checkbox-item input[type="checkbox"] {
+      width: calc(19px * var(--font-scale, 1));
+      height: calc(19px * var(--font-scale, 1));
+      margin-right: 12px;
+      margin-top: 3px;
+      flex-shrink: 0;
+    }
     .item-desc-box {
       background-color: #f0f7ff;
       border-left: 4px solid #1a73e8;
       padding: 8px 12px;
-      font-size: 13px;
+      font-size: calc(13.5px * var(--font-scale, 1));
       color: #333;
       margin-top: 4px;
       margin-bottom: 10px;
       margin-left: 32px;
       border-radius: 0 4px 4px 0;
-      line-height: 1.5;
+      line-height: 1.65;
       white-space: pre-wrap;
     }
     .item-img-display { max-width: 280px; max-height: 200px; border-radius: 6px; margin-top: 6px; margin-bottom: 10px; margin-left: 32px; display: block; border: 1px solid #ddd; }
 
+    /* 標準統一輸入框樣式 */
     .input-group { margin-bottom: 15px; position: relative; }
-    .input-group label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
+    .input-group label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+      font-size: calc(14px * var(--font-scale, 1));
+    }
     .input-group input, .input-group select, .input-group textarea,
     .admin-form-input, .admin-form-textarea {
       width: 100%;
       padding: 10px 12px;
       border: 1px solid #ccc;
       border-radius: 6px;
-      font-size: 14px;
+      font-size: calc(14px * var(--font-scale, 1));
       box-sizing: border-box;
       font-family: inherit;
     }
@@ -182,8 +260,8 @@
 
     .class-info-group { display: flex; gap: 12px; margin-bottom: 15px; flex-wrap: wrap; }
     .class-info-item { flex: 1; min-width: 100px; }
-    .class-info-item label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
-    .class-info-item select, .class-info-item input { width: 100%; padding: 10px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; box-sizing: border-box; }
+    .class-info-item label { display: block; font-weight: bold; margin-bottom: 5px; font-size: calc(14px * var(--font-scale, 1)); }
+    .class-info-item select, .class-info-item input { width: 100%; padding: 10px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: calc(14px * var(--font-scale, 1)); box-sizing: border-box; }
 
     .signature-container { border: 2px dashed #1a73e8; border-radius: 8px; background-color: #ffffff; margin-top: 8px; }
     canvas#signatureCanvas { width: 100%; height: 216px; display: block; cursor: crosshair; }
@@ -196,7 +274,7 @@
       color: white;
       border: none;
       border-radius: 6px;
-      font-size: 18px;
+      font-size: calc(17px * var(--font-scale, 1));
       font-weight: bold;
       cursor: pointer;
       margin-top: 15px;
@@ -275,9 +353,10 @@
     .setup-banner { background: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 12px 15px; border-radius: 6px; margin-bottom: 15px; font-size: 13.5px; line-height: 1.5; }
   </style>
 </head>
-<body>
+<body class="font-md">
 
 <div class="container">
+  <!-- 頂部導覽列 -->
   <div class="top-bar">
     <div class="top-bar-title">📋 同意書檢核填報系統</div>
     <div class="top-bar-actions">
@@ -286,10 +365,23 @@
     </div>
   </div>
 
+  <!-- 字體大小動態縮放控制工具列 -->
+  <div class="font-size-toolbar">
+    <span class="font-toolbar-title">🔤 閱讀字體：</span>
+    <div class="font-btn-group">
+      <button type="button" class="font-size-btn" id="btnFontSm" onclick="setFontSize('sm')">小</button>
+      <button type="button" class="font-size-btn active" id="btnFontMd" onclick="setFontSize('md')">標準</button>
+      <button type="button" class="font-size-btn" id="btnFontLg" onclick="setFontSize('lg')">大</button>
+      <button type="button" class="font-size-btn" id="btnFontXl" onclick="setFontSize('xl')">特大</button>
+    </div>
+  </div>
+
+  <!-- 提示設定區 -->
   <div id="unconfiguredBanner" class="setup-banner" style="display:none;">
     💡 <b>歡迎使用多使用者外接系統</b>：請點選右上角「⚙️ 系統與表單管理」，填入您的 Google 試算表 ID 及資料夾 ID 並完成初始化。
   </div>
 
+  <!-- 查詢區塊 -->
   <div id="querySection" style="display:none;">
     <div class="query-card">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
@@ -305,6 +397,7 @@
     </div>
   </div>
 
+  <!-- 填表主畫面 -->
   <form id="mainForm">
     <h2 id="displayTitle">載入中...</h2>
     <div class="header-desc" id="displayDesc">正在讀取表單設定資料...</div>
@@ -418,11 +511,10 @@
         <input type="text" id="cfgImgFolderId" placeholder="請貼上照片存放資料夾 ID 或網址">
       </div>
 
-      <!-- 操作按鈕區：儲存、僅儲存、清除目前設定 -->
       <div style="display:flex; gap:10px; margin-bottom: 20px; flex-wrap:wrap;">
-        <button type="button" class="query-btn" style="flex:1; min-width:180px;" onclick="saveSystemConnection(true)">💾 儲存並初始化試算表</button>
-        <button type="button" class="nav-btn" style="border:1px solid #ccc;" onclick="saveSystemConnection(false)">僅儲存設定</button>
-        <button type="button" class="nav-btn" style="border:1px solid #d93025; color:#d93025;" onclick="clearSystemConnection()">🧹 清除目前設定</button>
+        <button type="button" class="query-btn" style="flex:2; min-width:180px;" onclick="saveSystemConnection(true)">💾 儲存並初始化試算表</button>
+        <button type="button" class="nav-btn" style="border:1px solid #ccc; flex:1; min-width:110px;" onclick="saveSystemConnection(false)">僅儲存設定</button>
+        <button type="button" class="nav-btn" style="border:1px solid #d93025; color:#d93025; background:#fff; flex:1; min-width:110px;" onclick="clearSystemConnection()">🗑️ 清除設定</button>
       </div>
 
       <div style="background:#f8f9fa; border:1px solid #cbd5e1; border-radius:8px; padding:15px;">
@@ -561,14 +653,14 @@
 
 <script>
   // =========================================================================
-  // 後端 GAS Web App 部署網址
+  // 後端 GAS Web App 部署網址 (單一主程式)
   // =========================================================================
   const GAS_URL = "https://script.google.com/macros/s/AKfycbxxfJ77RCWK6yJEz-qOwqzEyIHUvq8SH29Uep0zLPVrOmJeN5C2Jjut_axN3u3wdN009w/exec";
 
-  // 全域變數
-  let SPREADSHEET_ID = "";
-  let PDF_FOLDER_ID = "";
-  let IMG_FOLDER_ID = "";
+  // 初始從本機 localStorage 讀取設定 (新使用者初次開啟為空白)
+  let SPREADSHEET_ID = localStorage.getItem('cfgSpreadsheetId') || "";
+  let PDF_FOLDER_ID = localStorage.getItem('cfgPdfFolderId') || "";
+  let IMG_FOLDER_ID = localStorage.getItem('cfgImgFolderId') || "";
 
   let currentFormId = "";
   let currentFormConfig = null;
@@ -584,6 +676,19 @@
   function getGVizCsvUrl(sheetId) {
     const cleanId = parseId(sheetId);
     return `https://docs.google.com/spreadsheets/d/${cleanId}/gviz/tq?tqx=out:csv&sheet=_FormConfig`;
+  }
+
+  // 字體大小切換與記憶功能
+  function setFontSize(size) {
+    document.body.classList.remove('font-sm', 'font-md', 'font-lg', 'font-xl');
+    document.body.classList.add(`font-${size}`);
+    
+    document.querySelectorAll('.font-size-btn').forEach(btn => btn.classList.remove('active'));
+    const btnMap = { sm: 'btnFontSm', md: 'btnFontMd', lg: 'btnFontLg', xl: 'btnFontXl' };
+    if (btnMap[size]) {
+      document.getElementById(btnMap[size]).classList.add('active');
+    }
+    localStorage.setItem('userFormFontSize', size);
   }
 
   async function callGAS(payload) {
@@ -641,9 +746,13 @@
     document.getElementById(inputId).value = value;
   }
 
-  // 網頁載入：優先讀取網址參數，若無參數則讀取 localStorage 保留的設定
+  // 網頁載入：初始化字體與表單資料
   window.addEventListener('load', () => {
     initCanvas();
+
+    // 讀取並套用上次儲存的字體大小偏好
+    const savedFontSize = localStorage.getItem('userFormFontSize') || 'md';
+    setFontSize(savedFontSize);
 
     const urlParams = new URLSearchParams(window.location.search);
     const sidFromUrl = urlParams.get('sid');
@@ -660,31 +769,14 @@
       document.getElementById('adminNavBtn').style.display = 'inline-block';
     }
 
-    // 讀取設定 (URL 參數優先，次之為 localStorage 保留值)
-    if (sidFromUrl) {
-      SPREADSHEET_ID = parseId(sidFromUrl);
-    } else {
-      SPREADSHEET_ID = parseId(localStorage.getItem('cfgSpreadsheetId') || "");
-    }
+    if (sidFromUrl) SPREADSHEET_ID = parseId(sidFromUrl);
+    if (pidFromUrl) PDF_FOLDER_ID = parseId(pidFromUrl);
+    if (iidFromUrl) IMG_FOLDER_ID = parseId(iidFromUrl);
 
-    if (pidFromUrl) {
-      PDF_FOLDER_ID = parseId(pidFromUrl);
-    } else {
-      PDF_FOLDER_ID = parseId(localStorage.getItem('cfgPdfFolderId') || "");
-    }
-
-    if (iidFromUrl) {
-      IMG_FOLDER_ID = parseId(iidFromUrl);
-    } else {
-      IMG_FOLDER_ID = parseId(localStorage.getItem('cfgImgFolderId') || "");
-    }
-
-    // 填回輸入欄位
     document.getElementById('cfgSpreadsheetId').value = SPREADSHEET_ID;
     document.getElementById('cfgPdfFolderId').value = PDF_FOLDER_ID;
     document.getElementById('cfgImgFolderId').value = IMG_FOLDER_ID;
 
-    // 若尚未設定試算表 ID，顯示提示
     if (!SPREADSHEET_ID) {
       document.getElementById('unconfiguredBanner').style.display = 'block';
       document.getElementById('displayTitle').innerText = "同意書檢核填報系統";
@@ -692,7 +784,6 @@
       return;
     }
 
-    // 自動進行 0.2 秒 GViz 極速載入
     const dynamicCsvUrl = getGVizCsvUrl(SPREADSHEET_ID);
     loadFormFromCSV(dynamicCsvUrl, formIdFromUrl);
   });
@@ -785,7 +876,7 @@
     }
   }
 
-  // 儲存設定並保留在系統中 (寫入 localStorage)
+  // 儲存設定並寫入本機記憶
   async function saveSystemConnection(doInit) {
     SPREADSHEET_ID = parseId(document.getElementById('cfgSpreadsheetId').value);
     PDF_FOLDER_ID = parseId(document.getElementById('cfgPdfFolderId').value);
@@ -793,7 +884,6 @@
 
     if (!SPREADSHEET_ID) return alert("請輸入試算表 ID！");
 
-    // 保存至瀏覽器快取
     localStorage.setItem('cfgSpreadsheetId', SPREADSHEET_ID);
     localStorage.setItem('cfgPdfFolderId', PDF_FOLDER_ID);
     localStorage.setItem('cfgImgFolderId', IMG_FOLDER_ID);
@@ -810,35 +900,27 @@
         alert("連線初始化失敗：\n" + err.message);
       }
     } else {
-      alert("✅ 設定已儲存保留！下次開啟網頁將自動帶入。");
+      alert("✅ 設定已成功儲存並記憶在此瀏覽器中！");
     }
   }
 
-  // 清除目前設定按鈕功能
+  // 一鍵清除目前設定
   function clearSystemConnection() {
-    if (!confirm("確定要清除目前已儲存的試算表與資料夾 ID 嗎？\n清除後可重新填入新的 ID。")) return;
-
-    // 清除快取
+    if (!confirm("確定要清除目前已儲存的試算表與資料夾 ID 嗎？\n\n清除後欄位將恢復純空白，方便填入另一組新的設定。")) return;
+    
     localStorage.removeItem('cfgSpreadsheetId');
     localStorage.removeItem('cfgPdfFolderId');
     localStorage.removeItem('cfgImgFolderId');
-
-    // 清空變數
+    
     SPREADSHEET_ID = "";
     PDF_FOLDER_ID = "";
     IMG_FOLDER_ID = "";
-
-    // 清空輸入框
+    
     document.getElementById('cfgSpreadsheetId').value = "";
     document.getElementById('cfgPdfFolderId').value = "";
     document.getElementById('cfgImgFolderId').value = "";
-
-    // 更新畫面狀態
-    document.getElementById('unconfiguredBanner').style.display = 'block';
-    document.getElementById('adminFormSelect').innerHTML = "<option value=''>-- 尚未載入表單 --</option>";
-    document.getElementById('adminFormUrlBox').style.display = 'none';
-
-    alert("✅ 已成功清除設定！您現在可以填入新的試算表與資料夾 ID。");
+    
+    alert("✅ 設定已成功清除！現在可以填入新的 ID。");
   }
 
   function parseCSV(text) {
@@ -1178,12 +1260,10 @@
         if (data.pdfFolderId) {
           PDF_FOLDER_ID = data.pdfFolderId;
           document.getElementById('cfgPdfFolderId').value = data.pdfFolderId;
-          localStorage.setItem('cfgPdfFolderId', data.pdfFolderId);
         }
         if (data.imageFolderId) {
           IMG_FOLDER_ID = data.imageFolderId;
           document.getElementById('cfgImgFolderId').value = data.imageFolderId;
-          localStorage.setItem('cfgImgFolderId', data.imageFolderId);
         }
 
         const extraCon = document.getElementById('adminExtraFieldsContainer');
@@ -1204,6 +1284,8 @@
     document.getElementById('adminFormId').value = "";
     document.getElementById('adminFormTitle').value = "";
     document.getElementById('adminFormDesc').value = "";
+    document.getElementById('adminExtraFieldsContainer').innerHTML = "";
+    document.getElementById('adminItemsContainer').innerHTML = "";
     document.getElementById('adminGradeOptions').value = "一年,二年,三年,四年,五年,六年";
     document.getElementById('adminClassOptions').value = "一班,二班,三班,四班";
     document.getElementById('adminFormUrlBox').style.display = 'none';
@@ -1288,6 +1370,7 @@
     document.getElementById(prevId).style.display = 'none';
   }
 
+  // 生成支援多使用者的極簡專屬網址與 QR Code
   function renderAdminUrlBox(formId) {
     const multiUserUrl = `${window.location.origin}${window.location.pathname}?sid=${SPREADSHEET_ID}&fid=${formId}`;
     const adminUrl = `${multiUserUrl}&admin=1`;
