@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>同意書檢核填報系統 - 專案外接版</title>
+  <title>同意書檢核填報系統</title>
   <style>
     * { box-sizing: border-box; }
     
@@ -356,7 +356,6 @@
 <body class="font-md">
 
 <div class="container">
-  <!-- 頂部導覽列 -->
   <div class="top-bar">
     <div class="top-bar-title">📋 同意書檢核填報系統</div>
     <div class="top-bar-actions">
@@ -376,12 +375,10 @@
     </div>
   </div>
 
-  <!-- 提示設定區 -->
   <div id="unconfiguredBanner" class="setup-banner" style="display:none;">
     💡 <b>歡迎使用多使用者外接系統</b>：請點選右上角「⚙️ 系統與表單管理」，填入您的 Google 試算表 ID 及資料夾 ID 並完成初始化。
   </div>
 
-  <!-- 查詢區塊 -->
   <div id="querySection" style="display:none;">
     <div class="query-card">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
@@ -397,7 +394,6 @@
     </div>
   </div>
 
-  <!-- 填表主畫面 -->
   <form id="mainForm">
     <h2 id="displayTitle">載入中...</h2>
     <div class="header-desc" id="displayDesc">正在讀取表單設定資料...</div>
@@ -655,7 +651,7 @@
   // =========================================================================
   // 後端 GAS Web App 部署網址 (單一主程式)
   // =========================================================================
-  const GAS_URL = "https://script.google.com/macros/s/AKfycbxxfJ77RCWK6yJEz-qOwqzEyIHUvq8SH29Uep0zLPVrOmJeN5C2Jjut_axN3u3wdN009w/exec";
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbyXOcT2MC1X1oDoRLjHwMVZF4XzJjSo1r3x9jPJ3lLZjWFsPIIuURuxb5PBZw7JIWgVDw/exec";
 
   // 初始從本機 localStorage 讀取設定 (新使用者初次開啟為空白)
   let SPREADSHEET_ID = localStorage.getItem('cfgSpreadsheetId') || "";
@@ -750,7 +746,6 @@
   window.addEventListener('load', () => {
     initCanvas();
 
-    // 讀取並套用上次儲存的字體大小偏好
     const savedFontSize = localStorage.getItem('userFormFontSize') || 'md';
     setFontSize(savedFontSize);
 
@@ -876,7 +871,7 @@
     }
   }
 
-  // 儲存設定並寫入本機記憶
+  // 儲存設定並一鍵自動將 試算表、PDF資料夾、照片資料夾 開放為任何人可編輯
   async function saveSystemConnection(doInit) {
     SPREADSHEET_ID = parseId(document.getElementById('cfgSpreadsheetId').value);
     PDF_FOLDER_ID = parseId(document.getElementById('cfgPdfFolderId').value);
@@ -890,7 +885,12 @@
 
     if (doInit) {
       try {
-        const data = await callGAS({ action: 'initSpreadsheet', spreadsheetId: SPREADSHEET_ID });
+        const data = await callGAS({
+          action: 'initSpreadsheet',
+          spreadsheetId: SPREADSHEET_ID,
+          pdfFolderId: PDF_FOLDER_ID,
+          imageFolderId: IMG_FOLDER_ID
+        });
         alert(data.message);
         if (data.result === 'success') {
           document.getElementById('unconfiguredBanner').style.display = 'none';
@@ -904,7 +904,6 @@
     }
   }
 
-  // 一鍵清除目前設定
   function clearSystemConnection() {
     if (!confirm("確定要清除目前已儲存的試算表與資料夾 ID 嗎？\n\n清除後欄位將恢復純空白，方便填入另一組新的設定。")) return;
     
@@ -1140,6 +1139,19 @@
       extraFieldData.push({ label: inp.getAttribute('data-label'), value: inp.value.trim() });
     });
 
+    // 打包所有檢核項目填報狀態與內容 (依序展開寫入試算表各題欄位)
+    let itemResults = [];
+    (currentFormConfig.items || []).forEach((itm, idx) => {
+      const box = document.querySelector(`.rule-check[data-index="${idx}"]`);
+      const isChecked = box ? box.checked : false;
+      itemResults.push({
+        index: idx,
+        title: itm.title,
+        checked: isChecked,
+        value: isChecked ? (itm.title || "同意") : "未勾選"
+      });
+    });
+
     const payload = {
       action: 'submitForm',
       spreadsheetId: SPREADSHEET_ID,
@@ -1157,6 +1169,7 @@
       classGroup: `${document.getElementById('userGrade').value}${document.getElementById('userClass').value}`,
       seatNo: document.getElementById('userSeat').value.trim(),
       extraFieldData: extraFieldData,
+      itemResults: itemResults,
       checkedCount: checkedBoxes.length,
       totalCount: checkboxes.length,
       checkedItemsDetail: checkedItemsDetail,
@@ -1370,7 +1383,6 @@
     document.getElementById(prevId).style.display = 'none';
   }
 
-  // 生成支援多使用者的極簡專屬網址與 QR Code
   function renderAdminUrlBox(formId) {
     const multiUserUrl = `${window.location.origin}${window.location.pathname}?sid=${SPREADSHEET_ID}&fid=${formId}`;
     const adminUrl = `${multiUserUrl}&admin=1`;
