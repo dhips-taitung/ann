@@ -388,7 +388,6 @@
   <div class="top-bar">
     <div class="top-bar-title">📋 人事表單填報與檢核系統</div>
     <div class="top-bar-actions">
-      <!-- 點擊在「🔍 表單查詢」與「📝 填寫新表單」之間自動切換 -->
       <button type="button" class="nav-btn" id="toggleQueryBtn" onclick="toggleQueryView()">🔍 已填查詢</button>
       <button type="button" class="admin-btn" onclick="openAdminLogin()">🔐 設定管理</button>
     </div>
@@ -399,7 +398,6 @@
     <div class="query-view-card">
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <h3 style="margin:0; color:#1a73e8;">🔍 查詢已填寫表單 (下載 PDF)</h3>
-        <!-- 點擊直接執行重設並返回填寫新表單 -->
         <button type="button" onclick="resetFormForNewEntry()" style="padding:6px 12px; cursor:pointer; background:#fff; border:1px solid #c2d7fa; border-radius:4px; font-weight:bold; color:#1a73e8;">✖ 關閉查詢</button>
       </div>
       <p style="font-size:14px; color:#666; margin:8px 0 12px 0;">請輸入您的 <b>6 位數檔案 ID</b> 或填表時留下的 <b>手機號碼</b> 進行查詢：</p>
@@ -589,43 +587,33 @@
   let adminPasswordToken = "";
   let allParsedForms = [];
 
-  // 清除所有填表欄位、勾選與手寫簽名，並將頂部按鈕固定為「🔍 表單查詢」
   function resetFormForNewEntry() {
-    // 1. 清空文字輸入框
     document.getElementById('userName').value = '';
     document.getElementById('schoolUnit').value = '';
     document.getElementById('userPhone').value = '';
 
-    // 2. 清除所有題目勾選
     document.querySelectorAll('.rule-check').forEach(cb => { cb.checked = false; });
 
-    // 3. 清空親筆簽名畫布
     clearSignature();
 
-    // 4. 重置送出按鈕狀態與載入提示
     const submitBtn = document.getElementById('submitBtn');
     submitBtn.disabled = false;
     submitBtn.innerText = '確認送出表單並生成 PDF';
     document.getElementById('loadingOverlay').style.display = 'none';
 
-    // 5. 確保頂部按鈕文字固定為「🔍 表單查詢」
-    document.getElementById('toggleQueryBtn').innerText = '🔍 表單查詢';
+    document.getElementById('toggleQueryBtn').innerText = '🔍 已填查詢';
 
-    // 6. 清空查詢欄位與前次查詢結果
     document.getElementById('queryKeyword').value = '';
     document.getElementById('queryResult').innerHTML = '';
 
-    // 7. 隱藏結果區與查詢區，顯示表單主畫面
     document.getElementById('successBox').style.display = 'none';
     document.getElementById('queryViewSection').style.display = 'none';
     document.getElementById('formViewSection').style.display = 'block';
     document.getElementById('mainForm').style.display = 'block';
 
-    // 8. 平滑滾動至頁面頂端
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  // 切換填表與查詢視圖 (按鈕顯示「📝 填寫新表單」，再次點擊自動清空並返回填寫頁)
   function toggleQueryView() {
     const formView = document.getElementById('formViewSection');
     const queryView = document.getElementById('queryViewSection');
@@ -637,15 +625,12 @@
       if (successBox) successBox.style.display = 'none';
       queryView.style.display = 'block';
       
-      // 切換為「填寫新表單」
       toggleBtn.innerText = '📝 填寫新表單';
 
-      // 自動清空輸入框與搜尋結果
       document.getElementById('queryKeyword').value = '';
       document.getElementById('queryResult').innerHTML = '';
       document.getElementById('queryKeyword').focus();
     } else {
-      // 點擊「填寫新表單」直接執行全新重設並返回填報
       resetFormForNewEntry();
     }
   }
@@ -965,7 +950,6 @@
     ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height); hasSigned = false;
   }
 
-  // 查詢 PDF 檔
   function queryPDF() {
     const keyword = document.getElementById('queryKeyword').value.trim();
     const resultDiv = document.getElementById('queryResult');
@@ -1003,7 +987,7 @@
     });
   }
 
-  // 前台送出表單
+  // 前台送出表單 (收集每題勾選狀態 "已勾選" / "未勾選")
   document.getElementById('mainForm').addEventListener('submit', function(e) {
     e.preventDefault();
     const checkboxes = document.querySelectorAll('.rule-check');
@@ -1035,10 +1019,11 @@
     loadingOverlay.style.display = 'block';
 
     let checkedItemsDetail = [];
+    let allItemStatuses = [];
     checkboxes.forEach((box) => {
+      const idx = box.getAttribute('data-index');
+      const itemObj = currentFormConfig.items[idx];
       if (box.checked) {
-        const idx = box.getAttribute('data-index');
-        const itemObj = currentFormConfig.items[idx];
         checkedItemsDetail.push({
           title: itemObj.title,
           desc: itemObj.desc || "",
@@ -1046,6 +1031,10 @@
           imgBase64: itemObj.imgBase64 || ""
         });
       }
+      allItemStatuses.push({
+        title: itemObj.title,
+        status: box.checked ? "已勾選" : "未勾選"
+      });
     });
 
     const payload = {
@@ -1061,6 +1050,7 @@
       checkedCount: checkedBoxes.length,
       totalCount: checkboxes.length,
       checkedItemsDetail: checkedItemsDetail,
+      allItemStatuses: allItemStatuses,
       signatureBase64: canvas.toDataURL('image/png')
     };
 
@@ -1077,7 +1067,7 @@
         document.getElementById('successBox').style.display = 'block';
         document.getElementById('resFileId').innerText = data.fileId;
         document.getElementById('resDownloadBtn').href = data.downloadUrl;
-        document.getElementById('toggleQueryBtn').innerText = '🔍 表單查詢';
+        document.getElementById('toggleQueryBtn').innerText = '🔍 已填查詢';
       } else {
         alert("提交失敗：" + data.message);
         submitBtn.disabled = false;
