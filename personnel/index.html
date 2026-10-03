@@ -37,43 +37,75 @@
       font-size: 16px;
       font-weight: bold;
     }
+    .top-bar-actions {
+      display: flex;
+      gap: 8px;
+    }
+    .nav-btn {
+      background: #ffffff;
+      color: #1a73e8;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.2s;
+    }
+    .nav-btn:hover { background: #e8f0fe; }
     .admin-btn {
       background: #fbbc04;
       color: #202124;
       border: none;
-      padding: 8px 16px;
+      padding: 8px 14px;
       border-radius: 4px;
       cursor: pointer;
       font-weight: bold;
     }
     .admin-btn:hover { background: #f29900; }
 
-    .query-card {
-      background-color: #eef3fc;
+    .query-view-card {
+      background-color: #f8fafd;
       border: 1px solid #c2d7fa;
       border-radius: 8px;
-      padding: 12px 18px;
+      padding: 20px 24px;
       margin-bottom: 20px;
     }
     .query-input-group {
       display: flex;
       gap: 10px;
-      margin-top: 6px;
+      margin-top: 10px;
     }
     .query-input-group input {
       flex: 1;
-      padding: 8px 12px;
+      padding: 10px 14px;
       border: 1px solid #ccc;
-      border-radius: 4px;
+      border-radius: 6px;
+      font-size: 15px;
     }
     .query-btn {
-      padding: 8px 16px;
+      padding: 10px 20px;
       background-color: #1a73e8;
       color: white;
       border: none;
-      border-radius: 4px;
+      border-radius: 6px;
       cursor: pointer;
       font-weight: bold;
+      font-size: 15px;
+    }
+    .query-btn:hover { background-color: #1557b0; }
+    .query-btn:disabled { background-color: #9aa0a6; cursor: not-allowed; }
+
+    .query-result-item {
+      background: #ffffff;
+      border: 1px solid #dcdfe6;
+      border-radius: 6px;
+      padding: 14px;
+      margin-top: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
     }
 
     h2 { text-align: center; color: #1a73e8; margin-top: 0; }
@@ -158,6 +190,33 @@
     .input-group label { display: block; font-weight: bold; margin-bottom: 5px; }
     .input-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
 
+    .field-config-box {
+      background: #f0f4f9;
+      padding: 12px 15px;
+      border-radius: 6px;
+      border: 1px solid #c2d7fa;
+      margin-bottom: 15px;
+    }
+    .field-config-title {
+      font-weight: bold;
+      color: #1a73e8;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    .field-config-options {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .field-config-options label {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: normal;
+    }
+
     .signature-container {
       border: 2px dashed #1a73e8;
       border-radius: 8px;
@@ -215,7 +274,6 @@
       overflow-y: auto;
     }
 
-    /* 後台頁籤 Tab 樣式 */
     .tab-bar {
       display: flex;
       gap: 5px;
@@ -238,7 +296,6 @@
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
-    /* 後台表格樣式 */
     .admin-table {
       width: 100%;
       border-collapse: collapse;
@@ -289,91 +346,125 @@
     }
 
     #loadingOverlay { display: none; text-align: center; margin-top: 15px; color: #1a73e8; font-weight: bold; }
-    #successBox { display: none; text-align: center; padding: 20px; }
+    
+    #successBox {
+      display: none;
+      text-align: center;
+      padding: 25px 20px;
+      background: #ffffff;
+      border-radius: 8px;
+      border: 1px solid #c2d7fa;
+      margin-top: 15px;
+    }
     .file-id-box {
       background: #e8f0fe;
-      padding: 10px;
-      font-size: 24px;
+      padding: 12px;
+      font-size: 26px;
       font-weight: bold;
       color: #1a73e8;
       border-radius: 6px;
-      margin: 10px 0;
+      margin: 15px auto;
+      max-width: 300px;
+      letter-spacing: 2px;
     }
     .download-btn {
       display: inline-block;
-      margin-top: 10px;
+      margin-top: 8px;
       padding: 12px 24px;
       background: #d93025;
       color: white;
       text-decoration: none;
       border-radius: 6px;
       font-weight: bold;
+      font-size: 16px;
     }
+    .download-btn:hover { background: #b31f15; }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <!-- 頂部功能列 (前台已取消表單選擇選單) -->
+  <!-- 頂部功能列 -->
   <div class="top-bar">
     <div class="top-bar-title">📋 人事表單填報與檢核系統</div>
-    <button class="admin-btn" onclick="openAdminLogin()">🔐 管理者後台設定</button>
+    <div class="top-bar-actions">
+      <!-- 點擊在「🔍 表單查詢」與「📝 填寫新表單」之間自動切換 -->
+      <button type="button" class="nav-btn" id="toggleQueryBtn" onclick="toggleQueryView()">🔍 已填查詢</button>
+      <button type="button" class="admin-btn" onclick="openAdminLogin()">🔐 設定管理</button>
+    </div>
   </div>
 
-  <!-- 重複下載查詢區塊 -->
-  <div class="query-card">
-    <div style="font-weight: bold; color: #1a73e8;">🔍 查詢已填寫表單 (下載 PDF)</div>
-    <div class="query-input-group">
-      <input type="text" id="queryFileId" placeholder="請輸入 6 位數檔案 ID (例如：849201)">
-      <button type="button" class="query-btn" onclick="queryPDF()">查詢</button>
-    </div>
-    <div id="queryResult"></div>
-  </div>
-
-  <!-- 前台填表畫面 -->
-  <form id="mainForm">
-    <h2 id="displayTitle">載入中...</h2>
-    <div class="header-desc" id="displayDesc">正在讀取表單設定內容...</div>
-    
-    <!-- 標題參考網址與照片展示區 -->
-    <div id="displayRefUrl" class="ref-link-box" style="display:none;"></div>
-    <img id="displayImg" class="header-img-display" style="display:none;">
-
-    <!-- 個人基本資料 -->
-    <div class="input-group">
-      <label>填寫人姓名 <span style="color:red">*</span></label>
-      <input type="text" id="userName" placeholder="請輸入姓名" required>
-    </div>
-    <div class="input-group">
-      <label>單位名稱 / 學校與隊別</label>
-      <input type="text" id="schoolUnit" placeholder="例如：XX國小 體育組長/教練">
-    </div>
-
-    <!-- 動態檢核題目渲染區 -->
-    <div id="checklistContainer"></div>
-
-    <!-- 手寫簽名 -->
-    <div class="input-group">
-      <label>親筆簽名確認 <span style="color:red">*</span></label>
-      <div class="signature-container">
-        <canvas id="signatureCanvas" width="700" height="180"></canvas>
+  <!-- 獨立查詢視圖 (預設隱藏) -->
+  <div id="queryViewSection" style="display:none;">
+    <div class="query-view-card">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h3 style="margin:0; color:#1a73e8;">🔍 查詢已填寫表單 (下載 PDF)</h3>
+        <!-- 點擊直接執行重設並返回填寫新表單 -->
+        <button type="button" onclick="resetFormForNewEntry()" style="padding:6px 12px; cursor:pointer; background:#fff; border:1px solid #c2d7fa; border-radius:4px; font-weight:bold; color:#1a73e8;">✖ 關閉查詢</button>
       </div>
-      <button type="button" class="clear-btn" onclick="clearSignature()">清除重簽</button>
-      <div style="clear: both;"></div>
+      <p style="font-size:14px; color:#666; margin:8px 0 12px 0;">請輸入您的 <b>6 位數檔案 ID</b> 或填表時留下的 <b>手機號碼</b> 進行查詢：</p>
+      
+      <div class="query-input-group">
+        <input type="text" id="queryKeyword" placeholder="請輸入 6 位數 ID 或 手機號碼 (例如：0912345678)" onkeyup="if(event.key==='Enter') queryPDF()">
+        <button type="button" class="query-btn" onclick="queryPDF()">立即查詢</button>
+      </div>
+      
+      <div id="queryResult" style="margin-top:15px;"></div>
     </div>
+  </div>
 
-    <button type="submit" class="submit-btn" id="submitBtn">確認送出表單並生成 PDF</button>
-    <div id="loadingOverlay">資料處理中，請稍候...</div>
-  </form>
+  <!-- 前台填表主畫面 -->
+  <div id="formViewSection">
+    <form id="mainForm">
+      <h2 id="displayTitle">載入中...</h2>
+      <div class="header-desc" id="displayDesc">正在讀取表單設定內容...</div>
+      
+      <!-- 標題參考網址與照片展示區 -->
+      <div id="displayRefUrl" class="ref-link-box" style="display:none;"></div>
+      <img id="displayImg" class="header-img-display" style="display:none;">
+
+      <!-- 個人基本資料欄位區塊 -->
+      <div class="input-group" id="groupUserName">
+        <label>填寫人姓名 <span style="color:red">*</span></label>
+        <input type="text" id="userName" placeholder="請輸入姓名" required>
+      </div>
+      
+      <div class="input-group" id="groupSchoolUnit">
+        <label>單位 / 職稱</label>
+        <input type="text" id="schoolUnit" placeholder="例如：XX國小 / 體育組長">
+      </div>
+
+      <div class="input-group" id="groupUserPhone">
+        <label>手機號碼 <span style="color:red">*</span> (用於忘記 ID 時查詢下載紀錄)</label>
+        <input type="tel" id="userPhone" placeholder="例如：0912345678" required pattern="09[0-9]{8}">
+      </div>
+
+      <!-- 動態檢核題目渲染區 -->
+      <div id="checklistContainer"></div>
+
+      <!-- 手寫簽名 -->
+      <div class="input-group">
+        <label>親筆簽名確認 <span style="color:red">*</span></label>
+        <div class="signature-container">
+          <canvas id="signatureCanvas" width="700" height="180"></canvas>
+        </div>
+        <button type="button" class="clear-btn" onclick="clearSignature()">清除重簽</button>
+        <div style="clear: both;"></div>
+      </div>
+
+      <button type="submit" class="submit-btn" id="submitBtn">確認送出表單並生成 PDF</button>
+      <div id="loadingOverlay">資料處理中，請稍候...</div>
+    </form>
+  </div>
 
   <!-- 送出成功結果 -->
   <div id="successBox">
-    <h3 style="color:#34a853;">🎉 表單與簽名已成功提交！</h3>
-    <p>請保存您的專屬 6 位數檔案 ID：</p>
+    <h3 style="color:#34a853; margin-top:0;">🎉 表單與簽名已成功提交！</h3>
+    <p>請妥善保存您的專屬 6 位數檔案 ID (亦可使用手機號碼查詢)：</p>
     <div class="file-id-box" id="resFileId">000000</div>
     <a href="#" target="_blank" class="download-btn" id="resDownloadBtn">📄 立即下載 PDF 檔</a>
     <br><br>
-    <button type="button" onclick="location.reload()" style="padding:8px 16px; cursor:pointer;">填寫新表單</button>
+    <button type="button" onclick="resetFormForNewEntry()" style="padding:10px 22px; font-weight:bold; cursor:pointer; background:#1a73e8; color:white; border:none; border-radius:6px; font-size:15px; box-shadow:0 2px 6px rgba(26,115,232,0.3);">📝 填寫新表單</button>
   </div>
 </div>
 
@@ -383,11 +474,10 @@
     <h3>🔐 管理者登入</h3>
     <div class="input-group">
       <label>請輸入管理者密碼：</label>
-      <!-- 支援 Enter 鍵按鍵登入 -->
-      <input type="password" id="adminPasswordInput" placeholder="密碼: 1234" onkeyup="if(event.key==='Enter') submitAdminLogin()">
+      <input type="password" id="adminPasswordInput" placeholder="請輸入密碼" onkeyup="if(event.key==='Enter') submitAdminLogin()">
     </div>
-    <button class="query-btn" style="width:100%;" onclick="submitAdminLogin()">登入後台</button>
-    <button style="width:100%; margin-top:8px;" onclick="closeModal('loginModal')">取消</button>
+    <button class="query-btn" id="adminLoginBtn" style="width:100%;" onclick="submitAdminLogin()">登入後台</button>
+    <button style="width:100%; margin-top:8px; padding:8px; border:1px solid #ccc; border-radius:4px; cursor:pointer; background:#fff;" onclick="closeModal('loginModal')">取消</button>
   </div>
 </div>
 
@@ -426,6 +516,15 @@
         <textarea id="adminFormDesc" style="width:100%; height:80px; border-radius:6px; padding:8px;" placeholder="請輸入說明條文內容..."></textarea>
       </div>
 
+      <div class="field-config-box">
+        <div class="field-config-title">📋 前台基本資料欄位顯示設定 (勾選表示在前台顯示此欄位)：</div>
+        <div class="field-config-options">
+          <label><input type="checkbox" id="adminShowName" checked> 1. 填寫人姓名</label>
+          <label><input type="checkbox" id="adminShowUnit" checked> 2. 單位名稱 / 學校與隊別</label>
+          <label><input type="checkbox" id="adminShowPhone" checked> 3. 手機號碼 (方便查詢 ID)</label>
+        </div>
+      </div>
+
       <div class="input-group" style="background:#eef3fc; padding:10px; border-radius:6px; border:1px solid #c2d7fa;">
         <label style="color:#1a73e8;">全表單最少需勾選數量 (0 表不限制數量)：</label>
         <input type="number" id="adminMinRequiredCount" min="0" value="0" placeholder="0">
@@ -451,7 +550,6 @@
       <button type="button" onclick="addAdminItemRow()" style="padding:8px 14px; background:#1a73e8; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">➕ 新增檢核項目</button>
 
       <br><br>
-      <!-- 動態專屬網址顯示區 (含一鍵複製按鈕) -->
       <div id="adminFormUrlBox" style="background:#e8f0fe; padding:12px 15px; border-radius:6px; font-size:13.5px; display:none; word-break:break-all; border:1px solid #c2d7fa;"></div>
       <br>
 
@@ -483,18 +581,75 @@
 </div>
 
 <script>
-  // 發佈之 CSV 網址 (用於極速讀取前台內容)
-  const CONFIG_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR-WdWkslDs5DO1ufrrZw9OkgLuwDIk-T3Fpm2sw1_J91Gg5XgX_WnlcZq7MQnF4fFk8g4JLgeIsNCw/pub?gid=783571477&single=true&output=csv";
-  
-  // Apps Script Web App URL
-  const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyVtROSfH3xEVU7TtwXUGUucecGbWjO2GpNpsKs32b3eFdqIPjtpg2L_UDByGpD88kN/exec";
+  const CONFIG_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTFQGQHFcP1ulNB6C8Iq3Tz_tUWx7cojxjDNMhFJjEiNuf3opvFoeNfFX1rM5sGhf-fwcqG95NIMfmU/pub?gid=783571477&single=true&output=csv";
+  const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxT-gA3pc7xkvCNsLqaxLq0hjsEFtv9izEj06sDAtvUZn9IEZUvs-fH6M2AcyEgmAaL/exec";
 
   let currentFormId = "";
   let currentFormConfig = null;
   let adminPasswordToken = "";
   let allParsedForms = [];
 
-  // 一鍵複製網址功能
+  // 清除所有填表欄位、勾選與手寫簽名，並將頂部按鈕固定為「🔍 表單查詢」
+  function resetFormForNewEntry() {
+    // 1. 清空文字輸入框
+    document.getElementById('userName').value = '';
+    document.getElementById('schoolUnit').value = '';
+    document.getElementById('userPhone').value = '';
+
+    // 2. 清除所有題目勾選
+    document.querySelectorAll('.rule-check').forEach(cb => { cb.checked = false; });
+
+    // 3. 清空親筆簽名畫布
+    clearSignature();
+
+    // 4. 重置送出按鈕狀態與載入提示
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.disabled = false;
+    submitBtn.innerText = '確認送出表單並生成 PDF';
+    document.getElementById('loadingOverlay').style.display = 'none';
+
+    // 5. 確保頂部按鈕文字固定為「🔍 表單查詢」
+    document.getElementById('toggleQueryBtn').innerText = '🔍 表單查詢';
+
+    // 6. 清空查詢欄位與前次查詢結果
+    document.getElementById('queryKeyword').value = '';
+    document.getElementById('queryResult').innerHTML = '';
+
+    // 7. 隱藏結果區與查詢區，顯示表單主畫面
+    document.getElementById('successBox').style.display = 'none';
+    document.getElementById('queryViewSection').style.display = 'none';
+    document.getElementById('formViewSection').style.display = 'block';
+    document.getElementById('mainForm').style.display = 'block';
+
+    // 8. 平滑滾動至頁面頂端
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // 切換填表與查詢視圖 (按鈕顯示「📝 填寫新表單」，再次點擊自動清空並返回填寫頁)
+  function toggleQueryView() {
+    const formView = document.getElementById('formViewSection');
+    const queryView = document.getElementById('queryViewSection');
+    const toggleBtn = document.getElementById('toggleQueryBtn');
+    const successBox = document.getElementById('successBox');
+
+    if (queryView.style.display === 'none') {
+      formView.style.display = 'none';
+      if (successBox) successBox.style.display = 'none';
+      queryView.style.display = 'block';
+      
+      // 切換為「填寫新表單」
+      toggleBtn.innerText = '📝 填寫新表單';
+
+      // 自動清空輸入框與搜尋結果
+      document.getElementById('queryKeyword').value = '';
+      document.getElementById('queryResult').innerHTML = '';
+      document.getElementById('queryKeyword').focus();
+    } else {
+      // 點擊「填寫新表單」直接執行全新重設並返回填報
+      resetFormForNewEntry();
+    }
+  }
+
   function copyFormUrl(url) {
     navigator.clipboard.writeText(url).then(() => {
       alert("✅ 專屬網址已成功複製到剪貼簿！\n\n網址：" + url);
@@ -509,7 +664,6 @@
     });
   }
 
-  // 本地端快取更新 (解決 Google CSV 發佈延遲問題)
   function updateLocalParsedForms(payload, formId) {
     const existingIndex = allParsedForms.findIndex(f => f.formId === formId);
     const formData = {
@@ -519,17 +673,17 @@
       items: payload.items,
       formImgBase64: payload.formImgBase64,
       formRefUrl: payload.formRefUrl,
-      minRequiredCount: payload.minRequiredCount
+      minRequiredCount: payload.minRequiredCount,
+      fieldSettings: payload.fieldSettings
     };
 
     if (existingIndex >= 0) {
       allParsedForms[existingIndex] = formData;
     } else {
-      allParsedForms.unshift(formData); // 最新資料加入最上方
+      allParsedForms.unshift(formData);
     }
   }
 
-  // 渲染專屬網址 UI 區塊 (含複製按鈕)
   function renderAdminFormUrlBox(formId) {
     const formUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?formId=' + formId;
     const urlBox = document.getElementById('adminFormUrlBox');
@@ -545,7 +699,6 @@
     `;
   }
 
-  // CSV 高效解析器
   function parseCSV(text) {
     const result = [];
     let row = [];
@@ -571,7 +724,6 @@
     return result;
   }
 
-  // 網頁載入初始化 (從發佈之 CSV 讀取)
   window.addEventListener('load', () => {
     initCanvas();
     const urlParams = new URLSearchParams(window.location.search);
@@ -579,7 +731,6 @@
     loadFormFromCSV(formIdFromUrl);
   });
 
-  // 從 CSV 讀取表單內容
   function loadFormFromCSV(targetFormId) {
     fetch(CONFIG_CSV_URL + "&t=" + new Date().getTime())
       .then(res => res.text())
@@ -596,6 +747,16 @@
             let items = [];
             try { items = JSON.parse(cleanItemsStr); } catch(e){}
 
+            let cleanFieldSettingsStr = (row[8] || "{}").trim();
+            if (cleanFieldSettingsStr.startsWith("'")) cleanFieldSettingsStr = cleanFieldSettingsStr.substring(1);
+
+            let fieldSettings = { showName: true, showUnit: true, showPhone: true };
+            try {
+              if (cleanFieldSettingsStr) {
+                fieldSettings = Object.assign(fieldSettings, JSON.parse(cleanFieldSettingsStr));
+              }
+            } catch(e){}
+
             allParsedForms.push({
               formId: row[0].trim(),
               formTitle: row[1] || "",
@@ -604,20 +765,21 @@
               createdAt: row[4] || "",
               formImgBase64: row[5] || "",
               formRefUrl: row[6] || "",
-              minRequiredCount: parseInt(row[7] || "0", 10)
+              minRequiredCount: parseInt(row[7] || "0", 10),
+              fieldSettings: fieldSettings
             });
           }
         }
 
         if (allParsedForms.length > 0) {
           let selected = allParsedForms.find(f => f.formId === targetFormId);
-          if (!selected) selected = allParsedForms[0]; // 預設載入最上面 (最新的) 表單
+          if (!selected) selected = allParsedForms[0];
           
           currentFormId = selected.formId;
           renderFrontendForm(selected);
         } else {
           document.getElementById('displayTitle').innerText = "尚未建立任何表單";
-          document.getElementById('displayDesc').innerText = "請點選右上角「管理者後台設定」建立第一份表單。";
+          document.getElementById('displayDesc').innerText = "請點選右上角「設定管理」建立第一份表單。";
         }
       })
       .catch(err => {
@@ -625,7 +787,6 @@
       });
   }
 
-  // 渲染前台表單
   function renderFrontendForm(data) {
     currentFormConfig = data;
     document.getElementById('displayTitle').innerText = data.formTitle;
@@ -645,6 +806,42 @@
       headerImg.style.display = 'block';
     } else {
       headerImg.style.display = 'none';
+    }
+
+    const fieldSettings = data.fieldSettings || { showName: true, showUnit: true, showPhone: true };
+    
+    // 1. 填寫人姓名
+    const groupName = document.getElementById('groupUserName');
+    const inputName = document.getElementById('userName');
+    if (fieldSettings.showName !== false) {
+      groupName.style.display = 'block';
+      inputName.required = true;
+    } else {
+      groupName.style.display = 'none';
+      inputName.required = false;
+      inputName.value = "";
+    }
+
+    // 2. 單位名稱 / 學校與隊別
+    const groupUnit = document.getElementById('groupSchoolUnit');
+    const inputUnit = document.getElementById('schoolUnit');
+    if (fieldSettings.showUnit !== false) {
+      groupUnit.style.display = 'block';
+    } else {
+      groupUnit.style.display = 'none';
+      inputUnit.value = "";
+    }
+
+    // 3. 手機號碼
+    const groupPhone = document.getElementById('groupUserPhone');
+    const inputPhone = document.getElementById('userPhone');
+    if (fieldSettings.showPhone !== false) {
+      groupPhone.style.display = 'block';
+      inputPhone.required = true;
+    } else {
+      groupPhone.style.display = 'none';
+      inputPhone.required = false;
+      inputPhone.value = "";
     }
 
     const container = document.getElementById('checklistContainer');
@@ -671,7 +868,6 @@
     }
   }
 
-  // 照片上傳壓縮引擎
   function handleImageUpload(fileInput, previewImgId, base64HiddenId) {
     const file = fileInput.files[0];
     if (!file) return;
@@ -726,7 +922,6 @@
     }
   }
 
-  // 手寫簽名引擎
   const canvas = document.getElementById('signatureCanvas');
   const ctx = canvas.getContext('2d');
   let isDrawing = false, hasSigned = false, lastX = 0, lastY = 0;
@@ -772,27 +967,43 @@
 
   // 查詢 PDF 檔
   function queryPDF() {
-    const queryId = document.getElementById('queryFileId').value.trim();
+    const keyword = document.getElementById('queryKeyword').value.trim();
     const resultDiv = document.getElementById('queryResult');
-    if (!queryId) return alert("請輸入 6 位數檔案 ID");
+    if (!keyword) return alert("請輸入 6 位數檔案 ID 或 手機號碼！");
 
-    resultDiv.innerHTML = "查詢中...";
+    resultDiv.innerHTML = "<p style='color:#1a73e8;'>🔍 正在為您檢索填報紀錄...</p>";
+    
     fetch(GAS_WEB_APP_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'querySubmission', queryId: queryId, formId: currentFormId })
+      body: JSON.stringify({ action: 'querySubmission', queryKeyword: keyword, formId: currentFormId })
     })
     .then(res => res.json())
     .then(data => {
       if (data.result === 'success') {
-        resultDiv.innerHTML = `✅ 找到檔案 (ID: ${data.fileId})！<a href="${data.downloadUrl}" target="_blank" style="color:#d93025; font-weight:bold;">點此下載 PDF 檔</a>`;
+        let html = `<div style="font-weight:bold; color:#2e7d32; margin-bottom:8px;">✅ 找到 ${data.records.length} 筆填報紀錄：</div>`;
+        data.records.forEach((rec, idx) => {
+          html += `
+            <div class="query-result-item">
+              <div>
+                <b>【${rec.userName}】</b> <span style="color:#666; font-size:13px;">(填寫時間: ${rec.createdAt})</span><br>
+                <span style="font-size:14px;">專屬檔案 ID：<b style="color:#1a73e8; font-size:16px;">${rec.fileId}</b></span>
+              </div>
+              <a href="${rec.downloadUrl}" target="_blank" class="download-btn" style="padding:8px 16px; margin:0; font-size:14px;">📄 下載 PDF 檔</a>
+            </div>
+          `;
+        });
+        resultDiv.innerHTML = html;
       } else {
-        resultDiv.innerHTML = `<span style="color:red;">❌ ${data.message}</span>`;
+        resultDiv.innerHTML = `<span style="color:#d93025; font-weight:bold;">❌ ${data.message}</span>`;
       }
+    })
+    .catch(err => {
+      resultDiv.innerHTML = `<span style="color:#d93025;">連線失敗：${err.toString()}</span>`;
     });
   }
 
-  // 前台送出填寫表單
+  // 前台送出表單
   document.getElementById('mainForm').addEventListener('submit', function(e) {
     e.preventDefault();
     const checkboxes = document.querySelectorAll('.rule-check');
@@ -845,6 +1056,7 @@
       formRefUrl: currentFormConfig.formRefUrl || "",
       formImgBase64: currentFormConfig.formImgBase64 || "",
       userName: document.getElementById('userName').value.trim(),
+      userPhone: document.getElementById('userPhone').value.trim(),
       schoolUnit: document.getElementById('schoolUnit').value.trim(),
       checkedCount: checkedBoxes.length,
       totalCount: checkboxes.length,
@@ -860,10 +1072,12 @@
     .then(res => res.json())
     .then(data => {
       if (data.result === 'success') {
-        document.getElementById('mainForm').style.display = 'none';
+        document.getElementById('formViewSection').style.display = 'none';
+        document.getElementById('queryViewSection').style.display = 'none';
         document.getElementById('successBox').style.display = 'block';
         document.getElementById('resFileId').innerText = data.fileId;
         document.getElementById('resDownloadBtn').href = data.downloadUrl;
+        document.getElementById('toggleQueryBtn').innerText = '🔍 表單查詢';
       } else {
         alert("提交失敗：" + data.message);
         submitBtn.disabled = false;
@@ -872,15 +1086,20 @@
     });
   });
 
-  // 管理者後台功能
   function openAdminLogin() { 
-    document.getElementById('adminPasswordInput').value = "";
+    const pwdInput = document.getElementById('adminPasswordInput');
+    const loginBtn = document.getElementById('adminLoginBtn');
+    pwdInput.value = "";
+    pwdInput.disabled = false;
+    loginBtn.disabled = false;
+    loginBtn.innerText = "登入後台";
+
     document.getElementById('loginModal').style.display = 'flex'; 
-    document.getElementById('adminPasswordInput').focus();
+    pwdInput.focus();
   }
+
   function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
-  // 後台頁籤切換
   function switchAdminTab(tabId) {
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
@@ -890,8 +1109,15 @@
   }
 
   function submitAdminLogin() {
-    const pwd = document.getElementById('adminPasswordInput').value;
+    const pwdInput = document.getElementById('adminPasswordInput');
+    const loginBtn = document.getElementById('adminLoginBtn');
+    const pwd = pwdInput.value.trim();
+
     if (!pwd) return alert("請輸入密碼！");
+
+    loginBtn.disabled = true;
+    loginBtn.innerText = "⏳ 登入中...";
+    pwdInput.disabled = true;
 
     fetch(GAS_WEB_APP_URL, {
       method: 'POST',
@@ -900,6 +1126,10 @@
     })
     .then(res => res.json())
     .then(data => {
+      loginBtn.disabled = false;
+      loginBtn.innerText = "登入後台";
+      pwdInput.disabled = false;
+
       if (data.result === 'success') {
         adminPasswordToken = pwd;
         closeModal('loginModal');
@@ -907,11 +1137,18 @@
         populateAdminFormSelect();
       } else {
         alert(data.message);
+        pwdInput.focus();
+        pwdInput.select();
       }
+    })
+    .catch(err => {
+      loginBtn.disabled = false;
+      loginBtn.innerText = "登入後台";
+      pwdInput.disabled = false;
+      alert("連線驗證失敗：" + err.toString());
     });
   }
 
-  // 填入後台表單選單
   function populateAdminFormSelect() {
     const adminSelect = document.getElementById('adminFormSelect');
     adminSelect.innerHTML = "<option value=''>-- 選擇表單進行編輯 --</option>";
@@ -924,7 +1161,6 @@
     }
   }
 
-  // 載入表單資料至後台編輯器
   function loadFormToAdmin() {
     const formId = document.getElementById('adminFormSelect').value;
     if (!formId) return;
@@ -938,6 +1174,11 @@
     document.getElementById('adminMinRequiredCount').value = data.minRequiredCount || 0;
     document.getElementById('adminFormRefUrl').value = data.formRefUrl || "";
     document.getElementById('adminFormImgBase64').value = data.formImgBase64 || "";
+
+    const fs = data.fieldSettings || { showName: true, showUnit: true, showPhone: true };
+    document.getElementById('adminShowName').checked = (fs.showName !== false);
+    document.getElementById('adminShowUnit').checked = (fs.showUnit !== false);
+    document.getElementById('adminShowPhone').checked = (fs.showPhone !== false);
 
     const headerPreview = document.getElementById('adminFormImgPreview');
     if (data.formImgBase64) {
@@ -965,6 +1206,11 @@
     document.getElementById('adminFormDesc').value = "";
     document.getElementById('adminMinRequiredCount').value = "0";
     document.getElementById('adminFormRefUrl').value = "";
+    
+    document.getElementById('adminShowName').checked = true;
+    document.getElementById('adminShowUnit').checked = true;
+    document.getElementById('adminShowPhone').checked = true;
+
     clearImageUpload('adminFormImgFile', 'adminFormImgPreview', 'adminFormImgBase64');
     document.getElementById('adminItemsContainer').innerHTML = "";
     document.getElementById('adminFormUrlBox').style.display = 'none';
@@ -1057,7 +1303,6 @@
     row.querySelector('.clear-item-img-btn').style.display = 'none';
   }
 
-  // 儲存表單設定 (自動顯示網址與一鍵複製，不自動關閉視窗)
   function saveAdminFormConfig() {
     const saveBtn = document.getElementById('saveAdminFormBtn');
     const saveStatus = document.getElementById('adminSaveStatus');
@@ -1082,6 +1327,12 @@
       if (t) items.push({ title: t, desc: d, refUrl: u, imgBase64: img, required: isReq });
     });
 
+    const fieldSettings = {
+      showName: document.getElementById('adminShowName').checked,
+      showUnit: document.getElementById('adminShowUnit').checked,
+      showPhone: document.getElementById('adminShowPhone').checked
+    };
+
     saveBtn.innerText = "⏳ 儲存中...";
     saveBtn.disabled = true;
 
@@ -1094,6 +1345,7 @@
       formRefUrl: formRefUrl,
       formImgBase64: formImgBase64,
       minRequiredCount: minRequiredCount,
+      fieldSettings: fieldSettings,
       items: items
     };
 
@@ -1109,18 +1361,12 @@
 
       if (data.result === 'success') {
         const savedFormId = data.formId;
-
         document.getElementById('adminFormId').value = savedFormId;
-
-        // 1. 儲存成功後【自動生成並顯示專屬網址】
         renderAdminFormUrlBox(savedFormId);
-
-        // 2. 即時更新本地快取 (無延遲)
         updateLocalParsedForms(payload, savedFormId);
         populateAdminFormSelect();
         document.getElementById('adminFormSelect').value = savedFormId;
 
-        // 3. 顯示成功文字，不安裝自動關閉視窗 (需手動關閉)
         saveStatus.style.display = 'block';
         saveStatus.innerText = data.message;
         setTimeout(() => { saveStatus.style.display = 'none'; }, 4000);
@@ -1137,7 +1383,6 @@
     });
   }
 
-  // 載入 PDF 檔案列表
   function loadAdminPdfList() {
     const container = document.getElementById('pdfListContainer');
     container.innerHTML = "資料載入中...";
@@ -1203,7 +1448,6 @@
     });
   }
 
-  // 載入附件照片列表
   function loadAdminImageList() {
     const container = document.getElementById('imageListContainer');
     container.innerHTML = "資料載入中...";
