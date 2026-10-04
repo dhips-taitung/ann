@@ -7,7 +7,6 @@
   <style>
     * { box-sizing: border-box; }
     
-    /* 動態字級縮放階梯變數 */
     body.font-sm { --font-scale: 0.9; }
     body.font-md { --font-scale: 1.0; }
     body.font-lg { --font-scale: 1.18; }
@@ -67,7 +66,6 @@
     }
     .admin-btn:hover { background: #f29900; }
 
-    /* 字體大小調整列樣式 */
     .font-size-toolbar {
       display: flex;
       align-items: center;
@@ -80,11 +78,7 @@
       flex-wrap: wrap;
       border: 1px solid #e2e8f0;
     }
-    .font-toolbar-title {
-      font-size: 13px;
-      color: #475569;
-      font-weight: bold;
-    }
+    .font-toolbar-title { font-size: 13px; color: #475569; font-weight: bold; }
     .font-btn-group {
       display: inline-flex;
       background: #ffffff;
@@ -145,7 +139,6 @@
       gap: 10px;
     }
 
-    /* 支援等比縮放的文字樣式 */
     h2#displayTitle {
       text-align: center;
       color: #1a73e8;
@@ -164,6 +157,21 @@
       margin-bottom: 15px;
       white-space: pre-wrap;
     }
+
+    /* 填報期限提示條樣式 */
+    .deadline-banner {
+      padding: 12px 16px;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      font-size: calc(13.5px * var(--font-scale, 1));
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      line-height: 1.5;
+    }
+    .deadline-info { background: #e8f4fd; color: #0c5460; border: 1px solid #bee5eb; }
+    .deadline-not-started { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+    .deadline-expired { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
 
     .ref-link-box {
       background: #f0f7ff;
@@ -209,7 +217,6 @@
     }
     .item-img-display { max-width: 280px; max-height: 200px; border-radius: 6px; margin-top: 6px; margin-bottom: 10px; margin-left: 32px; display: block; border: 1px solid #ddd; }
 
-    /* 標準統一輸入框樣式 */
     .input-group { margin-bottom: 15px; position: relative; }
     .input-group label {
       display: block;
@@ -364,7 +371,6 @@
     </div>
   </div>
 
-  <!-- 字體大小動態縮放控制工具列 -->
   <div class="font-size-toolbar">
     <span class="font-toolbar-title">🔤 閱讀字體：</span>
     <div class="font-btn-group">
@@ -398,6 +404,9 @@
     <h2 id="displayTitle">載入中...</h2>
     <div class="header-desc" id="displayDesc">正在讀取表單設定資料...</div>
     
+    <!-- 填報期限狀態顯示條 -->
+    <div id="deadlineBanner" class="deadline-banner" style="display:none;"></div>
+
     <div id="displayRefUrl" class="ref-link-box" style="display:none;"></div>
     <img id="displayImg" class="header-img-display" style="display:none;">
 
@@ -440,7 +449,7 @@
       <div class="signature-container">
         <canvas id="signatureCanvas" width="700" height="216"></canvas>
       </div>
-      <button type="button" class="clear-btn" onclick="clearSignature()">清除重簽</button>
+      <button type="button" class="clear-btn" id="clearSignBtn" onclick="clearSignature()">清除重簽</button>
       <div style="clear: both;"></div>
     </div>
 
@@ -551,6 +560,18 @@
         <textarea id="adminFormDesc" style="height:70px;" placeholder="請輸入說明條文內容..."></textarea>
       </div>
 
+      <!-- 填報期限設定 -->
+      <div style="display:flex; gap:10px; flex-wrap:wrap; background:#eef3fc; padding:12px; border-radius:6px; border:1px solid #c2d7fa; margin-bottom:15px;">
+        <div class="input-group" style="flex:1; min-width:200px; margin-bottom:0;">
+          <label style="color:#1a73e8;">📅 填報開始時間 (未設定表示即日起開放)：</label>
+          <input type="datetime-local" id="adminStartDate">
+        </div>
+        <div class="input-group" style="flex:1; min-width:200px; margin-bottom:0;">
+          <label style="color:#d93025;">⏰ 填報截止時間 (未設定表示無截止期限)：</label>
+          <input type="datetime-local" id="adminEndDate">
+        </div>
+      </div>
+
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
         <div class="input-group" style="flex:1; min-width:180px;">
           <label>「姓名」欄位名稱：</label>
@@ -648,12 +669,8 @@
 </div>
 
 <script>
-  // =========================================================================
-  // 後端 GAS Web App 部署網址 (單一主程式)
-  // =========================================================================
-  const GAS_URL = "https://script.google.com/macros/s/AKfycbyXOcT2MC1X1oDoRLjHwMVZF4XzJjSo1r3x9jPJ3lLZjWFsPIIuURuxb5PBZw7JIWgVDw/exec";
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbzOrITPpu64sv0iLvP6NeCEFQxNS6TQ0Q78Jf06jHwC-5Vrtr528IZQe2neROurzgcWjg/exec";
 
-  // 初始從本機 localStorage 讀取設定 (新使用者初次開啟為空白)
   let SPREADSHEET_ID = localStorage.getItem('cfgSpreadsheetId') || "";
   let PDF_FOLDER_ID = localStorage.getItem('cfgPdfFolderId') || "";
   let IMG_FOLDER_ID = localStorage.getItem('cfgImgFolderId') || "";
@@ -662,6 +679,7 @@
   let currentFormConfig = null;
   let allParsedForms = [];
   let isAdminAuthenticated = false;
+  let isFormSubmissionAllowed = true;
 
   function parseId(str) {
     if (!str) return "";
@@ -674,7 +692,6 @@
     return `https://docs.google.com/spreadsheets/d/${cleanId}/gviz/tq?tqx=out:csv&sheet=_FormConfig`;
   }
 
-  // 字體大小切換與記憶功能
   function setFontSize(size) {
     document.body.classList.remove('font-sm', 'font-md', 'font-lg', 'font-xl');
     document.body.classList.add(`font-${size}`);
@@ -726,9 +743,7 @@
       const response = await fetch(qrImgUrl);
       const blob = await response.blob();
       await navigator.clipboard.write([
-        new ClipboardItem({
-          [blob.type]: blob
-        })
+        new ClipboardItem({ [blob.type]: blob })
       ]);
       alert("✅ QR Code 圖片已成功複製到剪貼簿！可直接至 Line 或 Word 按 Ctrl+V 貼上。");
     } catch (err) {
@@ -742,7 +757,6 @@
     document.getElementById(inputId).value = value;
   }
 
-  // 網頁載入：初始化字體與表單資料
   window.addEventListener('load', () => {
     initCanvas();
 
@@ -871,7 +885,6 @@
     }
   }
 
-  // 儲存設定並一鍵自動將 試算表、PDF資料夾、照片資料夾 開放為任何人可編輯
   async function saveSystemConnection(doInit) {
     SPREADSHEET_ID = parseId(document.getElementById('cfgSpreadsheetId').value);
     PDF_FOLDER_ID = parseId(document.getElementById('cfgPdfFolderId').value);
@@ -972,7 +985,9 @@
               phoneLabel: row[12] || "家長電話",
               classOptions: row[13] || "一班,二班,三班,四班",
               pdfFolderId: row[14] || "",
-              imageFolderId: row[15] || ""
+              imageFolderId: row[15] || "",
+              startDate: row[16] || "",
+              endDate: row[17] || ""
             });
           }
         }
@@ -1009,10 +1024,66 @@
     }
   }
 
+  function formatDisplayDate(dateStr) {
+    if (!dateStr) return "";
+    return dateStr.replace('T', ' ');
+  }
+
   function renderFrontendForm(data) {
     currentFormConfig = data;
     document.getElementById('displayTitle').innerText = data.formTitle;
     document.getElementById('displayDesc').innerText = data.formDesc || "";
+
+    // 填報期限狀態檢查
+    const now = new Date();
+    const banner = document.getElementById('deadlineBanner');
+    const submitBtn = document.getElementById('submitBtn');
+    isFormSubmissionAllowed = true;
+
+    banner.className = 'deadline-banner';
+    banner.style.display = 'none';
+
+    let sDate = data.startDate ? new Date(data.startDate) : null;
+    let eDate = data.endDate ? new Date(data.endDate) : null;
+
+    if (sDate && !isNaN(sDate.getTime()) && now < sDate) {
+      isFormSubmissionAllowed = false;
+      banner.className = 'deadline-banner deadline-not-started';
+      banner.style.display = 'block';
+      banner.innerHTML = `⏳ <b>填報尚未開放</b>：本表單將於 <u>${formatDisplayDate(data.startDate)}</u> 正式開放填寫。`;
+    } else if (eDate && !isNaN(eDate.getTime()) && now > eDate) {
+      isFormSubmissionAllowed = false;
+      banner.className = 'deadline-banner deadline-expired';
+      banner.style.display = 'block';
+      banner.innerHTML = `⛔ <b>填報期限已截止</b>：本表單已於 <u>${formatDisplayDate(data.endDate)}</u> 截止填報，目前無法提交！`;
+    } else if (data.startDate || data.endDate) {
+      banner.className = 'deadline-banner deadline-info';
+      banner.style.display = 'block';
+      let periodText = '⏰ <b>填報期限</b>：';
+      if (data.startDate && data.endDate) {
+        periodText += `${formatDisplayDate(data.startDate)} 至 ${formatDisplayDate(data.endDate)}`;
+      } else if (data.endDate) {
+        periodText += `即日起至 ${formatDisplayDate(data.endDate)} 止`;
+      } else if (data.startDate) {
+        periodText += `自 ${formatDisplayDate(data.startDate)} 起開放填寫`;
+      }
+      banner.innerHTML = periodText;
+    }
+
+    // 控制表單元件啟用/停用
+    const allFormInputs = document.querySelectorAll('#mainForm input, #mainForm select, #mainForm textarea');
+    allFormInputs.forEach(el => el.disabled = !isFormSubmissionAllowed);
+    document.getElementById('clearSignBtn').disabled = !isFormSubmissionAllowed;
+
+    if (!isFormSubmissionAllowed) {
+      submitBtn.disabled = true;
+      submitBtn.innerText = (eDate && now > eDate) ? "⛔ 填報期限已截止" : "⏳ 尚未開放填寫";
+      submitBtn.style.backgroundColor = "#999999";
+    } else {
+      submitBtn.disabled = false;
+      submitBtn.innerText = "確認送出表單並生成 PDF";
+      submitBtn.style.backgroundColor = "#34a853";
+    }
 
     document.getElementById('displayUserNameLabel').innerText = data.userNameLabel || "填寫人姓名";
     document.getElementById('displayPhoneLabel').innerText = data.phoneLabel || "家長電話";
@@ -1024,7 +1095,7 @@
       extraContainer.innerHTML += `
         <div class="input-group">
           <label>${field.label} ${field.required ? '<span style="color:red">*</span>' : ''}</label>
-          <input type="text" class="user-extra-input" data-label="${field.label}" data-required="${field.required}" placeholder="請輸入${field.label}" ${field.required ? 'required' : ''}>
+          <input type="text" class="user-extra-input" data-label="${field.label}" data-required="${field.required}" placeholder="請輸入${field.label}" ${field.required ? 'required' : ''} ${!isFormSubmissionAllowed ? 'disabled' : ''}>
         </div>
       `;
     });
@@ -1063,7 +1134,7 @@
       data.items.forEach((item, index) => {
         let html = `
           <label class="checkbox-item">
-            <input type="checkbox" class="rule-check" data-index="${index}">
+            <input type="checkbox" class="rule-check" data-index="${index}" ${!isFormSubmissionAllowed ? 'disabled' : ''}>
             <span><b>${index + 1}. ${item.title}</b> ${item.required ? '<span class="required-badge">必選</span>' : ''}</span>
           </label>
         `;
@@ -1090,9 +1161,13 @@
     if (e.touches && e.touches.length > 0) { cx = e.touches[0].clientX; cy = e.touches[0].clientY; }
     return { x: (cx - rect.left) * (canvas.width / rect.width), y: (cy - rect.top) * (canvas.height / rect.height) };
   }
-  function startDraw(e) { e.preventDefault(); isDrawing = true; const p = getCoords(e); lastX = p.x; lastY = p.y; hasSigned = true; }
+  function startDraw(e) {
+    if (!isFormSubmissionAllowed) return;
+    e.preventDefault(); isDrawing = true; const p = getCoords(e); lastX = p.x; lastY = p.y; hasSigned = true;
+  }
   function draw(e) {
-    if (!isDrawing) return; e.preventDefault(); const p = getCoords(e);
+    if (!isDrawing || !isFormSubmissionAllowed) return;
+    e.preventDefault(); const p = getCoords(e);
     ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(p.x, p.y); ctx.stroke();
     lastX = p.x; lastY = p.y; hasSigned = true;
   }
@@ -1102,11 +1177,17 @@
   canvas.addEventListener('touchstart', startDraw); canvas.addEventListener('touchmove', draw); canvas.addEventListener('touchend', stopDraw);
 
   function clearSignature() {
+    if (!isFormSubmissionAllowed) return;
     ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height); hasSigned = false;
   }
 
   document.getElementById('mainForm').addEventListener('submit', async function(e) {
     e.preventDefault();
+
+    if (!isFormSubmissionAllowed) {
+      return alert("⚠️ 目前非填報開放時間，無法提交表單！");
+    }
+
     const checkboxes = document.querySelectorAll('.rule-check');
     const checkedBoxes = document.querySelectorAll('.rule-check:checked');
 
@@ -1139,7 +1220,6 @@
       extraFieldData.push({ label: inp.getAttribute('data-label'), value: inp.value.trim() });
     });
 
-    // 打包所有檢核項目填報狀態與內容 (依序展開寫入試算表各題欄位)
     let itemResults = [];
     (currentFormConfig.items || []).forEach((itm, idx) => {
       const box = document.querySelector(`.rule-check[data-index="${idx}"]`);
@@ -1269,6 +1349,8 @@
         document.getElementById('adminMinRequiredCount').value = data.minRequiredCount;
         document.getElementById('adminFormRefUrl').value = data.formRefUrl || "";
         document.getElementById('adminFormImgBase64').value = data.formImgBase64 || "";
+        document.getElementById('adminStartDate').value = data.startDate || "";
+        document.getElementById('adminEndDate').value = data.endDate || "";
 
         if (data.pdfFolderId) {
           PDF_FOLDER_ID = data.pdfFolderId;
@@ -1297,6 +1379,8 @@
     document.getElementById('adminFormId').value = "";
     document.getElementById('adminFormTitle').value = "";
     document.getElementById('adminFormDesc').value = "";
+    document.getElementById('adminStartDate').value = "";
+    document.getElementById('adminEndDate').value = "";
     document.getElementById('adminExtraFieldsContainer').innerHTML = "";
     document.getElementById('adminItemsContainer').innerHTML = "";
     document.getElementById('adminGradeOptions').value = "一年,二年,三年,四年,五年,六年";
@@ -1458,6 +1542,8 @@
       minRequiredCount: document.getElementById('adminMinRequiredCount').value,
       formRefUrl: document.getElementById('adminFormRefUrl').value.trim(),
       formImgBase64: document.getElementById('adminFormImgBase64').value,
+      startDate: document.getElementById('adminStartDate').value,
+      endDate: document.getElementById('adminEndDate').value,
       extraFields: extraFields,
       items: items
     };
