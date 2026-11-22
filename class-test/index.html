@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>同意書檢核填報系統</title>
+  <!-- Google Identity Services (GIS) OAuth 函式庫 -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     * { box-sizing: border-box; }
     
@@ -158,7 +160,6 @@
       white-space: pre-wrap;
     }
 
-    /* 填報期限提示條樣式 */
     .deadline-banner {
       padding: 12px 16px;
       border-radius: 6px;
@@ -358,6 +359,25 @@
     .download-btn { display: inline-block; margin-top: 10px; padding: 10px 20px; background: #d93025; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; }
     
     .setup-banner { background: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 12px 15px; border-radius: 6px; margin-bottom: 15px; font-size: 13.5px; line-height: 1.5; }
+    
+    /* 登入身分標籤與申請表樣式 */
+    .user-auth-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #eef3fc;
+      border: 1px solid #c2d7fa;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      color: #1a73e8;
+      font-weight: bold;
+    }
+    .user-auth-badge img {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+    }
   </style>
 </head>
 <body class="font-md">
@@ -382,7 +402,7 @@
   </div>
 
   <div id="unconfiguredBanner" class="setup-banner" style="display:none;">
-    💡 <b>歡迎使用多使用者外接系統</b>：請點選右上角「⚙️ 系統與表單管理」，填入您的 Google 試算表 ID 及資料夾 ID 並完成初始化。
+    💡 <b>歡迎使用多使用者外接系統</b>：請點選右上角「⚙️ 系統與表單管理」，透過 Google 登入後填入您的 Google 試算表 ID 及資料夾 ID 並完成初始化。
   </div>
 
   <div id="querySection" style="display:none;">
@@ -404,9 +424,7 @@
     <h2 id="displayTitle">載入中...</h2>
     <div class="header-desc" id="displayDesc">正在讀取表單設定資料...</div>
     
-    <!-- 填報期限狀態顯示條 -->
     <div id="deadlineBanner" class="deadline-banner" style="display:none;"></div>
-
     <div id="displayRefUrl" class="ref-link-box" style="display:none;"></div>
     <img id="displayImg" class="header-img-display" style="display:none;">
 
@@ -467,25 +485,44 @@
   </div>
 </div>
 
+<!-- Google OAuth 登入彈窗 -->
 <div class="modal-overlay" id="adminLoginModal">
-  <div class="modal-card" style="max-width: 400px;">
-    <h3 style="margin-top:0; color:#1a73e8;">🔐 管理者登入驗證</h3>
-    <p style="font-size:13px; color:#666;">請輸入管理者密碼以開啟管理介面：</p>
-    <div class="input-group">
-      <input type="password" id="adminLoginPassword" placeholder="預設密碼為 1234" onkeyup="if(event.key==='Enter') submitAdminLogin()">
+  <div class="modal-card" style="max-width: 420px; text-align:center;">
+    <h3 style="margin-top:0; color:#1a73e8;">🔐 Google 帳號授權登入</h3>
+    <p style="font-size:13.5px; color:#555; line-height:1.5;">本系統僅限核准之教師及管理者存取。<br>請使用 Google 帳號進行身分登入驗證：</p>
+    
+    <div id="g_id_signin_container" style="display:flex; justify-content:center; margin: 20px 0;"></div>
+    
+    <div id="authStatusMsg" style="font-size:13px; color:#d93025; font-weight:bold; min-height:20px; margin-bottom:15px;"></div>
+
+    <!-- 申請帳號對話框 (未核准時自動切換顯示) -->
+    <div id="applyBox" style="display:none; background:#f8f9fa; border:1px solid #cbd5e1; border-radius:8px; padding:15px; text-align:left;">
+      <h4 style="margin:0 0 8px 0; color:#1e293b;">📝 申請開通使用權限</h4>
+      <p style="font-size:12px; color:#666; margin-bottom:10px;">您的 Google 帳號尚未經管理者授權，請填妥姓名送出申請：</p>
+      <div class="input-group" style="margin-bottom:8px;">
+        <label style="font-size:12px;">姓名：</label>
+        <input type="text" id="applyUserName" placeholder="請輸入您的真實姓名">
+      </div>
+      <div class="input-group" style="margin-bottom:10px;">
+        <label style="font-size:12px;">Google 信箱：</label>
+        <input type="text" id="applyUserEmail" readonly style="background:#e9ecef;">
+      </div>
+      <button type="button" class="query-btn" style="width:100%;" onclick="submitAuthApplication()">📤 送出授權申請</button>
     </div>
-    <div style="display:flex; gap:10px;">
-      <button type="button" id="adminLoginSubmitBtn" class="query-btn" style="flex:1;" onclick="submitAdminLogin()">登入後台</button>
-      <button type="button" class="nav-btn" style="border:1px solid #ccc;" onclick="closeModal('adminLoginModal')">取消</button>
-    </div>
+
+    <button type="button" class="nav-btn" style="border:1px solid #ccc; width:100%; margin-top:10px;" onclick="closeModal('adminLoginModal')">關閉視窗</button>
   </div>
 </div>
 
+<!-- 管理者設定後台彈窗 -->
 <div class="modal-overlay" id="adminModal">
   <div class="modal-card">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-      <h3 style="margin:0; color:#1a73e8;">⚙️ 專案管理與設定系統</h3>
-      <button type="button" onclick="adminLogout()" style="padding:6px 14px; background:#d93025; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:bold; font-size:13.5px;">🚪 登出</button>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <h3 style="margin:0; color:#1a73e8;">⚙️ 專案管理與設定系統</h3>
+        <div id="currentUserBadge" class="user-auth-badge"></div>
+      </div>
+      <button type="button" onclick="adminLogout()" style="padding:6px 14px; background:#d93025; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:bold; font-size:13.5px;">🚪 登出帳號</button>
     </div>
 
     <div class="tab-bar">
@@ -521,21 +558,6 @@
         <button type="button" class="nav-btn" style="border:1px solid #ccc; flex:1; min-width:110px;" onclick="saveSystemConnection(false)">僅儲存設定</button>
         <button type="button" class="nav-btn" style="border:1px solid #d93025; color:#d93025; background:#fff; flex:1; min-width:110px;" onclick="clearSystemConnection()">🗑️ 清除設定</button>
       </div>
-
-      <div style="background:#f8f9fa; border:1px solid #cbd5e1; border-radius:8px; padding:15px;">
-        <h4 style="margin:0 0 10px 0; color:#1e293b;">🔐 變更管理者登入密碼</h4>
-        <div style="display:flex; gap:10px; flex-wrap:wrap;">
-          <div class="input-group" style="flex:1; min-width:180px; margin-bottom:8px;">
-            <label>目前管理者密碼：</label>
-            <input type="password" id="adminOldPwd" placeholder="請輸入目前密碼">
-          </div>
-          <div class="input-group" style="flex:1; min-width:180px; margin-bottom:8px;">
-            <label>設定新密碼：</label>
-            <input type="password" id="adminNewPwd" placeholder="請輸入新密碼 (至少4碼)">
-          </div>
-        </div>
-        <button type="button" class="query-btn" style="background:#475569;" onclick="changeAdminPasswordAction()">🔑 變更密碼</button>
-      </div>
     </div>
 
     <div id="tabFormConfig" class="tab-content">
@@ -560,7 +582,6 @@
         <textarea id="adminFormDesc" style="height:70px;" placeholder="請輸入說明條文內容..."></textarea>
       </div>
 
-      <!-- 填報期限設定 -->
       <div style="display:flex; gap:10px; flex-wrap:wrap; background:#eef3fc; padding:12px; border-radius:6px; border:1px solid #c2d7fa; margin-bottom:15px;">
         <div class="input-group" style="flex:1; min-width:200px; margin-bottom:0;">
           <label style="color:#1a73e8;">📅 填報開始時間 (未設定表示即日起開放)：</label>
@@ -669,7 +690,10 @@
 </div>
 
 <script>
-  const GAS_URL = "https://script.google.com/macros/s/AKfycbzOrITPpu64sv0iLvP6NeCEFQxNS6TQ0Q78Jf06jHwC-5Vrtr528IZQe2neROurzgcWjg/exec";
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbyXOcT2MC1X1oDoRLjHwMVZF4XzJjSo1r3x9jPJ3lLZjWFsPIIuURuxb5PBZw7JIWgVDw/exec";
+  
+  // 👉 請在此處填入您向 Google Cloud Console 申請的 OAuth 用戶端 ID
+  const GOOGLE_CLIENT_ID = "341910377782-3unva3oggi84vp88uga23horpumjaptt.apps.googleusercontent.com";
 
   let SPREADSHEET_ID = localStorage.getItem('cfgSpreadsheetId') || "";
   let PDF_FOLDER_ID = localStorage.getItem('cfgPdfFolderId') || "";
@@ -678,8 +702,10 @@
   let currentFormId = "";
   let currentFormConfig = null;
   let allParsedForms = [];
-  let isAdminAuthenticated = false;
   let isFormSubmissionAllowed = true;
+
+  // 登入驗證狀態與當前登入者資訊
+  let currentUser = JSON.parse(localStorage.getItem('authUserInfo') || "null");
 
   function parseId(str) {
     if (!str) return "";
@@ -721,40 +747,113 @@
     }
   }
 
-  async function downloadQrCodeImage(qrImgUrl, fileName) {
+  // 解碼 Google Credential JWT
+  function parseJwt(token) {
     try {
-      const response = await fetch(qrImgUrl);
-      const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = blobUrl;
-      a.download = fileName || "表單_QRCode.png";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(blobUrl);
-    } catch (err) {
-      window.open(qrImgUrl, '_blank');
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      return JSON.parse(jsonPayload);
+    } catch (e) {
+      return null;
     }
   }
 
-  async function copyQrCodeImage(qrImgUrl) {
+  // 接收 Google 登入完成的回調處理
+  async function handleCredentialResponse(response) {
+    const statusMsg = document.getElementById('authStatusMsg');
+    statusMsg.innerText = "⏳ 正在驗證身分授權中...";
+    statusMsg.style.color = "#1a73e8";
+
+    const payload = parseJwt(response.credential);
+    if (!payload) {
+      statusMsg.innerText = "❌ 憑證解析失敗，請重新嘗試！";
+      statusMsg.style.color = "#d93025";
+      return;
+    }
+
+    const email = payload.email;
+    const name = payload.name;
+    const uuid = payload.sub; // Google 專屬唯一識別碼
+    const picture = payload.picture || "";
+
     try {
-      const response = await fetch(qrImgUrl);
-      const blob = await response.blob();
-      await navigator.clipboard.write([
-        new ClipboardItem({ [blob.type]: blob })
-      ]);
-      alert("✅ QR Code 圖片已成功複製到剪貼簿！可直接至 Line 或 Word 按 Ctrl+V 貼上。");
+      const checkRes = await callGAS({
+        action: 'checkUserAuth',
+        email: email,
+        uuid: uuid
+      });
+
+      if (checkRes.result === 'success' && checkRes.status === 'Approved') {
+        currentUser = { email, name: checkRes.name || name, uuid, picture };
+        localStorage.setItem('authUserInfo', JSON.stringify(currentUser));
+        closeModal('adminLoginModal');
+        openAdminModalDirectly();
+      } else if (checkRes.status === 'Pending') {
+        statusMsg.innerText = "⏳ 您的帳號已送審，管理者正在審核中，請靜候開通！";
+        statusMsg.style.color = "#856404";
+      } else {
+        // 未申請，顯示填表申請區
+        statusMsg.innerText = "⚠️ 此帳號尚未獲得授權，請填妥姓名送出申請：";
+        statusMsg.style.color = "#d93025";
+        document.getElementById('applyBox').style.display = 'block';
+        document.getElementById('applyUserName').value = name;
+        document.getElementById('applyUserEmail').value = email;
+        document.getElementById('applyBox').setAttribute('data-uuid', uuid);
+      }
     } catch (err) {
-      alert("⚠️ 瀏覽器安全性限制無法直接複製圖片，請點選「📥 下載 QR Code」直接保存！");
+      statusMsg.innerText = "連線驗證失敗: " + err.message;
+      statusMsg.style.color = "#d93025";
     }
   }
 
-  function showQuickTips(id) { document.getElementById(id).style.display = 'block'; }
-  function hideQuickTips(id) { setTimeout(() => { document.getElementById(id).style.display = 'none'; }, 200); }
-  function applyQuickTip(inputId, value) {
-    document.getElementById(inputId).value = value;
+  // 提交開通權限申請
+  async function submitAuthApplication() {
+    const name = document.getElementById('applyUserName').value.trim();
+    const email = document.getElementById('applyUserEmail').value.trim();
+    const uuid = document.getElementById('applyBox').getAttribute('data-uuid') || "";
+    const statusMsg = document.getElementById('authStatusMsg');
+
+    if (!name) return alert("請輸入真實姓名！");
+
+    statusMsg.innerText = "⏳ 申請送出中，請稍候...";
+    statusMsg.style.color = "#1a73e8";
+
+    try {
+      const res = await callGAS({
+        action: 'applyAuthAccount',
+        email: email,
+        name: name,
+        uuid: uuid
+      });
+      alert(res.message);
+      if (res.result === 'success') {
+        document.getElementById('applyBox').style.display = 'none';
+        statusMsg.innerText = "✅ 申請已送出！請待管理者信件審核核可後再行登入。";
+        statusMsg.style.color = "#28a745";
+      } else {
+        statusMsg.innerText = res.message;
+        statusMsg.style.color = "#d93025";
+      }
+    } catch (err) {
+      alert("申請送出失敗: " + err.message);
+      statusMsg.innerText = "";
+    }
+  }
+
+  function initGoogleOAuth() {
+    if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
+      google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleCredentialResponse
+      });
+      google.accounts.id.renderButton(
+        document.getElementById("g_id_signin_container"),
+        { theme: "outline", size: "large", width: 280, text: "signin_with", shape: "rectangular" }
+      );
+    }
   }
 
   window.addEventListener('load', () => {
@@ -795,6 +894,9 @@
 
     const dynamicCsvUrl = getGVizCsvUrl(SPREADSHEET_ID);
     loadFormFromCSV(dynamicCsvUrl, formIdFromUrl);
+
+    // 延遲嘗試載入 Google GIS
+    setTimeout(initGoogleOAuth, 800);
   });
 
   function showFormSection() {
@@ -812,52 +914,35 @@
   }
 
   function openAdminLoginModal() {
-    if (isAdminAuthenticated) {
+    if (currentUser && currentUser.email) {
       openAdminModalDirectly();
     } else {
-      document.getElementById('adminLoginPassword').value = "";
+      document.getElementById('authStatusMsg').innerText = "";
+      document.getElementById('applyBox').style.display = 'none';
       document.getElementById('adminLoginModal').style.display = 'flex';
-      document.getElementById('adminLoginPassword').focus();
-    }
-  }
-
-  async function submitAdminLogin() {
-    const pwd = document.getElementById('adminLoginPassword').value.trim();
-    if (!pwd) return alert("請輸入管理者密碼！");
-
-    const loginBtn = document.getElementById('adminLoginSubmitBtn');
-    loginBtn.innerText = "⏳ 登入中...";
-    loginBtn.disabled = true;
-
-    try {
-      const data = await callGAS({ action: 'adminLogin', spreadsheetId: SPREADSHEET_ID, password: pwd });
-      if (data.result === 'success') {
-        isAdminAuthenticated = true;
-        closeModal('adminLoginModal');
-        openAdminModalDirectly();
-      } else {
-        alert(data.message);
-      }
-    } catch (err) {
-      alert("登入驗證失敗：\n" + err.message);
-    } finally {
-      loginBtn.innerText = "登入後台";
-      loginBtn.disabled = false;
+      initGoogleOAuth();
     }
   }
 
   function openAdminModalDirectly() {
     document.getElementById('adminModal').style.display = 'flex';
+    const badge = document.getElementById('currentUserBadge');
+    if (currentUser) {
+      badge.innerHTML = `
+        ${currentUser.picture ? `<img src="${currentUser.picture}" alt="avatar">` : ''}
+        <span>👤 ${currentUser.name} (${currentUser.email})</span>
+      `;
+    }
     if (SPREADSHEET_ID) loadAdminFormList();
   }
 
   function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
   function adminLogout() {
-    isAdminAuthenticated = false;
-    document.getElementById('adminLoginPassword').value = "";
+    currentUser = null;
+    localStorage.removeItem('authUserInfo');
     closeModal('adminModal');
-    alert("🔒 已成功登出管理後台！下次進入需重新驗證密碼。");
+    alert("🔒 已成功登出！下次開啟後台需重新以 Google 帳號授權登入。");
   }
 
   function switchAdminTab(tabId, event) {
@@ -865,24 +950,6 @@
     document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
     event.target.classList.add('active');
     document.getElementById(tabId).classList.add('active');
-  }
-
-  async function changeAdminPasswordAction() {
-    if (!SPREADSHEET_ID) return alert("請先填寫並儲存試算表 ID！");
-    const oldP = document.getElementById('adminOldPwd').value.trim();
-    const newP = document.getElementById('adminNewPwd').value.trim();
-    if (!oldP || !newP) return alert("請完整填寫目前密碼與新密碼！");
-
-    try {
-      const data = await callGAS({ action: 'changeAdminPassword', spreadsheetId: SPREADSHEET_ID, oldPassword: oldP, newPassword: newP });
-      alert(data.message);
-      if (data.result === 'success') {
-        document.getElementById('adminOldPwd').value = "";
-        document.getElementById('adminNewPwd').value = "";
-      }
-    } catch (err) {
-      alert("密碼變更失敗：\n" + err.message);
-    }
   }
 
   async function saveSystemConnection(doInit) {
@@ -1034,7 +1101,6 @@
     document.getElementById('displayTitle').innerText = data.formTitle;
     document.getElementById('displayDesc').innerText = data.formDesc || "";
 
-    // 填報期限狀態檢查
     const now = new Date();
     const banner = document.getElementById('deadlineBanner');
     const submitBtn = document.getElementById('submitBtn');
@@ -1070,7 +1136,6 @@
       banner.innerHTML = periodText;
     }
 
-    // 控制表單元件啟用/停用
     const allFormInputs = document.querySelectorAll('#mainForm input, #mainForm select, #mainForm textarea');
     allFormInputs.forEach(el => el.disabled = !isFormSubmissionAllowed);
     document.getElementById('clearSignBtn').disabled = !isFormSubmissionAllowed;
@@ -1471,7 +1536,6 @@
     const multiUserUrl = `${window.location.origin}${window.location.pathname}?sid=${SPREADSHEET_ID}&fid=${formId}`;
     const adminUrl = `${multiUserUrl}&admin=1`;
     const box = document.getElementById('adminFormUrlBox');
-    
     const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(multiUserUrl)}`;
 
     box.style.display = 'block';
