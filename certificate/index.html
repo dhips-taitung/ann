@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>憑證管理系統 - Google 登入</title>
+  <!-- 引入 Google 原生登入庫 -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body style="font-family: sans-serif; text-align: center; padding-top: 50px;">
+
+  <h2>核銷憑證系統登入</h2>
+
+  <!-- Google 登入按鈕掛載點 -->
+  <div id="g_id_onload"
+       data-client_id="341910377782-3unva3oggi84vp88uga23horpumjaptt.apps.googleusercontent.com"
+       data-callback="handleCredentialResponse"
+       data-auto_prompt="false">
+  </div>
+  <div class="g_id_signin" data-type="standard" style="display: inline-block;"></div>
+
+  <div id="msg" style="margin-top: 20px; font-size: 16px;"></div>
+
+  <script>
+    // 您的 GAS 部署 Web App 網址
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwF47CoHbuGAFnOWkoqrifLfppHUUrbyp4kVcD5eeaUAdqgzSLS5SD5oHdO7OaNZ_VILg/exec";
+
+    // 登入成功後的回調
+    function handleCredentialResponse(response) {
+      document.getElementById("msg").innerHTML = "驗證中，請稍候...";
+      
+      // 將 Google ID Token 傳送到 GAS 後端進行驗證
+      fetch(GAS_API_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          action: "oauth_login",
+          id_token: response.credential
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.result === "success") {
+          document.getElementById("msg").innerHTML = 
+            "<span style='color:green;'><b>登入成功！</b> 歡迎 " + data.user.name + "</span><br><br>" +
+            "<a href='" + data.user.spreadsheetUrl + "' target='_blank' style='padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 5px;'>" +
+            "開啟我的專屬憑證試算表</a>";
+        } else {
+          document.getElementById("msg").innerHTML = "<span style='color:red;'>⚠️ " + data.message + "</span>";
+        }
+      })
+      .catch(err => {
+        document.getElementById("msg").innerHTML = "連線失敗：" + err;
+      });
+    }
+  </script>
+</body>
+</html>
