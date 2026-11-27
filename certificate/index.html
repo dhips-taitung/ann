@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>東海國小 - 核銷憑證系統登入與申請</title>
-  <!-- 引入 Google 原生登入套件 -->
+  <title>東海國小 - 核銷憑證多專案管理系統</title>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -20,24 +19,20 @@
     .card {
       background: #ffffff;
       width: 100%;
-      max-width: 460px;
-      padding: 40px 30px;
+      max-width: 500px;
+      padding: 35px 25px;
       border-radius: 12px;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
       text-align: center;
     }
-    h2 { color: #1a1a1a; margin-bottom: 8px; font-size: 24px; }
-    p.subtitle { color: #666; font-size: 14px; margin-bottom: 25px; }
-    
-    .login-box {
-      margin: 20px 0;
-      display: flex;
-      justify-content: center;
-    }
+    h2 { color: #1a1a1a; margin-bottom: 6px; font-size: 24px; }
+    p.subtitle { color: #666; font-size: 14px; margin-bottom: 20px; }
 
-    /* 狀態提示區塊 */
+    .login-box { margin: 15px 0; display: flex; justify-content: center; }
+
+    /* 狀態提示 */
     .status-box {
-      margin-top: 20px;
+      margin-top: 15px;
       padding: 12px 16px;
       border-radius: 8px;
       font-size: 14px;
@@ -50,10 +45,26 @@
     .status-success { background-color: #def7ec; color: #03543f; border-left: 4px solid #31c48d; }
     .status-info { background-color: #e1effe; color: #1e429f; border-left: 4px solid #76a9fa; }
 
-    /* 動態申請卡片區塊 */
+    /* 專案卡片清單 */
+    .voucher-list { margin-top: 20px; text-align: left; display: none; }
+    .voucher-item {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.2s;
+    }
+    .voucher-item:hover { border-color: #1a73e8; background: #f0f7ff; }
+    .voucher-title { font-weight: 600; color: #1f2937; font-size: 15px; }
+
+    /* 申請卡片 */
     .apply-card {
       display: none;
-      margin-top: 25px;
+      margin-top: 20px;
       padding: 20px;
       background-color: #f9fafb;
       border: 1px solid #e5e7eb;
@@ -61,43 +72,43 @@
       text-align: left;
     }
     .apply-card h3 { font-size: 16px; margin-bottom: 12px; color: #374151; }
-    .form-group { margin-bottom: 14px; }
+    .form-group { margin-bottom: 12px; }
     .form-group label { display: block; font-size: 13px; color: #4b5563; margin-bottom: 4px; font-weight: 500; }
     .form-control {
       width: 100%;
-      padding: 10px 12px;
+      padding: 9px 12px;
       border: 1px solid #d1d5db;
       border-radius: 6px;
       font-size: 14px;
       background-color: #fff;
     }
     .form-control:read-only { background-color: #e5e7eb; cursor: not-allowed; }
-    
+
     /* 按鈕樣式 */
     .btn {
-      width: 100%;
-      padding: 12px;
+      padding: 8px 14px;
       border: none;
       border-radius: 6px;
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 600;
       cursor: pointer;
-      transition: background 0.2s;
       text-decoration: none;
       display: inline-block;
       text-align: center;
     }
     .btn-primary { background-color: #1a73e8; color: #fff; }
     .btn-primary:hover { background-color: #1557b0; }
-    .btn-success { background-color: #0e9f6e; color: #fff; margin-top: 15px; }
+    .btn-outline { background: transparent; border: 1px dashed #1a73e8; color: #1a73e8; width: 100%; padding: 12px; margin-top: 10px; }
+    .btn-outline:hover { background: #f0f7ff; }
+    .btn-success { background-color: #0e9f6e; color: #fff; width: 100%; padding: 11px; margin-top: 12px; }
     .btn-success:hover { background-color: #046c4e; }
   </style>
 </head>
 <body>
 
   <div class="card">
-    <h2>核銷憑證系統</h2>
-    <p class="subtitle">請使用學校 Google 帳號登入</p>
+    <h2>東海國小核銷憑證系統</h2>
+    <p class="subtitle">登入或申請您的專案核銷試算表</p>
 
     <!-- Google 登入按鈕 -->
     <div class="login-box">
@@ -109,26 +120,33 @@
       <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="sign_in_with" data-shape="pill"></div>
     </div>
 
-    <!-- 訊息提示區 -->
+    <!-- 狀態通知訊息 -->
     <div id="statusBox" class="status-box"></div>
 
-    <!-- 登入成功跳轉按鈕 -->
-    <div id="enterBox" style="display: none; margin-top: 20px;">
-      <a id="sheetLink" href="#" target="_blank" class="btn btn-primary">進入我的專屬憑證系統 ➔</a>
+    <!-- 專案試算表列表區 (登入成功後展示) -->
+    <div id="voucherListArea" class="voucher-list">
+      <p style="font-size: 14px; font-weight: bold; margin-bottom: 10px; color: #374151;">📄 您名下的專案試算表：</p>
+      <div id="voucherItems"></div>
+      <!-- 申請第二份/新專案按鈕 -->
+      <button type="button" class="btn btn-outline" onclick="toggleNewProjectForm()">➕ 申請建立新專案試算表</button>
     </div>
 
-    <!-- 偵測未申請時自動彈出的【申請表單區】 -->
+    <!-- 申請專案表單區 (首次使用或點選新增時展開) -->
     <div id="applyCard" class="apply-card">
-      <h3>📋 初次使用？送出開通申請</h3>
+      <h3 id="applyCardTitle">📋 申請開通專案憑證試算表</h3>
       <div class="form-group">
-        <label>您的姓名：</label>
-        <input type="text" id="applyName" class="form-control" placeholder="請確認您的真實姓名">
+        <label>申請人姓名：</label>
+        <input type="text" id="applyName" class="form-control" placeholder="請確認真實姓名">
       </div>
       <div class="form-group">
         <label>學校帳號 (Email)：</label>
         <input type="text" id="applyEmail" class="form-control" readonly>
       </div>
-      <button type="button" id="btnSubmitApply" class="btn btn-success" onclick="submitApplication()">🚀 送出開通申請</button>
+      <div class="form-group">
+        <label>專案名稱 / 表單用途：</label>
+        <input type="text" id="applyProject" class="form-control" placeholder="例如：115沙城盃、體育組訓、115常規經費">
+      </div>
+      <button type="button" id="btnSubmitApply" class="btn btn-success" onclick="submitApplication()">🚀 送出專案開通申請</button>
     </div>
   </div>
 
@@ -136,11 +154,13 @@
     // ⚠️ 請填入您的中央帳號 GAS 部署 Web App URL (結尾為 /exec)
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwF47CoHbuGAFnOWkoqrifLfppHUUrbyp4kVcD5eeaUAdqgzSLS5SD5oHdO7OaNZ_VILg/exec";
 
-    // 處理 Google 登入成功後的回調
+    let currentLoggedInUser = null;
+
+    // 處理 Google 登入回調
     function handleCredentialResponse(response) {
-      showStatus("正在核對帳號權限，請稍候...", "info");
+      showStatus("正在核對專案清單，請稍候...", "status-info");
       hideElement("applyCard");
-      hideElement("enterBox");
+      hideElement("voucherListArea");
 
       fetch(GAS_API_URL, {
         method: "POST",
@@ -152,74 +172,111 @@
       .then(res => res.json())
       .then(data => {
         if (data.result === "success") {
-          // 1. 已核准且成功登入
+          currentLoggedInUser = data.user;
           showStatus("✅ <b>登入成功！</b> 歡迎 " + data.user.name + " 同仁", "status-success");
-          document.getElementById("sheetLink").href = data.user.spreadsheetUrl;
-          showElement("enterBox");
+          
+          // 渲染名下所有已核准專案試算表
+          renderVoucherList(data.user.vouchers, data.user.pendingCount);
+          showElement("voucherListArea");
 
         } else if (data.result === "not_registered") {
-          // 2. 帳號尚未申請：自動展開申請卡片，預填姓名與信箱
-          showStatus("⚠️ <b>此帳號尚未申請憑證系統</b><br>請確認下方資訊並點擊按鈕送出申請：", "status-warning");
+          showStatus("⚠️ <b>您尚未開通憑證系統</b><br>請填寫下方專案名稱並送出申請：", "status-warning");
           document.getElementById("applyEmail").value = data.email || "";
           document.getElementById("applyName").value = data.name || "";
+          document.getElementById("applyProject").value = "115年度經費"; // 預設值
           showElement("applyCard");
 
         } else if (data.result === "pending") {
-          // 3. 審核中
-          showStatus("⏳ <b>帳號審核中！</b><br>" + data.message, "status-warning");
+          showStatus("⏳ <b>專案審核中！</b><br>" + data.message, "status-warning");
 
         } else {
-          // 4. 其他錯誤
           showStatus("❌ " + data.message, "status-error");
         }
       })
       .catch(err => {
-        showStatus("連線伺服器失敗，請檢查網路或稍後再試！", "status-error");
+        showStatus("連線伺服器失敗，請稍後再試！", "status-error");
         console.error(err);
       });
     }
 
-    // 送出申請邏輯
+    // 渲染專案列表卡片
+    function renderVoucherList(vouchers, pendingCount) {
+      const container = document.getElementById("voucherItems");
+      container.innerHTML = "";
+
+      vouchers.forEach((v, index) => {
+        const item = document.createElement("div");
+        item.className = "voucher-item";
+        item.innerHTML = `
+          <div>
+            <div class="voucher-title">📌 ${v.projectName}</div>
+          </div>
+          <a href="${v.spreadsheetUrl}" target="_blank" class="btn btn-primary">進入試算表 ➔</a>
+        `;
+        container.appendChild(item);
+      });
+
+      if (pendingCount > 0) {
+        const pendingNote = document.createElement("p");
+        pendingNote.style.cssText = "font-size: 13px; color: #b45309; margin: 8px 0;";
+        pendingNote.innerHTML = `⏳ 提醒：您目前尚有 <b>${pendingCount}</b> 個專案申請正在管理員審核中。`;
+        container.appendChild(pendingNote);
+      }
+    }
+
+    // 切換顯示「申請新專案」表單
+    function toggleNewProjectForm() {
+      if (!currentLoggedInUser) return;
+      document.getElementById("applyName").value = currentLoggedInUser.name;
+      document.getElementById("applyEmail").value = currentLoggedInUser.email;
+      document.getElementById("applyProject").value = "";
+      document.getElementById("applyCardTitle").innerText = "➕ 申請建立第二份/新專案試算表";
+      showElement("applyCard");
+      document.getElementById("applyProject").focus();
+    }
+
+    // 送出專案申請
     function submitApplication() {
       const name = document.getElementById("applyName").value.trim();
       const email = document.getElementById("applyEmail").value.trim();
+      const project = document.getElementById("applyProject").value.trim() || "個人專用憑證系統";
       const btn = document.getElementById("btnSubmitApply");
 
       if (!name) {
-        alert("請輸入您的真實姓名！");
+        alert("請確認姓名！");
         return;
       }
 
       btn.disabled = true;
-      btn.innerText = "正在傳送申請...";
+      btn.innerText = "傳送申請中...";
 
       fetch(GAS_API_URL, {
         method: "POST",
         body: JSON.stringify({
           action: "apply",
           name: name,
-          email: email
+          email: email,
+          projectName: project
         })
       })
       .then(res => res.json())
       .then(data => {
         if (data.result === "success") {
           hideElement("applyCard");
-          showStatus("🎉 <b>申請已成功送出！</b><br>已發送審核通知給管理員。核准後您將收到 Email 通知，屆時即可直接進入系統！", "status-success");
+          showStatus("🎉 <b>專案【" + project + "】申請已送出！</b><br>管理員核准後將自動為您生成專屬試算表並發信通知。", "status-success");
         } else {
           showStatus("❌ 申請失敗：" + data.message, "status-error");
-          btn.disabled = false;
-          btn.innerText = "🚀 送出開通申請";
         }
+        btn.disabled = false;
+        btn.innerText = "🚀 送出專案開通申請";
       })
       .catch(err => {
-        alert("申請發送失敗，請稍候重試！");
+        alert("發送失敗，請稍後重試！");
         btn.disabled = false;
-        btn.innerText = "🚀 送出開通申請";
+        btn.innerText = "🚀 送出專案開通申請";
       });
     }
 
-    // 輔助函式
     function showStatus(html, typeClass) {
       const box = document.getElementById("statusBox");
       box.className = "status-box " + typeClass;
