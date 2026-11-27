@@ -1,34 +1,147 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <title>憑證管理系統 - Google 登入</title>
-  <!-- 引入 Google 原生登入庫 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>東海國小 - 核銷憑證系統登入與申請</title>
+  <!-- 引入 Google 原生登入套件 -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Microsoft JhengHei", sans-serif;
+      background-color: #f0f2f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .card {
+      background: #ffffff;
+      width: 100%;
+      max-width: 460px;
+      padding: 40px 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      text-align: center;
+    }
+    h2 { color: #1a1a1a; margin-bottom: 8px; font-size: 24px; }
+    p.subtitle { color: #666; font-size: 14px; margin-bottom: 25px; }
+    
+    .login-box {
+      margin: 20px 0;
+      display: flex;
+      justify-content: center;
+    }
+
+    /* 狀態提示區塊 */
+    .status-box {
+      margin-top: 20px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      line-height: 1.5;
+      display: none;
+      text-align: left;
+    }
+    .status-error { background-color: #fde8e8; color: #9b1c1c; border-left: 4px solid #f98080; }
+    .status-warning { background-color: #fef08a; color: #713f12; border-left: 4px solid #eab308; }
+    .status-success { background-color: #def7ec; color: #03543f; border-left: 4px solid #31c48d; }
+    .status-info { background-color: #e1effe; color: #1e429f; border-left: 4px solid #76a9fa; }
+
+    /* 動態申請卡片區塊 */
+    .apply-card {
+      display: none;
+      margin-top: 25px;
+      padding: 20px;
+      background-color: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      text-align: left;
+    }
+    .apply-card h3 { font-size: 16px; margin-bottom: 12px; color: #374151; }
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 13px; color: #4b5563; margin-bottom: 4px; font-weight: 500; }
+    .form-control {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 14px;
+      background-color: #fff;
+    }
+    .form-control:read-only { background-color: #e5e7eb; cursor: not-allowed; }
+    
+    /* 按鈕樣式 */
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
+    }
+    .btn-primary { background-color: #1a73e8; color: #fff; }
+    .btn-primary:hover { background-color: #1557b0; }
+    .btn-success { background-color: #0e9f6e; color: #fff; margin-top: 15px; }
+    .btn-success:hover { background-color: #046c4e; }
+  </style>
 </head>
-<body style="font-family: sans-serif; text-align: center; padding-top: 50px;">
+<body>
 
-  <h2>核銷憑證系統登入</h2>
+  <div class="card">
+    <h2>核銷憑證系統</h2>
+    <p class="subtitle">請使用學校 Google 帳號登入</p>
 
-  <!-- Google 登入按鈕掛載點 -->
-  <div id="g_id_onload"
-       data-client_id="341910377782-3unva3oggi84vp88uga23horpumjaptt.apps.googleusercontent.com"
-       data-callback="handleCredentialResponse"
-       data-auto_prompt="false">
+    <!-- Google 登入按鈕 -->
+    <div class="login-box">
+      <div id="g_id_onload"
+           data-client_id="341910377782-3unva3oggi84vp88uga23horpumjaptt.apps.googleusercontent.com
+           data-callback="handleCredentialResponse"
+           data-auto_prompt="false">
+      </div>
+      <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="sign_in_with" data-shape="pill"></div>
+    </div>
+
+    <!-- 訊息提示區 -->
+    <div id="statusBox" class="status-box"></div>
+
+    <!-- 登入成功跳轉按鈕 -->
+    <div id="enterBox" style="display: none; margin-top: 20px;">
+      <a id="sheetLink" href="#" target="_blank" class="btn btn-primary">進入我的專屬憑證系統 ➔</a>
+    </div>
+
+    <!-- 偵測未申請時自動彈出的【申請表單區】 -->
+    <div id="applyCard" class="apply-card">
+      <h3>📋 初次使用？送出開通申請</h3>
+      <div class="form-group">
+        <label>您的姓名：</label>
+        <input type="text" id="applyName" class="form-control" placeholder="請確認您的真實姓名">
+      </div>
+      <div class="form-group">
+        <label>學校帳號 (Email)：</label>
+        <input type="text" id="applyEmail" class="form-control" readonly>
+      </div>
+      <button type="button" id="btnSubmitApply" class="btn btn-success" onclick="submitApplication()">🚀 送出開通申請</button>
+    </div>
   </div>
-  <div class="g_id_signin" data-type="standard" style="display: inline-block;"></div>
-
-  <div id="msg" style="margin-top: 20px; font-size: 16px;"></div>
 
   <script>
-    // 您的 GAS 部署 Web App 網址
+    // ⚠️ 請填入您的中央帳號 GAS 部署 Web App URL (結尾為 /exec)
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwF47CoHbuGAFnOWkoqrifLfppHUUrbyp4kVcD5eeaUAdqgzSLS5SD5oHdO7OaNZ_VILg/exec";
 
-    // 登入成功後的回調
+    // 處理 Google 登入成功後的回調
     function handleCredentialResponse(response) {
-      document.getElementById("msg").innerHTML = "驗證中，請稍候...";
-      
-      // 將 Google ID Token 傳送到 GAS 後端進行驗證
+      showStatus("正在核對帳號權限，請稍候...", "info");
+      hideElement("applyCard");
+      hideElement("enterBox");
+
       fetch(GAS_API_URL, {
         method: "POST",
         body: JSON.stringify({
@@ -39,18 +152,83 @@
       .then(res => res.json())
       .then(data => {
         if (data.result === "success") {
-          document.getElementById("msg").innerHTML = 
-            "<span style='color:green;'><b>登入成功！</b> 歡迎 " + data.user.name + "</span><br><br>" +
-            "<a href='" + data.user.spreadsheetUrl + "' target='_blank' style='padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 5px;'>" +
-            "開啟我的專屬憑證試算表</a>";
+          // 1. 已核准且成功登入
+          showStatus("✅ <b>登入成功！</b> 歡迎 " + data.user.name + " 同仁", "status-success");
+          document.getElementById("sheetLink").href = data.user.spreadsheetUrl;
+          showElement("enterBox");
+
+        } else if (data.result === "not_registered") {
+          // 2. 帳號尚未申請：自動展開申請卡片，預填姓名與信箱
+          showStatus("⚠️ <b>此帳號尚未申請憑證系統</b><br>請確認下方資訊並點擊按鈕送出申請：", "status-warning");
+          document.getElementById("applyEmail").value = data.email || "";
+          document.getElementById("applyName").value = data.name || "";
+          showElement("applyCard");
+
+        } else if (data.result === "pending") {
+          // 3. 審核中
+          showStatus("⏳ <b>帳號審核中！</b><br>" + data.message, "status-warning");
+
         } else {
-          document.getElementById("msg").innerHTML = "<span style='color:red;'>⚠️ " + data.message + "</span>";
+          // 4. 其他錯誤
+          showStatus("❌ " + data.message, "status-error");
         }
       })
       .catch(err => {
-        document.getElementById("msg").innerHTML = "連線失敗：" + err;
+        showStatus("連線伺服器失敗，請檢查網路或稍後再試！", "status-error");
+        console.error(err);
       });
     }
+
+    // 送出申請邏輯
+    function submitApplication() {
+      const name = document.getElementById("applyName").value.trim();
+      const email = document.getElementById("applyEmail").value.trim();
+      const btn = document.getElementById("btnSubmitApply");
+
+      if (!name) {
+        alert("請輸入您的真實姓名！");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerText = "正在傳送申請...";
+
+      fetch(GAS_API_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          action: "apply",
+          name: name,
+          email: email
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.result === "success") {
+          hideElement("applyCard");
+          showStatus("🎉 <b>申請已成功送出！</b><br>已發送審核通知給管理員。核准後您將收到 Email 通知，屆時即可直接進入系統！", "status-success");
+        } else {
+          showStatus("❌ 申請失敗：" + data.message, "status-error");
+          btn.disabled = false;
+          btn.innerText = "🚀 送出開通申請";
+        }
+      })
+      .catch(err => {
+        alert("申請發送失敗，請稍候重試！");
+        btn.disabled = false;
+        btn.innerText = "🚀 送出開通申請";
+      });
+    }
+
+    // 輔助函式
+    function showStatus(html, typeClass) {
+      const box = document.getElementById("statusBox");
+      box.className = "status-box " + typeClass;
+      box.innerHTML = html;
+      box.style.display = "block";
+    }
+
+    function showElement(id) { document.getElementById(id).style.display = "block"; }
+    function hideElement(id) { document.getElementById(id).style.display = "none"; }
   </script>
 </body>
 </html>
